@@ -166,65 +166,70 @@ h1 { font-size: 2.2rem !important; }
     gap: 0.8vh;
 }
 
-/* Ajustes na Tabela Principal - MAIS COMPACTA */
+/* Ajustes na Tabela Principal - VOLTANDO AO TAMANHO LEGÍVEL */
 .w1-table td, .w1-table th {
-    padding: 1vh 0.8vw; /* Reduzido de 1.5vh */
-    font-size: 1.1rem; /* Reduzido de 1.6rem */
+    padding: 1.4vh 1vw; 
+    font-size: 1.5rem; 
 }
 
 .w1-table td:first-child {
     font-weight: 700;
-    white-space: nowrap; /* Evita quebra de linha nos nomes */
-}
-
-.highlight-cell {
-    font-size: 1.3rem !important; /* Valor PP um pouco maior que o resto */
+    white-space: nowrap;
 }
 
 .ranking-header {
     text-align: center;
-    margin-bottom: 0.2vh; /* Reduzido drasticamente */
+    margin-bottom: 0.2vh;
 }
 
-.ranking-header h2 { 
-    font-size: 1.2rem; /* Reduzido */
-}
-
+.ranking-header h2 { font-size: 1.2rem; }
 .ranking-header p { font-size: 0.8rem; }
 
-/* Ajustes na Tabela de Ranking - EXTRA COMPACTO */
+/* Ajustes na Tabela de Ranking - MANTIDO COMPACTO */
 .ranking-table td {
-    font-size: 0.85rem; /* Fonte pequena para caber mais */
-    padding: 0.5vh 0.4vw; /* Padding mínimo */
-    white-space: nowrap; /* Nomes em uma linha só */
+    font-size: 0.85rem;
+    padding: 0.5vh 0.4vw;
+    white-space: nowrap;
 }
 
 .ranking-table td:nth-child(3) {
-    font-size: 1.1rem; /* Número do AA um pouco maior para destaque */
+    font-size: 1.1rem;
     font-weight: 800;
 }
 
-/* Ajustes de Metas - MAIS COMPACTO */
+/* Metas Restauradas e no Rodapé */
 .goals-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 1vw;
-    margin-bottom: 0.5vh;
+    margin-top: 1.5vh; /* Espaço após a tabela */
 }
 
 .goal-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    padding: 0.8vh 1vw;
+    padding: 1.2vh 1.5vw;
     border-radius: 12px;
 }
 
-.goal-header { margin-bottom: 0.3vh; }
-.goal-header h2 { font-size: 1rem; }
-.goal-targets { font-size: 0.75rem; }
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--w1-teal), #4ade80);
+    border-radius: 5px;
+    transition: width 1.5s ease;
+}
 
-.progress-group { gap: 0.3vh; }
-.progress-labels { font-size: 0.8rem; }
-.progress-bar { height: 6px; }
+.goal-card.monthly .progress-fill {
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+}
+
+.progress-bar {
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
 
 .dashboard-footer { margin-top: 0.5vh; }
 .footer-note { font-size: 0.7rem; }

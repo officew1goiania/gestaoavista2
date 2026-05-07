@@ -35,7 +35,28 @@
         <div class="dashboard-layout">
             <!-- COLUNA ESQUERDA: PRODUÇÃO -->
             <div class="main-column">
-                <!-- Seção de Metas -->
+                <main class="data-grid">
+                    <table class="w1-table">
+                        <thead>
+                            <tr>
+                                <th>Consultor</th>
+                                <th class="center">AA</th>
+                                <th class="center">AF</th>
+                                <th class="center">AP</th>
+                                <th class="center">AP Valor</th>
+                                <th class="center">REC</th>
+                                <th class="highlight-header center">PP Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr class="loading-row">
+                                <td colspan="7">Sincronizando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </main>
+
+                <!-- Seção de Metas (Agora abaixo da tabela) -->
                 <section class="goals-container">
                     <div class="goal-card">
                         <div class="goal-header">
@@ -91,27 +112,6 @@
                         </div>
                     </div>
                 </section>
-
-                <main class="data-grid">
-                    <table class="w1-table">
-                        <thead>
-                            <tr>
-                                <th>Consultor</th>
-                                <th class="center">AA</th>
-                                <th class="center">AF</th>
-                                <th class="center">AP</th>
-                                <th class="center">AP Valor</th>
-                                <th class="center">REC</th>
-                                <th class="highlight-header center">PP Total</th>
-                            </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr class="loading-row">
-                            <td colspan="7">Sincronizando...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </main>
             </div>
 
             <!-- COLUNA DIREITA: RANKING MUAPD -->
