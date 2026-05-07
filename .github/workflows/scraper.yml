@@ -50,7 +50,10 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           # Adiciona os arquivos obrigatórios primeiro
-          git add dados_extraidos.csv ranking_muapd.csv last_update.txt
+          git add dados_extraidos.csv last_update.txt
+          
+          # Adiciona o ranking apenas se ele tiver sido criado
+          git add ranking_muapd.csv 2>/dev/null || true
           
           # Tenta adicionar opcionais (logs e fotos) individualmente para não dar erro
           git add *.png 2>/dev/null || true
