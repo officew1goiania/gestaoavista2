@@ -68,16 +68,7 @@ function renderizarTabela(data) {
         return;
     }
 
-    let totalEscritorioAP = 0;
-    let totalEscritorioPP = 0;
-
     filtrados.forEach(row => {
-        const valAP = parseNumero(row['AP [R$]']);
-        const valPP = parseNumero(row['Total']);
-        
-        totalEscritorioAP += valAP;
-        totalEscritorioPP += valPP;
-
         const tr = document.createElement('tr');
         
         // Limpa o nome: remove (P), remove o símbolo ◦ e espaços extras
@@ -91,38 +82,10 @@ function renderizarTabela(data) {
             <td class="center">${formatarNumero(parseNumero(row['AA']))}</td>
             <td class="center">${formatarNumero(parseNumero(row['AF']))}</td>
             <td class="center">${formatarNumero(parseNumero(row['AP']))}</td>
-            <td class="center">${formatarNumero(valAP, true)}</td>
+            <td class="center">${formatarNumero(parseNumero(row['AP [R$]']), true)}</td>
             <td class="center">${formatarNumero(parseNumero(row['Recs']))}</td>
-            <td class="center highlight-cell">${formatarNumero(valPP)}</td>
+            <td class="center highlight-cell">${formatarNumero(parseNumero(row['Total']))}</td>
         `;
         tbody.appendChild(tr);
     });
-
-    // Atualiza as Metas do Escritório
-    atualizarBarrasMetas(totalEscritorioAP, totalEscritorioPP);
-}
-
-function atualizarBarrasMetas(realizadoAP, realizadoPP) {
-    // Configurações das Metas
-    const metas = {
-        semanal: { ap: 50000, pp: 925 },
-        mensal: { ap: 200000, pp: 3700 }
-    };
-
-    // Função auxiliar para calcular e atualizar
-    const aplicarProgresso = (realizado, meta, barId, labelId) => {
-        const pct = Math.min((realizado / meta) * 100, 100).toFixed(1);
-        const bar = document.getElementById(barId);
-        const label = document.getElementById(labelId);
-        if (bar) bar.style.width = pct + '%';
-        if (label) label.textContent = pct + '%';
-    };
-
-    // Semana
-    aplicarProgresso(realizadoAP, metas.semanal.ap, 'barWeeklyAP', 'pctWeeklyAP');
-    aplicarProgresso(realizadoPP, metas.semanal.pp, 'barWeeklyPP', 'pctWeeklyPP');
-
-    // Mês
-    aplicarProgresso(realizadoAP, metas.mensal.ap, 'barMonthlyAP', 'pctMonthlyAP');
-    aplicarProgresso(realizadoPP, metas.mensal.pp, 'barMonthlyPP', 'pctMonthlyPP');
 }
