@@ -126,3 +126,10 @@ function atualizarBarrasMetas(realizadoAP, realizadoPP) {
     aplicarProgresso(realizadoAP, metas.mensal.ap, 'barMonthlyAP', 'pctMonthlyAP');
     aplicarProgresso(realizadoPP, metas.mensal.pp, 'barMonthlyPP', 'pctMonthlyPP');
 }
+
+// AUTO-REFRESH: Atualiza os dados a cada 30 minutos (1.800.000 ms)
+setInterval(() => {
+    console.log("Atualizando dados automaticamente...");
+    carregarUltimaAtualizacao();
+    carregarDadosCSV();
+}, 30 * 60 * 1000);
