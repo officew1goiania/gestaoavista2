@@ -57,11 +57,18 @@ def extrair_dados_da_conta(page, email, senha):
         print("Aviso: 'W1 Goiânia' não encontrado.")
 
     print("Clicando no botão Filtrar...")
+    page.wait_for_timeout(2000) # Pequena pausa para garantir que o menu de filtros estabilizou
     try:
-        page.get_by_role("button", name="Filtrar", exact=False).click()
+        # Tenta pelo texto exato primeiro
+        page.get_by_role("button", name="Filtrar", exact=True).click()
     except Exception as e:
-        print("Aviso: Botão 'Filtrar' não encontrado. Tentando localizar de outra forma...")
-        page.locator("button:has-text('Filtrar')").click()
+        print("Aviso: Botão 'Filtrar' (exato) não encontrado. Tentando alternativas...")
+        try:
+            # Tenta conter o texto
+            page.locator("button:has-text('Filtrar')").first.click()
+        except:
+            # Tenta pela classe do botão (btn-positive é o verde de filtrar)
+            page.locator("button.btn-positive").first.click()
 
     print("Aguardando carregamento da tabela (pausa fixa de 15 segundos)...")
     
@@ -121,22 +128,25 @@ def executar_robo():
     with sync_playwright() as p:
         # headless=True é OBRIGATÓRIO para rodar no servidor em nuvem
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
 
         for conta in CONTAS:
-            # Pula se a conta não estiver configurada no .env
             if not conta["email"] or not conta["senha"]:
-                print(f"\nAviso: Uma das contas não está totalmente configurada no arquivo .env. Pulando...")
                 continue
                 
-            df_conta = extrair_dados_da_conta(page, conta["email"], conta["senha"])
+            # Cria um contexto e página NOVOS para cada conta (limpeza total)
+            context = browser.new_context()
+            page = context.new_page()
             
-            if df_conta is not None:
-                todos_os_dados.append(df_conta)
-                
-            # Limpa os cookies para que o sistema deslogue antes de tentar a próxima conta
-            context.clear_cookies()
+            try:
+                df_conta = extrair_dados_da_conta(page, conta["email"], conta["senha"])
+                if df_conta is not None:
+                    todos_os_dados.append(df_conta)
+            except Exception as e:
+                print(f"ERRO CRÍTICO na conta {conta['email']}: {e}")
+            finally:
+                # Fecha a página da conta atual antes de ir para a próxima
+                page.close()
+                context.close()
 
         browser.close()
         
@@ -146,7 +156,7 @@ def executar_robo():
         df_final = pd.concat(todos_os_dados, ignore_index=True)
         arquivo_saida = "dados_extraidos.csv"
         df_final.to_csv(arquivo_saida, index=False)
-        print(f"SUCESSO TOTAL! {len(df_final)} linhas de ambas as contas foram combinadas e salvas em {arquivo_saida}.")
+        print(f"SUCESSO TOTAL! {len(df_final)} linhas combinadas e salvas em {arquivo_saida}.")
         
         # Salva o horário UTC em formato ISO para o frontend exibir
         from datetime import datetime
@@ -154,7 +164,7 @@ def executar_robo():
             f.write(datetime.utcnow().isoformat() + "Z")
         print("Arquivo last_update.txt gerado para o frontend.")
     else:
-        print("\nNenhum dado foi extraído de nenhuma conta.")
+        print("\nNenhum dado pôde ser extraído de nenhuma conta.")
 
 if __name__ == "__main__":
     executar_robo()
