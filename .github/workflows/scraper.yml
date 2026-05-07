@@ -49,18 +49,11 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Adiciona os arquivos obrigatórios primeiro
-          git add dados_extraidos.csv last_update.txt
-          
-          # Adiciona o ranking apenas se ele tiver sido criado
-          git add ranking_muapd.csv 2>/dev/null || true
-          
-          # Tenta adicionar opcionais (logs e fotos) individualmente para não dar erro
-          git add *.png 2>/dev/null || true
-          git add *.txt 2>/dev/null || true
+          # Adiciona tudo o que mudou (dados, ranking, fotos de erro, logs)
+          git add .
           
           # Se tiver alguma alteração (para não dar erro caso os dados estejam idênticos)
-          git commit -m "Automated: Atualização horária dos dados de produção" || echo "Nenhuma mudança nos dados para commitar"
+          git commit -m "Automated: Atualização horária dos dados" || echo "Nenhuma mudança para commitar"
           
           # Puxa qualquer mudança manual que você tenha feito no código para evitar conflitos
           git pull --rebase origin main

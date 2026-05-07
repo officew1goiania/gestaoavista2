@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 # pyrefly: ignore [missing-import]
 from playwright.sync_api import sync_playwright
 import pandas as pd
+from bs4 import BeautifulSoup
+from datetime import datetime
 import time
 
 # Carrega as variáveis de ambiente do arquivo .env
@@ -181,6 +183,13 @@ def extrair_ranking_muapd(page):
 
 def executar_robo():
     print("Iniciando o robô...")
+    
+    # Cria os arquivos vazios logo de cara para evitar erro no Git Add
+    for arq in ["dados_extraidos.csv", "ranking_muapd.csv"]:
+        if not os.path.exists(arq):
+            with open(arq, "w", encoding="utf-8") as f:
+                f.write("") 
+
     todos_os_dados = []
     rankings_acumulados = []
     
