@@ -61,10 +61,10 @@ function carregarRankingCSV() {
 function renderizarTabela(data) {
     const tbody = document.getElementById('tableBody');
     const tfoot = document.getElementById('tableFooter');
-    if (!tbody || !tfoot) return;
+    if (!tbody) return;
     
     tbody.innerHTML = ''; 
-    tfoot.innerHTML = '';
+    if (tfoot) tfoot.innerHTML = '';
 
     const consultoresAlvo = ["Gianlucca", "Daniela", "Tarek"];
     const filtrados = data.filter(row => {
@@ -80,12 +80,12 @@ function renderizarTabela(data) {
     let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0 };
 
     filtrados.forEach(row => {
-        const valAP = parseNumero(row['AP [R$]']);
-        const valPP = parseNumero(row['Total']);
         const aa = parseNumero(row['AA']);
         const af = parseNumero(row['AF']);
         const ap = parseNumero(row['AP']);
+        const valAP = parseNumero(row['AP [R$]']);
         const rec = parseNumero(row['Recs']);
+        const valPP = parseNumero(row['Total']);
 
         totais.aa += aa;
         totais.af += af;
@@ -95,10 +95,12 @@ function renderizarTabela(data) {
         totais.pp += valPP;
 
         const tr = document.createElement('tr');
-        const nomeCurto = row['Consultor/Nível'].split(' (')[0].replace(/[^\w\sÀ-ú]/g, '').trim(); 
+        // PEGA APENAS O PRIMEIRO NOME
+        const nomeCompleto = row['Consultor/Nível'].split(' (')[0].replace(/[^\w\sÀ-ú]/g, '').trim();
+        const primeiroNome = nomeCompleto.split(' ')[0];
         
         tr.innerHTML = `
-            <td>${nomeCurto}</td>
+            <td>${primeiroNome}</td>
             <td class="center">${aa}</td>
             <td class="center">${af}</td>
             <td class="center">${ap}</td>
@@ -109,19 +111,20 @@ function renderizarTabela(data) {
         tbody.appendChild(tr);
     });
 
-    // Adicionar Linha de Totais no Rodapé da Tabela
-    const trTotal = document.createElement('tr');
-    trTotal.className = 'total-row';
-    trTotal.innerHTML = `
-        <td><strong>TOTAL EQUIPE</strong></td>
-        <td class="center"><strong>${totais.aa}</strong></td>
-        <td class="center"><strong>${totais.af}</strong></td>
-        <td class="center"><strong>${totais.ap}</strong></td>
-        <td class="center"><strong>${formatarNumero(totais.apValor, true)}</strong></td>
-        <td class="center"><strong>${totais.rec}</strong></td>
-        <td class="center highlight-cell"><strong>${formatarNumero(totais.pp)}</strong></td>
-    `;
-    tfoot.appendChild(trTotal);
+    if (tfoot) {
+        const trTotal = document.createElement('tr');
+        trTotal.className = 'total-row';
+        trTotal.innerHTML = `
+            <td><strong>TOTAL</strong></td>
+            <td class="center"><strong>${totais.aa}</strong></td>
+            <td class="center"><strong>${totais.af}</strong></td>
+            <td class="center"><strong>${totais.ap}</strong></td>
+            <td class="center"><strong>${formatarNumero(totais.apValor, true)}</strong></td>
+            <td class="center"><strong>${totais.rec}</strong></td>
+            <td class="center highlight-cell"><strong>${formatarNumero(totais.pp)}</strong></td>
+        `;
+        tfoot.appendChild(trTotal);
+    }
 }
 
 function renderizarRanking(data) {
@@ -131,7 +134,7 @@ function renderizarRanking(data) {
     tbody.innerHTML = ''; 
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 50px;">Nenhum ranking disponível...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 50px;">-</td></tr>';
         return;
     }
 
@@ -139,9 +142,12 @@ function renderizarRanking(data) {
         const tr = document.createElement('tr');
         const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
         
+        // APENAS O PRIMEIRO NOME NO RANKING TAMBÉM
+        const primeiroNomeRanking = row['Consultor'].split(' ')[0];
+
         tr.innerHTML = `
             <td class="center">${medal}</td>
-            <td>${row['Consultor']}</td>
+            <td>${primeiroNomeRanking}</td>
             <td class="center highlight-cell">${row['AA']}</td>
         `;
         tbody.appendChild(tr);
