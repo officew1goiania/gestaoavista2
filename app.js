@@ -6,7 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function parseNumero(str) {
     if (!str || str.trim() === '-' || str.trim() === '') return 0;
-    let formatado = str.toString().replace(/\./g, '').replace(',', '.');
+    // Remove "R$", espaços, e pontos de milhar. Depois troca vírgula por ponto decimal.
+    let formatado = str.toString()
+        .replace(/R\$/g, '')
+        .replace(/\s/g, '')
+        .replace(/\./g, '')
+        .replace(',', '.')
+        .trim();
     return parseFloat(formatado) || 0;
 }
 
@@ -66,7 +72,7 @@ function renderizarTabela(data) {
         // Limpa o nome: remove (P), remove o símbolo ◦ e espaços extras
         const nomeCurto = row['Consultor/Nível']
             .split(' (')[0]
-            .replace('◦', '')
+            .replace(/[^\w\sÀ-ú]/g, '') // Remove símbolos como ◦ ou marcadores
             .trim(); 
         
         tr.innerHTML = `
