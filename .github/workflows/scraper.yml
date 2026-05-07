@@ -49,9 +49,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Adiciona todos os arquivos que mudaram (dados, txt, logs, fotos)
-          # O "|| true" garante que o processo continue mesmo se algum arquivo não existir
-          git add dados_extraidos.csv last_update.txt *.png *.txt 2>/dev/null || true
+          # Adiciona os arquivos obrigatórios primeiro
+          git add dados_extraidos.csv last_update.txt
+          
+          # Tenta adicionar opcionais (logs e fotos) individualmente para não dar erro
+          git add *.png 2>/dev/null || true
+          git add *.txt 2>/dev/null || true
           
           # Se tiver alguma alteração (para não dar erro caso os dados estejam idênticos)
           git commit -m "Automated: Atualização horária dos dados de produção" || echo "Nenhuma mudança nos dados para commitar"
