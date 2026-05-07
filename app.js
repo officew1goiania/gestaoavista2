@@ -104,7 +104,7 @@ function renderizarTabela(data) {
             <td class="center">${aa}</td>
             <td class="center">${af}</td>
             <td class="center">${ap}</td>
-            <td class="center">${formatarNumero(valAP, true)}</td>
+            <td class="center highlight-cell">${formatarNumero(valAP, true)}</td>
             <td class="center">${rec}</td>
             <td class="center highlight-cell">${formatarNumero(valPP)}</td>
         `;
@@ -119,7 +119,7 @@ function renderizarTabela(data) {
             <td class="center"><strong>${totais.aa}</strong></td>
             <td class="center"><strong>${totais.af}</strong></td>
             <td class="center"><strong>${totais.ap}</strong></td>
-            <td class="center"><strong>${formatarNumero(totais.apValor, true)}</strong></td>
+            <td class="center highlight-cell"><strong>${formatarNumero(totais.apValor, true)}</strong></td>
             <td class="center"><strong>${totais.rec}</strong></td>
             <td class="center highlight-cell"><strong>${formatarNumero(totais.pp)}</strong></td>
         `;
@@ -154,9 +154,9 @@ function renderizarRanking(data) {
     });
 }
 
-// Auto-refresh a cada 30 minutos
+// Auto-refresh a cada 10 minutos para acompanhar o Robô
 setInterval(() => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
     carregarRankingCSV();
-}, 30 * 60 * 1000);
+}, 10 * 60 * 1000);
