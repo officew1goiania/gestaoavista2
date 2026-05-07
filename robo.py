@@ -60,23 +60,19 @@ def extrair_dados_da_conta(page, email, senha):
     page.wait_for_timeout(2000)
     
     try:
-        # Clique via JS Puro - Alvo Específico
+        # A IDENTIDADE ÚNICA: Clica no botão que tem a classe js-btn-filter
+        # Essa classe só existe no botão de Filtrar da página de Resultados
         page.evaluate("""() => {
-            // Tenta encontrar o botão Filtrar que está perto da seção de 'Escritórios'
-            // Isso evita clicar no botão de Notificações
-            const b = document.querySelector('form button.btn-positive') || 
-                      document.querySelector('.card button.btn-positive');
-            
-            if (b && b.innerText.includes('Filtrar')) {
-                b.click();
+            const btn = document.querySelector('button.js-btn-filter');
+            if (btn) {
+                btn.click();
             } else {
-                // Se falhar, tenta o seletor por texto mas garantindo que NÃO é o topo da página
-                const buttons = Array.from(document.querySelectorAll('button'));
-                const target = buttons.find(btn => btn.textContent.includes('Filtrar') && btn.offsetTop > 300);
-                if (target) target.click();
+                // Fallback de segurança caso a classe mude
+                const fallback = document.querySelector('form.economy_center button.btn-positive');
+                if (fallback) fallback.click();
             }
         }""")
-        print("Clique via JavaScript disparado no alvo específico.")
+        print("Clique disparado via seletor exclusivo .js-btn-filter")
     except Exception as e:
         print(f"Aviso: Erro no clique JS: {e}. Tentando teclado...")
         page.keyboard.press("Enter")
