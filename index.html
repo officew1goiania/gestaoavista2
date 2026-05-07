@@ -3,140 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>W1 Dashboard | Gestão à Vista</title>
+    <title>W1 Gestão à Vista - Office Goiânia</title>
     <link rel="stylesheet" href="style.css">
     
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- PapaParse para ler CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    
-    <!-- Chart.js para gráficos -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="dark-theme">
-    <div class="dashboard-container">
-        <!-- Sidebar lateral (opcional) -->
-        <aside class="sidebar">
-            <div class="logo-container">
-                <div class="logo-circle">W1</div>
-                <h2>Gestão à Vista</h2>
-            </div>
-            
-            <nav class="nav-menu">
-                <a href="#" class="nav-item active">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    Visão Geral
-                </a>
-            </nav>
-            
-            <div class="update-info">
-                <div class="status-indicator">
-                    <span class="pulse"></span> Ao vivo
+<body class="light-theme">
+    <div class="tv-dashboard">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo-wrapper">
+                    <div class="w1-logo-brand">W1</div>
                 </div>
-                <div class="last-updated">
-                    <p>Última atualização:</p>
-                    <p id="update-time">Carregando...</p>
+                <div class="title-group">
+                    <h1>Gestão à Vista - Office Goiânia</h1>
+                    <p class="subtitle">Produção parcial do mês</p>
                 </div>
             </div>
-        </aside>
+            <div class="update-status">
+                <div class="status-dot"></div>
+                <div class="update-text">
+                    <span>Última atualização:</span>
+                    <strong id="update-time">Carregando...</strong>
+                </div>
+            </div>
+        </header>
 
-        <!-- Conteúdo Principal -->
-        <main class="main-content">
-            <header class="top-header">
-                <div>
-                    <h1>Resultados de Produção</h1>
-                    <p class="subtitle">Acompanhamento consolidado das equipes</p>
-                </div>
-            </header>
-
-            <!-- Cards de KPI -->
-            <div class="kpi-grid">
-                <div class="kpi-card glass">
-                    <div class="kpi-icon">🎯</div>
-                    <div class="kpi-details">
-                        <p class="kpi-label">Total Previsto</p>
-                        <h3 class="kpi-value" id="kpi-previsto">--</h3>
-                    </div>
-                </div>
-                
-                <div class="kpi-card glass">
-                    <div class="kpi-icon">📈</div>
-                    <div class="kpi-details">
-                        <p class="kpi-label">Total Realizado</p>
-                        <h3 class="kpi-value" id="kpi-realizado">--</h3>
-                    </div>
-                </div>
-                
-                <div class="kpi-card glass">
-                    <div class="kpi-icon">🤝</div>
-                    <div class="kpi-details">
-                        <p class="kpi-label">Total de Entrevistas</p>
-                        <h3 class="kpi-value" id="kpi-entrevistas">--</h3>
-                    </div>
-                </div>
-                
-                <div class="kpi-card glass">
-                    <div class="kpi-icon">💼</div>
-                    <div class="kpi-details">
-                        <p class="kpi-label">Total de Clientes (C)</p>
-                        <h3 class="kpi-value" id="kpi-clientes">--</h3>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gráficos -->
-            <div class="charts-grid">
-                <div class="chart-card glass span-2">
-                    <div class="card-header">
-                        <h3>PPs por Equipe (Consultoria vs Serviço)</h3>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="ppsChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="chart-card glass">
-                    <div class="card-header">
-                        <h3>Realizado vs Meta (Geral)</h3>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="metaChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabela Detalhada -->
-            <div class="table-card glass">
-                <div class="card-header">
-                    <h3>Ranking de Consultores</h3>
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Buscar consultor...">
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table id="dataTable">
-                        <thead>
-                            <tr>
-                                <th>Consultor/Nível</th>
-                                <th>Entrevistas (E)</th>
-                                <th>Clientes (C)</th>
-                                <th>PPs Serviço</th>
-                                <th>PPs Consultoria</th>
-                                <th>PPs Previstos</th>
-                                <th>PPs Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <!-- Preenchido via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <main class="data-grid">
+            <table class="w1-table">
+                <thead>
+                    <tr>
+                        <th>Consultor</th>
+                        <th class="center">AA</th>
+                        <th class="center">AF</th>
+                        <th class="center">AP</th>
+                        <th class="center">AP Valor</th>
+                        <th class="center">REC</th>
+                        <th class="highlight-header center">PP Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Gerado dinamicamente pelo JS -->
+                    <tr class="loading-row">
+                        <td colspan="7">Sincronizando dados...</td>
+                    </tr>
+                </tbody>
+            </table>
         </main>
+
+        <footer class="dashboard-footer">
+            <div class="footer-note">Dashboard em tempo real • W1 Consultoria</div>
+        </footer>
     </div>
 
     <script src="app.js"></script>
