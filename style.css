@@ -237,3 +237,17 @@ tr:nth-child(even) { background-color: var(--w1-gray-light); }
 
 .dashboard-footer { margin-top: 1vh; text-align: center; }
 .footer-note { font-size: 0.8rem; color: #9CA3AF; }
+
+/* Estilos para Ranking MUAPD */
+.ranking-table th {
+    background: var(--w1-teal);
+}
+
+.ranking-table td {
+    font-size: 2.2rem;
+    padding: 2.5vh 2vw;
+}
+
+.ranking-table tr:nth-child(1) td:first-child { font-size: 3rem; }
+.ranking-table tr:nth-child(2) td:first-child { font-size: 2.8rem; }
+.ranking-table tr:nth-child(3) td:first-child { font-size: 2.6rem; }

@@ -2,11 +2,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
+    carregarRankingCSV(); 
+    iniciarAlternanciaTelas();
 });
 
 function parseNumero(str) {
     if (!str || str.trim() === '-' || str.trim() === '') return 0;
-    // Remove "R$", espaços, e pontos de milhar. Depois troca vírgula por ponto decimal.
     let formatado = str.toString()
         .replace(/R\$/g, '')
         .replace(/\s/g, '')
@@ -25,7 +26,6 @@ function formatarNumero(num, ehMoeda = false) {
 }
 
 function carregarUltimaAtualizacao() {
-    // Adiciona um timestamp para evitar cache do navegador
     fetch('last_update.txt?t=' + new Date().getTime())
         .then(response => response.text())
         .then(isoString => {
@@ -38,7 +38,6 @@ function carregarUltimaAtualizacao() {
 }
 
 function carregarDadosCSV() {
-    // Adiciona um timestamp para evitar cache do navegador
     Papa.parse('dados_extraidos.csv?t=' + new Date().getTime(), {
         download: true,
         header: true,
@@ -49,15 +48,24 @@ function carregarDadosCSV() {
     });
 }
 
+function carregarRankingCSV() {
+    Papa.parse('ranking_muapd.csv?t=' + new Date().getTime(), {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            renderizarRanking(results.data);
+        }
+    });
+}
+
 function renderizarTabela(data) {
     const tbody = document.getElementById('tableBody');
     if (!tbody) return;
     
     tbody.innerHTML = ''; 
 
-    // Nomes Alvo
     const consultoresAlvo = ["Gianlucca", "Daniela", "Tarek"];
-
     const filtrados = data.filter(row => {
         const nome = row['Consultor/Nível'] || "";
         return consultoresAlvo.some(alvo => nome.toLowerCase().includes(alvo.toLowerCase()));
@@ -74,17 +82,11 @@ function renderizarTabela(data) {
     filtrados.forEach(row => {
         const valAP = parseNumero(row['AP [R$]']);
         const valPP = parseNumero(row['Total']);
-        
         totalEscritorioAP += valAP;
         totalEscritorioPP += valPP;
 
         const tr = document.createElement('tr');
-        
-        // Limpa o nome: remove (P), remove o símbolo ◦ e espaços extras
-        const nomeCurto = row['Consultor/Nível']
-            .split(' (')[0]
-            .replace(/[^\w\sÀ-ú]/g, '') // Remove símbolos como ◦ ou marcadores
-            .trim(); 
+        const nomeCurto = row['Consultor/Nível'].split(' (')[0].replace(/[^\w\sÀ-ú]/g, '').trim(); 
         
         tr.innerHTML = `
             <td>${nomeCurto}</td>
@@ -98,18 +100,65 @@ function renderizarTabela(data) {
         tbody.appendChild(tr);
     });
 
-    // Atualiza as Metas do Escritório
     atualizarBarrasMetas(totalEscritorioAP, totalEscritorioPP);
 }
 
+function renderizarRanking(data) {
+    const tbody = document.getElementById('rankingBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = ''; 
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 50px;">Nenhum ranking disponível...</td></tr>';
+        return;
+    }
+
+    data.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
+        
+        tr.innerHTML = `
+            <td class="center">${medal}</td>
+            <td>${row['Consultor']}</td>
+            <td class="center highlight-cell">${row['AA']}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function iniciarAlternanciaTelas() {
+    let telaAtual = 'producao'; 
+    const tempoTroca = 10 * 60 * 1000; 
+
+    setInterval(() => {
+        const prodView = document.getElementById('production-view');
+        const rankView = document.getElementById('ranking-view');
+        const title = document.getElementById('view-title');
+        const subtitle = document.getElementById('view-subtitle');
+
+        if (telaAtual === 'producao') {
+            prodView.style.display = 'none';
+            rankView.style.display = 'block';
+            title.textContent = "Ranking MUAPD - Office Goiânia";
+            subtitle.textContent = "Agendamentos de Tel Party (Total)";
+            telaAtual = 'ranking';
+        } else {
+            rankView.style.display = 'none';
+            prodView.style.display = 'block';
+            title.textContent = "Gestão à Vista - Office Goiânia";
+            subtitle.textContent = "Produção parcial do mês";
+            telaAtual = 'producao';
+        }
+    }, tempoTroca);
+}
+
 function atualizarBarrasMetas(realizadoAP, realizadoPP) {
-    // Configurações das Metas
     const metas = {
         semanal: { ap: 50000, pp: 925 },
         mensal: { ap: 200000, pp: 3700 }
     };
 
-    // Função auxiliar para calcular e atualizar
     const aplicarProgresso = (realizado, meta, barId, labelId) => {
         const pct = Math.min((realizado / meta) * 100, 100).toFixed(1);
         const bar = document.getElementById(barId);
@@ -118,18 +167,14 @@ function atualizarBarrasMetas(realizadoAP, realizadoPP) {
         if (label) label.textContent = pct + '%';
     };
 
-    // Semana
     aplicarProgresso(realizadoAP, metas.semanal.ap, 'barWeeklyAP', 'pctWeeklyAP');
     aplicarProgresso(realizadoPP, metas.semanal.pp, 'barWeeklyPP', 'pctWeeklyPP');
-
-    // Mês
     aplicarProgresso(realizadoAP, metas.mensal.ap, 'barMonthlyAP', 'pctMonthlyAP');
     aplicarProgresso(realizadoPP, metas.mensal.pp, 'barMonthlyPP', 'pctMonthlyPP');
 }
 
-// AUTO-REFRESH: Atualiza os dados a cada 30 minutos (1.800.000 ms)
 setInterval(() => {
-    console.log("Atualizando dados automaticamente...");
     carregarUltimaAtualizacao();
     carregarDadosCSV();
+    carregarRankingCSV();
 }, 30 * 60 * 1000);

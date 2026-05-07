@@ -128,28 +128,83 @@ def extrair_dados_da_conta(page, email, senha):
     print(f"SUCESSO! {len(df)} linhas formatadas e extraídas da conta {email}.")
     return df
 
+def extrair_ranking_muapd(page):
+    print("Acessando página de Rankings...")
+    url_ranking = "https://w1nner.w1consultoria.com.br/painel-consultor/indicadores/rankings"
+    page.goto(url_ranking)
+    page.wait_for_load_state("networkidle")
+
+    print("Configurando filtros de Ranking (Tel Party)...")
+    try:
+        # 1. Clica em Tel Party
+        page.get_by_role("link", name="Tel Party").click()
+        page.wait_for_timeout(1000)
+
+        # 2. Desmarca "Data do Compromisso" (deixando apenas Data de Criação)
+        # Procuramos o checkbox pelo label
+        page.get_by_label("Data do Compromisso").uncheck()
+        
+        # 3. Escritórios: Desmarca todos e marca Goiânia
+        # O ID toggle_all_offices costuma ser padrão no sistema
+        page.locator("#toggle_all_offices").uncheck()
+        page.get_by_label("W1 Goiânia").check()
+
+        # 4. Filtra
+        print("Filtrando ranking...")
+        page.evaluate("() => { const b = document.querySelector('button.js-btn-filter') || document.querySelector('button.btn-positive'); if(b) b.click(); }")
+        
+        print("Aguardando ranking (15s)...")
+        page.wait_for_timeout(15000)
+
+        # 5. Extração
+        html = page.content()
+        soup = BeautifulSoup(html, 'html.parser')
+        # Procura a tabela de ranking
+        tabela = soup.find('table') # Pega a primeira tabela que aparecer após filtrar
+        
+        dados_ranking = []
+        if tabela:
+            linhas = tabela.find('tbody').find_all('tr')
+            for linha in linhas:
+                cols = linha.find_all('td')
+                if len(cols) >= 5:
+                    nome = cols[1].get_text(strip=True)
+                    aa = cols[4].get_text(strip=True)
+                    if nome and nome != "Total":
+                        dados_ranking.append({'Consultor': nome, 'AA': aa})
+        
+        return pd.DataFrame(dados_ranking)
+    except Exception as e:
+        print(f"Erro ao extrair ranking: {e}")
+        page.screenshot(path="erro_ranking.png")
+        return None
+
 def executar_robo():
     print("Iniciando o robô...")
     todos_os_dados = []
+    rankings_acumulados = []
     
     with sync_playwright() as p:
-        # headless=True é OBRIGATÓRIO para rodar no servidor em nuvem
         browser = p.chromium.launch(headless=True)
 
         for conta in CONTAS:
             if not conta["email"] or not conta["senha"]:
                 continue
                 
-            # Cria um contexto com tela grande para garantir que botões no rodapé apareçam
             context = browser.new_context(viewport={'width': 1280, 'height': 1600})
             page = context.new_page()
             
             try:
+                # 1. Extração de Produção
                 df_conta = extrair_dados_da_conta(page, conta["email"], conta["senha"])
                 if df_conta is not None:
                     todos_os_dados.append(df_conta)
-                else:
-                    page.screenshot(path=f"erro_vazio_{conta['email'].split('@')[0]}.png")
+                
+                # 2. Extração de Ranking MUAPD (Já logado na conta)
+                df_ranking = extrair_ranking_muapd(page)
+                if df_ranking is not None:
+                    rankings_acumulados.append(df_ranking)
+
             except Exception as e:
                 import traceback
                 erro_detalhado = traceback.format_exc()
@@ -163,21 +218,23 @@ def executar_robo():
 
         browser.close()
         
-    # Salva todos os dados combinados
+    # Salva Produção
     if todos_os_dados:
-        print("\n--- Finalizando e combinando todos os dados ---")
         df_final = pd.concat(todos_os_dados, ignore_index=True)
-        arquivo_saida = "dados_extraidos.csv"
-        df_final.to_csv(arquivo_saida, index=False)
-        print(f"SUCESSO TOTAL! {len(df_final)} linhas combinadas e salvas em {arquivo_saida}.")
-        
-        # Salva o horário UTC em formato ISO para o frontend exibir
+        df_final.to_csv("dados_extraidos.csv", index=False)
         from datetime import datetime
         with open("last_update.txt", "w", encoding="utf-8") as f:
             f.write(datetime.utcnow().isoformat() + "Z")
-        print("Arquivo last_update.txt gerado para o frontend.")
-    else:
-        print("\nNenhum dado pôde ser extraído de nenhuma conta.")
+        print("Dados de produção salvos.")
+
+    # Salva Ranking
+    if rankings_acumulados:
+        df_ranking_final = pd.concat(rankings_acumulados, ignore_index=True)
+        # Limpeza e Ordenação
+        df_ranking_final['AA'] = pd.to_numeric(df_ranking_final['AA'], errors='coerce').fillna(0)
+        df_ranking_final = df_ranking_final.sort_values(by='AA', ascending=False).drop_duplicates(subset=['Consultor'])
+        df_ranking_final.to_csv("ranking_muapd.csv", index=False)
+        print("Ranking MUAPD salvo com sucesso.")
 
 if __name__ == "__main__":
     executar_robo()
