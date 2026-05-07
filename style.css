@@ -203,48 +203,94 @@ h1 { font-size: 2.2rem !important; }
     align-items: center;
 }
 
-/* Linha de Totais */
+/* 4 QUADROS DE METAS - ESTILO RASCUNHO */
+.goals-grid-header {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1vw;
+    margin-bottom: 2vh;
+}
+
+.goal-box {
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 1.5vh 1vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.goal-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5vh;
+}
+
+.goal-value {
+    font-size: 1.4rem;
+    font-weight: 900;
+}
+
+/* Cores vibrantes com texto escuro para legibilidade */
+.goal-box.ap-semana { background-color: #ccfbf1; color: #0f766e; border-color: #99f6e4; }
+.goal-box.pp-semana { background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+.goal-box.ap-mes { background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
+.goal-box.pp-mes { background-color: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
+
+/* Ajustes na Tabela Principal - SEM FONTES BRANCAS */
+.w1-table {
+    background: #FFFFFF;
+    color: #000000;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.w1-table th {
+    background-color: #F9FAFB;
+    color: #111827;
+    font-weight: 800;
+    border-bottom: 2px solid #E5E7EB;
+}
+
+.w1-table td {
+    color: #000000;
+    border-bottom: 1px solid #F3F4F6;
+    font-weight: 500;
+}
+
 .total-row td {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border-top: 2px solid var(--w1-teal) !important;
-    color: var(--w1-teal) !important;
+    background-color: #F1F5F9 !important;
+    border-top: 2px solid #000000 !important;
+    color: #000000 !important;
     font-size: 1.2rem !important;
 }
 
-/* Barra de Metas no Topo - CORES CORRIGIDAS */
-.goals-summary-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2vw;
-    background: #111827; /* Fundo escuro sólido para contraste */
-    border: 1px solid var(--w1-teal);
-    border-radius: 8px;
-    padding: 1vh 2vw;
-    margin-bottom: 2vh; /* Espaço antes da tabela */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.summary-item .label {
+.highlight-cell {
+    color: #0d9488 !important;
     font-weight: 800;
-    color: var(--w1-teal);
-    font-size: 1rem;
 }
 
-.summary-item .value {
-    font-weight: 700;
-    color: #F9FAFB; /* Branco gelo para leitura fácil */
-    font-size: 1.1rem;
+/* Ranking - SEM FONTES BRANCAS */
+.side-column {
+    background: #FFFFFF;
+    border-left: 1px solid #E5E7EB;
 }
 
-.goals-summary-bar .separator {
-    color: var(--w1-teal);
-    opacity: 0.5;
-    font-size: 1.2rem;
-}
+.ranking-header h2 { color: #111827; }
+.ranking-header p { color: #4B5563; }
 
-.dashboard-footer { margin-top: 0.5vh; }
-.footer-note { font-size: 0.65rem; color: #9CA3AF; }
+.ranking-table { color: #111827; }
+.ranking-table td { border-bottom: 1px solid #F3F4F6; }
+
+.dashboard-footer { 
+    margin-top: 0.5vh; 
+    border-top: 1px solid #E5E7EB;
+    padding-top: 1vh;
+}
+.footer-note { color: #6B7280; }
 
 /* Destaques no Ranking */
 .ranking-table tr:nth-child(1) td { color: #FFD700; font-weight: 800; font-size: 0.95rem; }
