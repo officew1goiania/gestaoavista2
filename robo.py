@@ -57,18 +57,22 @@ def extrair_dados_da_conta(page, email, senha):
         print("Aviso: 'W1 Goiânia' não encontrado.")
 
     print("Clicando no botão Filtrar...")
-    page.wait_for_timeout(2000) # Pequena pausa para garantir que o menu de filtros estabilizou
+    page.wait_for_timeout(2000)
+    
     try:
-        # Tenta pelo texto exato primeiro
-        page.get_by_role("button", name="Filtrar", exact=True).click()
+        btn = page.get_by_role("button", name="Filtrar", exact=True)
+        btn.scroll_into_view_if_needed()
+        btn.click(force=True)
     except Exception as e:
         print("Aviso: Botão 'Filtrar' (exato) não encontrado. Tentando alternativas...")
         try:
-            # Tenta conter o texto
-            page.locator("button:has-text('Filtrar')").first.click()
+            btn_alt = page.locator("button:has-text('Filtrar')").first
+            btn_alt.scroll_into_view_if_needed()
+            btn_alt.click(force=True)
         except:
-            # Tenta pela classe do botão (btn-positive é o verde de filtrar)
-            page.locator("button.btn-positive").first.click()
+            btn_class = page.locator("button.btn-positive").first
+            btn_class.scroll_into_view_if_needed()
+            btn_class.click(force=True)
 
     print("Aguardando carregamento da tabela (pausa fixa de 15 segundos)...")
     
@@ -133,8 +137,8 @@ def executar_robo():
             if not conta["email"] or not conta["senha"]:
                 continue
                 
-            # Cria um contexto e página NOVOS para cada conta (limpeza total)
-            context = browser.new_context()
+            # Cria um contexto com tela grande para garantir que botões no rodapé apareçam
+            context = browser.new_context(viewport={'width': 1280, 'height': 1600})
             page = context.new_page()
             
             try:
