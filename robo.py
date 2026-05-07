@@ -60,20 +60,19 @@ def extrair_dados_da_conta(page, email, senha):
     page.wait_for_timeout(2000)
     
     try:
-        btn = page.get_by_role("button", name="Filtrar", exact=True)
-        btn.scroll_into_view_if_needed()
-        btn.click(force=True, timeout=5000)
+        # Clique via JS Puro (mais estável para elementos 'invisíveis')
+        page.evaluate("""() => {
+            let b = document.querySelector('button.btn-positive');
+            if (!b) {
+                const buttons = Array.from(document.querySelectorAll('button'));
+                b = buttons.find(btn => btn.textContent.includes('Filtrar'));
+            }
+            if (b) b.click();
+        }""")
+        print("Clique via JavaScript disparado.")
     except Exception as e:
-        print("Aviso: Botão 'Filtrar' (exato) falhou. Tentando Enter e seletor alternativo...")
-        try:
-            # Tenta dar Enter no campo de busca (frequentemente dispara o filtro)
-            page.keyboard.press("Enter")
-            page.wait_for_timeout(1000)
-            # Tenta o seletor CSS do botão verde
-            page.locator("button.btn-positive").first.click(force=True, timeout=5000)
-        except:
-            print("Tentativa final com clique por texto...")
-            page.locator("button:has-text('Filtrar')").first.click(force=True, timeout=5000)
+        print(f"Aviso: Erro no clique JS: {e}. Tentando teclado...")
+        page.keyboard.press("Enter")
 
     print("Aguardando carregamento da tabela (pausa fixa de 15 segundos)...")
     
