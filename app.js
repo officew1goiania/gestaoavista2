@@ -60,9 +60,11 @@ function carregarRankingCSV() {
 
 function renderizarTabela(data) {
     const tbody = document.getElementById('tableBody');
-    if (!tbody) return;
+    const tfoot = document.getElementById('tableFooter');
+    if (!tbody || !tfoot) return;
     
     tbody.innerHTML = ''; 
+    tfoot.innerHTML = '';
 
     const consultoresAlvo = ["Gianlucca", "Daniela", "Tarek"];
     const filtrados = data.filter(row => {
@@ -75,31 +77,51 @@ function renderizarTabela(data) {
         return;
     }
 
-    let totalEscritorioAP = 0;
-    let totalEscritorioPP = 0;
+    let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0 };
 
     filtrados.forEach(row => {
         const valAP = parseNumero(row['AP [R$]']);
         const valPP = parseNumero(row['Total']);
-        totalEscritorioAP += valAP;
-        totalEscritorioPP += valPP;
+        const aa = parseNumero(row['AA']);
+        const af = parseNumero(row['AF']);
+        const ap = parseNumero(row['AP']);
+        const rec = parseNumero(row['Recs']);
+
+        totais.aa += aa;
+        totais.af += af;
+        totais.ap += ap;
+        totais.apValor += valAP;
+        totais.rec += rec;
+        totais.pp += valPP;
 
         const tr = document.createElement('tr');
         const nomeCurto = row['Consultor/Nível'].split(' (')[0].replace(/[^\w\sÀ-ú]/g, '').trim(); 
         
         tr.innerHTML = `
             <td>${nomeCurto}</td>
-            <td class="center">${formatarNumero(parseNumero(row['AA']))}</td>
-            <td class="center">${formatarNumero(parseNumero(row['AF']))}</td>
-            <td class="center">${formatarNumero(parseNumero(row['AP']))}</td>
+            <td class="center">${aa}</td>
+            <td class="center">${af}</td>
+            <td class="center">${ap}</td>
             <td class="center">${formatarNumero(valAP, true)}</td>
-            <td class="center">${formatarNumero(parseNumero(row['Recs']))}</td>
+            <td class="center">${rec}</td>
             <td class="center highlight-cell">${formatarNumero(valPP)}</td>
         `;
         tbody.appendChild(tr);
     });
 
-    atualizarBarrasMetas(totalEscritorioAP, totalEscritorioPP);
+    // Adicionar Linha de Totais no Rodapé da Tabela
+    const trTotal = document.createElement('tr');
+    trTotal.className = 'total-row';
+    trTotal.innerHTML = `
+        <td><strong>TOTAL EQUIPE</strong></td>
+        <td class="center"><strong>${totais.aa}</strong></td>
+        <td class="center"><strong>${totais.af}</strong></td>
+        <td class="center"><strong>${totais.ap}</strong></td>
+        <td class="center"><strong>${formatarNumero(totais.apValor, true)}</strong></td>
+        <td class="center"><strong>${totais.rec}</strong></td>
+        <td class="center highlight-cell"><strong>${formatarNumero(totais.pp)}</strong></td>
+    `;
+    tfoot.appendChild(trTotal);
 }
 
 function renderizarRanking(data) {
@@ -126,52 +148,7 @@ function renderizarRanking(data) {
     });
 }
 
-function iniciarAlternanciaTelas() {
-    let telaAtual = 'producao'; 
-    const tempoTroca = 10 * 60 * 1000; 
-
-    setInterval(() => {
-        const prodView = document.getElementById('production-view');
-        const rankView = document.getElementById('ranking-view');
-        const title = document.getElementById('view-title');
-        const subtitle = document.getElementById('view-subtitle');
-
-        if (telaAtual === 'producao') {
-            prodView.style.display = 'none';
-            rankView.style.display = 'block';
-            title.textContent = "Ranking MUAPD - Office Goiânia";
-            subtitle.textContent = "Agendamentos de Tel Party (Total)";
-            telaAtual = 'ranking';
-        } else {
-            rankView.style.display = 'none';
-            prodView.style.display = 'block';
-            title.textContent = "Gestão à Vista - Office Goiânia";
-            subtitle.textContent = "Produção parcial do mês";
-            telaAtual = 'producao';
-        }
-    }, tempoTroca);
-}
-
-function atualizarBarrasMetas(realizadoAP, realizadoPP) {
-    const metas = {
-        semanal: { ap: 50000, pp: 925 },
-        mensal: { ap: 200000, pp: 3700 }
-    };
-
-    const aplicarProgresso = (realizado, meta, barId, labelId) => {
-        const pct = Math.min((realizado / meta) * 100, 100).toFixed(1);
-        const bar = document.getElementById(barId);
-        const label = document.getElementById(labelId);
-        if (bar) bar.style.width = pct + '%';
-        if (label) label.textContent = pct + '%';
-    };
-
-    aplicarProgresso(realizadoAP, metas.semanal.ap, 'barWeeklyAP', 'pctWeeklyAP');
-    aplicarProgresso(realizadoPP, metas.semanal.pp, 'barWeeklyPP', 'pctWeeklyPP');
-    aplicarProgresso(realizadoAP, metas.mensal.ap, 'barMonthlyAP', 'pctMonthlyAP');
-    aplicarProgresso(realizadoPP, metas.mensal.pp, 'barMonthlyPP', 'pctMonthlyPP');
-}
-
+// Auto-refresh a cada 30 minutos
 setInterval(() => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
