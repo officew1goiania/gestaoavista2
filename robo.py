@@ -141,10 +141,15 @@ def executar_robo():
                 df_conta = extrair_dados_da_conta(page, conta["email"], conta["senha"])
                 if df_conta is not None:
                     todos_os_dados.append(df_conta)
+                else:
+                    # Se retornou None, algo deu errado na extração interna
+                    page.screenshot(path=f"erro_{conta['email'].split('@')[0]}.png")
+                    print(f"Aviso: Extração falhou para {conta['email']}. Foto salva.")
             except Exception as e:
                 print(f"ERRO CRÍTICO na conta {conta['email']}: {e}")
+                # Tira uma foto do erro para sabermos o que o robô está vendo no servidor
+                page.screenshot(path=f"debug_erro_{conta['email'].split('@')[0]}.png")
             finally:
-                # Fecha a página da conta atual antes de ir para a próxima
                 page.close()
                 context.close()
 

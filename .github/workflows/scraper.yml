@@ -49,8 +49,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Adiciona o CSV e o TXT modificados
-          git add dados_extraidos.csv last_update.txt debug.html
+          # Adiciona o CSV, o TXT e fotos de erro caso existam
+          git add dados_extraidos.csv last_update.txt debug.html *.png || echo "Sem fotos de erro"
           
           # Se tiver alguma alteração (para não dar erro caso os dados estejam idênticos)
           git commit -m "Automated: Atualização horária dos dados de produção" || echo "Nenhuma mudança nos dados para commitar"
