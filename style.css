@@ -143,47 +143,94 @@ html, body {
 
 tr:nth-child(even) { background-color: var(--w1-gray-light); }
 
-/* Seção de Metas */
+/* Layout de Colunas */
+.dashboard-layout {
+    display: flex;
+    gap: 1.5vw;
+    padding: 0 2vw;
+    height: 75vh;
+}
+
+.main-column {
+    flex: 7; /* 70% da largura */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+}
+
+.side-column {
+    flex: 3; /* 30% da largura */
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 1.5vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ranking-header {
+    text-align: center;
+    margin-bottom: 1vh;
+}
+
+.ranking-header h2 {
+    font-size: 1.8rem;
+    color: var(--w1-teal);
+    margin: 0;
+}
+
+.ranking-header p {
+    font-size: 1rem;
+    color: #9CA3AF;
+    margin: 0;
+}
+
+/* Ajustes na Tabela Principal para caber */
+.w1-table td, .w1-table th {
+    padding: 1.5vh 1vw; /* Reduzido de 2vh */
+    font-size: 1.6rem; /* Reduzido de 2.2rem */
+}
+
+/* Ajustes na Tabela de Ranking */
+.ranking-table td {
+    font-size: 1.5rem;
+    padding: 1.2vh 1vw;
+}
+
+/* Ajustes de Metas */
 .goals-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5vw;
-    margin-bottom: 2vh;
+    margin-bottom: 1vh;
 }
 
 .goal-card {
-    background: var(--w1-gray-light);
-    border: 1.5px solid var(--w1-gray-border);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 1.5vh 1.5vw;
-}
-
-.goal-card.monthly {
-    border-color: var(--w1-teal);
-    background: #f0fffe;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .goal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5vh;
+    margin-bottom: 1vh;
 }
 
 .goal-header h2 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    color: var(--w1-teal);
+    margin: 0;
     font-weight: 800;
-    color: var(--w1-dark);
 }
 
 .goal-targets {
     font-size: 1rem;
-    font-weight: 700;
-    color: var(--w1-teal);
-    background: var(--w1-white);
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 1px solid var(--w1-gray-border);
+    color: #9CA3AF;
 }
 
 .progress-group {
@@ -195,59 +242,38 @@ tr:nth-child(even) { background-color: var(--w1-gray-light); }
 .progress-item {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 0.5vh;
 }
 
 .progress-labels {
     display: flex;
     justify-content: space-between;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #6B7280;
 }
 
 .progress-bar {
-    height: 12px;
-    background: var(--w1-gray-border);
-    border-radius: 10px;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
     overflow: hidden;
-    position: relative;
 }
 
 .progress-fill {
     height: 100%;
-    background: var(--w1-teal);
-    border-radius: 10px;
-    transition: width 1s ease-in-out;
+    background: linear-gradient(90deg, var(--w1-teal), #4ade80);
+    border-radius: 5px;
+    transition: width 1.5s ease;
 }
 
-.progress-item:nth-child(2) .progress-fill {
-    background: var(--w1-dark);
-}
-
-/* Ajustes na Tabela para TV */
-.w1-table td {
-    padding: 1.5vh 2vw;
-    font-size: 1.6rem;
-}
-
-@media (min-height: 900px) {
-    .w1-table td { font-size: 2rem; padding: 2.5vh 2vw; }
+.goal-card.monthly .progress-fill {
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
 }
 
 .dashboard-footer { margin-top: 1vh; text-align: center; }
 .footer-note { font-size: 0.8rem; color: #9CA3AF; }
 
-/* Estilos para Ranking MUAPD */
-.ranking-table th {
-    background: var(--w1-teal);
-}
-
-.ranking-table td {
-    font-size: 2.2rem;
-    padding: 2.5vh 2vw;
-}
-
-.ranking-table tr:nth-child(1) td:first-child { font-size: 3rem; }
-.ranking-table tr:nth-child(2) td:first-child { font-size: 2.8rem; }
-.ranking-table tr:nth-child(3) td:first-child { font-size: 2.6rem; }
+/* Destaques no Ranking */
+.ranking-table tr:nth-child(1) td { color: #FFD700; font-weight: 800; }
+.ranking-table tr:nth-child(2) td { color: #C0C0C0; }
+.ranking-table tr:nth-child(3) td { color: #CD7F32; }

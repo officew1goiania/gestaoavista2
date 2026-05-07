@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
     carregarRankingCSV(); 
-    iniciarAlternanciaTelas();
 });
 
 function parseNumero(str) {
