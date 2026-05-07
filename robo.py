@@ -138,19 +138,18 @@ def extrair_ranking_muapd(page):
         page.goto(url_ranking)
         page.wait_for_load_state("networkidle")
         
-        # 1. Garante que estamos na aba Tel Party
-        print("Acessando Tel Party...")
+        # 1. Acessa Tel Party
         page.get_by_role("link", name="Tel Party").click()
         page.wait_for_timeout(2000)
 
-        # 2. Limpa todos os filtros existentes
-        print("Limpando filtros anteriores...")
-        page.evaluate("() => { const b = document.querySelector('.js-btn-reset-filter'); if(b) b.click(); }")
-        page.wait_for_timeout(2000)
-
-        # 3. Configura Filtros de Data
-        print("Configurando datas...")
+        # 2. Limpa TUDO via JavaScript Agressivo
+        print("Limpando todos os escritórios...")
         page.evaluate("""() => {
+            // Desmarca todos os checkboxes de escritório
+            document.querySelectorAll('input[name="office_ids[]"]').forEach(cb => {
+                if(cb.checked) cb.click();
+            });
+            // Configura filtros de data (Desmarca compromisso, Marca criação)
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 const text = cb.parentElement.innerText.toLowerCase();
                 if(text.includes('compromisso') && cb.checked) cb.click();
@@ -158,49 +157,46 @@ def extrair_ranking_muapd(page):
             });
         }""")
 
-        # 4. Seleciona Goiânia
-        print("Selecionando Goiânia...")
+        # 3. Marca Goiânia especificamente
+        print("Marcando Goiânia...")
         page.locator("label").filter(has_text="W1 Goiânia").locator("input").check()
 
-        # 5. Filtra
-        print("Filtrando...")
+        # 4. Filtra
         page.evaluate("() => { document.querySelector('.js-btn-filter').click(); }")
-        
-        print("Aguardando resultados (15s)...")
+        print("Aguardando ranking (15s)...")
         page.wait_for_timeout(15000)
 
-        # 6. Extração dos dados
+        # 5. Extração com Filtro de Segurança em Python
         html = page.content()
         soup = BeautifulSoup(html, 'html.parser')
         tabela = soup.find('table')
         
         dados_ranking = []
         if tabela:
-            # Pega todas as linhas (tr) da tabela
             linhas = tabela.find_all('tr')
             for linha in linhas:
                 cols = linha.find_all('td')
-                # Precisa de pelo menos 5 colunas: #, Consultor, Cargo, Escritório, AA
+                # #=0, Consultor=1, Cargo=2, Escritório=3, AA=4
                 if len(cols) >= 5:
                     nome = cols[1].get_text(strip=True)
+                    escritorio = cols[3].get_text(strip=True)
                     aa_texto = cols[4].get_text(strip=True)
                     
-                    # Filtra apenas linhas que tenham nome válido e não sejam o Total
-                    if nome and nome != "-" and nome != "Total" and not nome.isdigit():
-                        # Limpa o valor de AA (converte para número)
-                        aa_val = 0
+                    # TRAVA DE SEGURANÇA: Só aceita se for Goiânia
+                    if "Goiânia" in escritorio and nome != "-" and nome != "Total":
                         try:
                             aa_val = int(aa_texto)
+                            dados_ranking.append({'Consultor': nome, 'AA': aa_val})
                         except:
-                            aa_val = 0
-                        
-                        dados_ranking.append({'Consultor': nome, 'AA': aa_val})
+                            continue
         
         df = pd.DataFrame(dados_ranking)
         if not df.empty:
-            # Ordena por AA decrescente
             df = df.sort_values(by='AA', ascending=False)
-            print(f"Sucesso: {len(df)} consultores no ranking.")
+            print(f"Sucesso: {len(df)} consultores de Goiânia filtrados.")
+        else:
+            print("Aviso: Nenhum dado de Goiânia encontrado na tabela.")
+            
         return df
 
     except Exception as e:

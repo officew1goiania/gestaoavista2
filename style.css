@@ -143,137 +143,79 @@ html, body {
 
 tr:nth-child(even) { background-color: var(--w1-gray-light); }
 
+/* Ajustes de Tipografia Global para Densidade */
+h1 { font-size: 2.2rem !important; }
+.subtitle { font-size: 1rem !important; }
+
 /* Layout de Colunas */
 .dashboard-layout {
     display: flex;
-    gap: 1.5vw;
-    padding: 0 2vw;
-    height: 75vh;
+    gap: 1vw;
+    padding: 0 1.5vw;
+    height: 78vh; /* Aumentado para ganhar espaço vertical */
 }
 
 .main-column {
-    flex: 7; /* 70% da largura */
-    display: flex;
-    flex-direction: column;
-    gap: 1.5vh;
+    flex: 7.2;
+    gap: 1vh;
 }
 
 .side-column {
-    flex: 3; /* 30% da largura */
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    padding: 1.5vh;
-    display: flex;
-    flex-direction: column;
-    gap: 1vh;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    flex: 2.8;
+    padding: 1vh;
+    gap: 0.8vh;
 }
 
-.ranking-header {
-    text-align: center;
-    margin-bottom: 1vh;
-}
+.ranking-header h2 { font-size: 1.4rem; }
+.ranking-header p { font-size: 0.9rem; }
 
-.ranking-header h2 {
-    font-size: 1.8rem;
-    color: var(--w1-teal);
-    margin: 0;
-}
-
-.ranking-header p {
-    font-size: 1rem;
-    color: #9CA3AF;
-    margin: 0;
-}
-
-/* Ajustes na Tabela Principal para caber */
+/* Ajustes na Tabela Principal - MAIS COMPACTA */
 .w1-table td, .w1-table th {
-    padding: 1.5vh 1vw; /* Reduzido de 2vh */
-    font-size: 1.6rem; /* Reduzido de 2.2rem */
+    padding: 1vh 0.8vw; /* Reduzido de 1.5vh */
+    font-size: 1.1rem; /* Reduzido de 1.6rem */
+}
+
+.w1-table td:first-child {
+    font-weight: 700;
+    white-space: nowrap; /* Evita quebra de linha nos nomes */
+}
+
+.highlight-cell {
+    font-size: 1.3rem !important; /* Valor PP um pouco maior que o resto */
 }
 
 /* Ajustes na Tabela de Ranking */
 .ranking-table td {
-    font-size: 1.5rem;
-    padding: 1.2vh 1vw;
+    font-size: 1rem;
+    padding: 0.8vh 0.6vw;
 }
 
-/* Ajustes de Metas */
+/* Ajustes de Metas - MAIS COMPACTO */
 .goals-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5vw;
-    margin-bottom: 1vh;
+    gap: 1vw;
+    margin-bottom: 0.5vh;
 }
 
 .goal-card {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 1.5vh 1.5vw;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    padding: 1vh 1.2vw;
+    border-radius: 12px;
 }
 
-.goal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1vh;
-}
+.goal-header { margin-bottom: 0.5vh; }
+.goal-header h2 { font-size: 1.1rem; }
+.goal-targets { font-size: 0.85rem; }
 
-.goal-header h2 {
-    font-size: 1.3rem;
-    color: var(--w1-teal);
-    margin: 0;
-    font-weight: 800;
-}
+.progress-group { gap: 0.5vh; }
+.progress-labels { font-size: 0.85rem; }
+.progress-bar { height: 8px; }
 
-.goal-targets {
-    font-size: 1rem;
-    color: #9CA3AF;
-}
-
-.progress-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1vh;
-}
-
-.progress-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5vh;
-}
-
-.progress-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.progress-bar {
-    height: 10px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--w1-teal), #4ade80);
-    border-radius: 5px;
-    transition: width 1.5s ease;
-}
-
-.goal-card.monthly .progress-fill {
-    background: linear-gradient(90deg, #3b82f6, #06b6d4);
-}
-
-.dashboard-footer { margin-top: 1vh; text-align: center; }
-.footer-note { font-size: 0.8rem; color: #9CA3AF; }
+.dashboard-footer { margin-top: 0.5vh; }
+.footer-note { font-size: 0.7rem; }
 
 /* Destaques no Ranking */
-.ranking-table tr:nth-child(1) td { color: #FFD700; font-weight: 800; }
+.ranking-table tr:nth-child(1) td { color: #FFD700; font-weight: 800; font-size: 1.1rem; }
 .ranking-table tr:nth-child(2) td { color: #C0C0C0; }
 .ranking-table tr:nth-child(3) td { color: #CD7F32; }
