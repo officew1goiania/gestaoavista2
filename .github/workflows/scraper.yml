@@ -1,0 +1,59 @@
+name: Atualizar Dashboard W1 a cada 60 min
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Executa no minuto 0 de cada hora
+  workflow_dispatch: # Permite rodar manualmente clicando em um botão no GitHub
+
+permissions:
+  contents: write # Permite que o robô faça o commit (salve os arquivos) de volta no repositório
+
+jobs:
+  extrair_dados:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependências (Pandas, Playwright, BS4)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install beautifulsoup4
+
+      - name: Instalar o navegador para o Playwright
+        run: |
+          playwright install chromium
+
+      - name: Criar o arquivo .env secreto
+        # Puxa as senhas dos "Secrets" do GitHub para não ficarem públicas no código
+        run: |
+          echo "CONTA1_EMAIL=${{ secrets.CONTA1_EMAIL }}" >> .env
+          echo "CONTA1_SENHA=${{ secrets.CONTA1_SENHA }}" >> .env
+          echo "CONTA2_EMAIL=${{ secrets.CONTA2_EMAIL }}" >> .env
+          echo "CONTA2_SENHA=${{ secrets.CONTA2_SENHA }}" >> .env
+
+      - name: Rodar o Robô de Extração
+        run: |
+          python robo.py
+
+      - name: Salvar os dados (Commit e Push)
+        run: |
+          # Configura um usuário bot para salvar o arquivo
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Adiciona o CSV e o TXT modificados
+          git add dados_extraidos.csv last_update.txt debug.html
+          
+          # Se tiver alguma alteração (para não dar erro caso os dados estejam idênticos)
+          git commit -m "Automated: Atualização horária dos dados de produção" || echo "Nenhuma mudança nos dados para commitar"
+          
+          # Envia de volta para o repositório
+          git push
