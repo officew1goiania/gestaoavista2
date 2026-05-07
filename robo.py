@@ -131,26 +131,26 @@ def extrair_dados_da_conta(page, email, senha):
     return df
 
 def extrair_ranking_muapd(page):
-    print("Acessando página de Rankings...")
+    print("Acessando Rankings...")
     url_ranking = "https://w1nner.w1consultoria.com.br/painel-consultor/indicadores/rankings"
     
     try:
         page.goto(url_ranking)
         page.wait_for_load_state("networkidle")
         
-        # 1. Clica em Tel Party
-        print("Configurando Ranking (Tel Party)...")
+        # 1. Garante que estamos na aba Tel Party
+        print("Acessando Tel Party...")
         page.get_by_role("link", name="Tel Party").click()
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(2000)
 
-        # 2. Limpeza profunda de escritórios via JavaScript
-        print("Limpando filtros de escritório...")
+        # 2. Limpa todos os filtros existentes
+        print("Limpando filtros anteriores...")
+        page.evaluate("() => { const b = document.querySelector('.js-btn-reset-filter'); if(b) b.click(); }")
+        page.wait_for_timeout(2000)
+
+        # 3. Configura Filtros de Data
+        print("Configurando datas...")
         page.evaluate("""() => {
-            // Desmarca todos os escritórios
-            document.querySelectorAll('input[name="office_ids[]"]').forEach(cb => {
-                if(cb.checked) cb.click();
-            });
-            // Desmarca filtros de data extras
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 const text = cb.parentElement.innerText.toLowerCase();
                 if(text.includes('compromisso') && cb.checked) cb.click();
@@ -158,42 +158,53 @@ def extrair_ranking_muapd(page):
             });
         }""")
 
-        # 3. Seleciona Goiânia
+        # 4. Seleciona Goiânia
         print("Selecionando Goiânia...")
         page.locator("label").filter(has_text="W1 Goiânia").locator("input").check()
 
-        # 4. Filtra
-        print("Filtrando resultados...")
-        page.evaluate("() => { const b = document.querySelector('button.js-btn-filter'); if(b) b.click(); }")
+        # 5. Filtra
+        print("Filtrando...")
+        page.evaluate("() => { document.querySelector('.js-btn-filter').click(); }")
         
-        print("Aguardando carregamento (15s)...")
+        print("Aguardando resultados (15s)...")
         page.wait_for_timeout(15000)
 
-        # 5. Extração
+        # 6. Extração dos dados
         html = page.content()
         soup = BeautifulSoup(html, 'html.parser')
-        
-        # Procura a tabela que contém o ranking
         tabela = soup.find('table')
         
         dados_ranking = []
         if tabela:
-            linhas = tabela.find('tbody').find_all('tr')
+            # Pega todas as linhas (tr) da tabela
+            linhas = tabela.find_all('tr')
             for linha in linhas:
                 cols = linha.find_all('td')
-                # Pelo print: Consultor está em cols[1], AA está em cols[4]
+                # Precisa de pelo menos 5 colunas: #, Consultor, Cargo, Escritório, AA
                 if len(cols) >= 5:
                     nome = cols[1].get_text(strip=True)
-                    aa = cols[4].get_text(strip=True)
-                    if nome and nome != "-" and nome != "Total":
-                        dados_ranking.append({'Consultor': nome, 'AA': aa})
+                    aa_texto = cols[4].get_text(strip=True)
+                    
+                    # Filtra apenas linhas que tenham nome válido e não sejam o Total
+                    if nome and nome != "-" and nome != "Total" and not nome.isdigit():
+                        # Limpa o valor de AA (converte para número)
+                        aa_val = 0
+                        try:
+                            aa_val = int(aa_texto)
+                        except:
+                            aa_val = 0
+                        
+                        dados_ranking.append({'Consultor': nome, 'AA': aa_val})
         
         df = pd.DataFrame(dados_ranking)
-        print(f"Sucesso: {len(df)} consultores extraídos para o ranking.")
+        if not df.empty:
+            # Ordena por AA decrescente
+            df = df.sort_values(by='AA', ascending=False)
+            print(f"Sucesso: {len(df)} consultores no ranking.")
         return df
 
     except Exception as e:
-        print(f"Erro ao extrair ranking: {e}")
+        print(f"Erro no Ranking: {e}")
         page.screenshot(path="erro_ranking.png")
         return None
 
