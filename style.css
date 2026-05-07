@@ -166,9 +166,6 @@ h1 { font-size: 2.2rem !important; }
     gap: 0.8vh;
 }
 
-.ranking-header h2 { font-size: 1.4rem; }
-.ranking-header p { font-size: 0.9rem; }
-
 /* Ajustes na Tabela Principal - MAIS COMPACTA */
 .w1-table td, .w1-table th {
     padding: 1vh 0.8vw; /* Reduzido de 1.5vh */
@@ -184,10 +181,27 @@ h1 { font-size: 2.2rem !important; }
     font-size: 1.3rem !important; /* Valor PP um pouco maior que o resto */
 }
 
-/* Ajustes na Tabela de Ranking */
+.ranking-header {
+    text-align: center;
+    margin-bottom: 0.2vh; /* Reduzido drasticamente */
+}
+
+.ranking-header h2 { 
+    font-size: 1.2rem; /* Reduzido */
+}
+
+.ranking-header p { font-size: 0.8rem; }
+
+/* Ajustes na Tabela de Ranking - EXTRA COMPACTO */
 .ranking-table td {
-    font-size: 1rem;
-    padding: 0.8vh 0.6vw;
+    font-size: 0.85rem; /* Fonte pequena para caber mais */
+    padding: 0.5vh 0.4vw; /* Padding mínimo */
+    white-space: nowrap; /* Nomes em uma linha só */
+}
+
+.ranking-table td:nth-child(3) {
+    font-size: 1.1rem; /* Número do AA um pouco maior para destaque */
+    font-weight: 800;
 }
 
 /* Ajustes de Metas - MAIS COMPACTO */
@@ -200,22 +214,22 @@ h1 { font-size: 2.2rem !important; }
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    padding: 1vh 1.2vw;
+    padding: 0.8vh 1vw;
     border-radius: 12px;
 }
 
-.goal-header { margin-bottom: 0.5vh; }
-.goal-header h2 { font-size: 1.1rem; }
-.goal-targets { font-size: 0.85rem; }
+.goal-header { margin-bottom: 0.3vh; }
+.goal-header h2 { font-size: 1rem; }
+.goal-targets { font-size: 0.75rem; }
 
-.progress-group { gap: 0.5vh; }
-.progress-labels { font-size: 0.85rem; }
-.progress-bar { height: 8px; }
+.progress-group { gap: 0.3vh; }
+.progress-labels { font-size: 0.8rem; }
+.progress-bar { height: 6px; }
 
 .dashboard-footer { margin-top: 0.5vh; }
 .footer-note { font-size: 0.7rem; }
 
 /* Destaques no Ranking */
-.ranking-table tr:nth-child(1) td { color: #FFD700; font-weight: 800; font-size: 1.1rem; }
+.ranking-table tr:nth-child(1) td { color: #FFD700; font-weight: 800; font-size: 0.95rem; }
 .ranking-table tr:nth-child(2) td { color: #C0C0C0; }
 .ranking-table tr:nth-child(3) td { color: #CD7F32; }
