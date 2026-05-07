@@ -62,7 +62,12 @@ function renderizarTabela(data) {
 
     filtrados.forEach(row => {
         const tr = document.createElement('tr');
-        const nomeCurto = row['Consultor/Nível'].split(' (')[0];
+        
+        // Limpa o nome: remove (P), remove o símbolo ◦ e espaços extras
+        const nomeCurto = row['Consultor/Nível']
+            .split(' (')[0]
+            .replace('◦', '')
+            .trim(); 
         
         tr.innerHTML = `
             <td>${nomeCurto}</td>
