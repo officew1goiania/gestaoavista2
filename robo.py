@@ -62,17 +62,18 @@ def extrair_dados_da_conta(page, email, senha):
     try:
         btn = page.get_by_role("button", name="Filtrar", exact=True)
         btn.scroll_into_view_if_needed()
-        btn.click(force=True)
+        btn.click(force=True, timeout=5000)
     except Exception as e:
-        print("Aviso: Botão 'Filtrar' (exato) não encontrado. Tentando alternativas...")
+        print("Aviso: Botão 'Filtrar' (exato) falhou. Tentando Enter e seletor alternativo...")
         try:
-            btn_alt = page.locator("button:has-text('Filtrar')").first
-            btn_alt.scroll_into_view_if_needed()
-            btn_alt.click(force=True)
+            # Tenta dar Enter no campo de busca (frequentemente dispara o filtro)
+            page.keyboard.press("Enter")
+            page.wait_for_timeout(1000)
+            # Tenta o seletor CSS do botão verde
+            page.locator("button.btn-positive").first.click(force=True, timeout=5000)
         except:
-            btn_class = page.locator("button.btn-positive").first
-            btn_class.scroll_into_view_if_needed()
-            btn_class.click(force=True)
+            print("Tentativa final com clique por texto...")
+            page.locator("button:has-text('Filtrar')").first.click(force=True, timeout=5000)
 
     print("Aguardando carregamento da tabela (pausa fixa de 15 segundos)...")
     
@@ -146,12 +147,13 @@ def executar_robo():
                 if df_conta is not None:
                     todos_os_dados.append(df_conta)
                 else:
-                    # Se retornou None, algo deu errado na extração interna
-                    page.screenshot(path=f"erro_{conta['email'].split('@')[0]}.png")
-                    print(f"Aviso: Extração falhou para {conta['email']}. Foto salva.")
+                    page.screenshot(path=f"erro_vazio_{conta['email'].split('@')[0]}.png")
             except Exception as e:
-                print(f"ERRO CRÍTICO na conta {conta['email']}: {e}")
-                # Tira uma foto do erro para sabermos o que o robô está vendo no servidor
+                import traceback
+                erro_detalhado = traceback.format_exc()
+                print(f"ERRO na conta {conta['email']}: {e}")
+                with open(f"log_erro_{conta['email'].split('@')[0]}.txt", "w") as f:
+                    f.write(erro_detalhado)
                 page.screenshot(path=f"debug_erro_{conta['email'].split('@')[0]}.png")
             finally:
                 page.close()
