@@ -204,6 +204,32 @@ def extrair_ranking_muapd(page):
         page.screenshot(path="erro_ranking.png")
         return None
 
+def extrair_dados_google_sheets():
+    """Busca dados da equipe externa na planilha do Google Sheets"""
+    print("\n[GOOGLE SHEETS] Buscando dados do Time Mario...")
+    url_planilha = "https://docs.google.com/spreadsheets/d/1MmoY1eIDApfLynUS3cKKc7OrEekEPEGSZjqz9ViOPW0/export?format=csv&gid=0"
+    
+    try:
+        df_externo = pd.read_csv(url_planilha)
+        # Mapear colunas para o padrão do nosso CSV
+        # Planilha: Equipe, AA, AF, AP, AP [R$], REC, PP
+        # Nosso CSV: Consultor/Nível, AA, AF, AP, AP [R$], Recs, Total
+        
+        df_externo = df_externo.rename(columns={
+            'Equipe': 'Consultor/Nível',
+            'REC': 'Recs',
+            'PP': 'Total'
+        })
+        
+        # Garante que o nome da equipe seja curto para o dashboard
+        df_externo['Consultor/Nível'] = df_externo['Consultor/Nível'].apply(lambda x: str(x).split(' ')[0])
+        
+        print(f"✓ Dados do Time Mario carregados: {len(df_externo)} equipe(s).")
+        return df_externo
+    except Exception as e:
+        print(f"✗ Erro ao buscar dados da planilha externa: {e}")
+        return None
+
 def executar_robo():
     print("Iniciando o robô...")
     
@@ -250,6 +276,11 @@ def executar_robo():
 
         browser.close()
         
+    # 3. Busca dados externos (Time Mario)
+    df_externo = extrair_dados_google_sheets()
+    if df_externo is not None:
+        todos_os_dados.append(df_externo)
+        
     # Salva Produção
     if todos_os_dados:
         df_final = pd.concat(todos_os_dados, ignore_index=True)
@@ -257,7 +288,7 @@ def executar_robo():
         from datetime import datetime
         with open("last_update.txt", "w", encoding="utf-8") as f:
             f.write(datetime.utcnow().isoformat() + "Z")
-        print("Dados de produção salvos.")
+        print("Dados de produção consolidados e salvos.")
 
     # Salva Ranking
     if rankings_acumulados:

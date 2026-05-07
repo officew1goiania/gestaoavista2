@@ -66,7 +66,7 @@ function renderizarTabela(data) {
     tbody.innerHTML = ''; 
     if (tfoot) tfoot.innerHTML = '';
 
-    const consultoresAlvo = ["Gianlucca", "Daniela", "Tarek"];
+    const consultoresAlvo = ["Gianlucca", "Daniela", "Tarek", "Mario"];
     const filtrados = data.filter(row => {
         const nome = row['Consultor/Nível'] || "";
         return consultoresAlvo.some(alvo => nome.toLowerCase().includes(alvo.toLowerCase()));
