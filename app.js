@@ -25,7 +25,8 @@ function formatarNumero(num, ehMoeda = false) {
 }
 
 function carregarUltimaAtualizacao() {
-    fetch('last_update.txt')
+    // Adiciona um timestamp para evitar cache do navegador
+    fetch('last_update.txt?t=' + new Date().getTime())
         .then(response => response.text())
         .then(isoString => {
             const date = new Date(isoString);
@@ -37,7 +38,8 @@ function carregarUltimaAtualizacao() {
 }
 
 function carregarDadosCSV() {
-    Papa.parse('dados_extraidos.csv', {
+    // Adiciona um timestamp para evitar cache do navegador
+    Papa.parse('dados_extraidos.csv?t=' + new Date().getTime(), {
         download: true,
         header: true,
         skipEmptyLines: true,
