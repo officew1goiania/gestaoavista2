@@ -133,49 +133,65 @@ def extrair_dados_da_conta(page, email, senha):
 def extrair_ranking_muapd(page):
     print("Acessando página de Rankings...")
     url_ranking = "https://w1nner.w1consultoria.com.br/painel-consultor/indicadores/rankings"
-    page.goto(url_ranking)
-    page.wait_for_load_state("networkidle")
-
-    print("Configurando filtros de Ranking (Tel Party)...")
+    
     try:
-        # 1. Clica em Tel Party
-        page.get_by_role("link", name="Tel Party").click()
-        page.wait_for_timeout(1000)
-
-        # 2. Desmarca "Data do Compromisso" (deixando apenas Data de Criação)
-        # Procuramos o checkbox pelo label
-        page.get_by_label("Data do Compromisso").uncheck()
+        page.goto(url_ranking)
+        page.wait_for_load_state("networkidle")
         
-        # 3. Escritórios: Desmarca todos e marca Goiânia
-        # O ID toggle_all_offices costuma ser padrão no sistema
-        page.locator("#toggle_all_offices").uncheck()
-        page.get_by_label("W1 Goiânia").check()
+        # 1. Clica em Tel Party
+        print("Configurando Ranking (Tel Party)...")
+        page.get_by_role("link", name="Tel Party").click()
+        page.wait_for_timeout(3000)
+
+        # 2. Limpeza profunda de escritórios via JavaScript
+        print("Limpando filtros de escritório...")
+        page.evaluate("""() => {
+            // Desmarca todos os escritórios
+            document.querySelectorAll('input[name="office_ids[]"]').forEach(cb => {
+                if(cb.checked) cb.click();
+            });
+            // Desmarca filtros de data extras
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                const text = cb.parentElement.innerText.toLowerCase();
+                if(text.includes('compromisso') && cb.checked) cb.click();
+                if(text.includes('criação') && !cb.checked) cb.click();
+            });
+        }""")
+
+        # 3. Seleciona Goiânia
+        print("Selecionando Goiânia...")
+        page.locator("label").filter(has_text="W1 Goiânia").locator("input").check()
 
         # 4. Filtra
-        print("Filtrando ranking...")
-        page.evaluate("() => { const b = document.querySelector('button.js-btn-filter') || document.querySelector('button.btn-positive'); if(b) b.click(); }")
+        print("Filtrando resultados...")
+        page.evaluate("() => { const b = document.querySelector('button.js-btn-filter'); if(b) b.click(); }")
         
-        print("Aguardando ranking (15s)...")
+        print("Aguardando carregamento (15s)...")
         page.wait_for_timeout(15000)
 
         # 5. Extração
         html = page.content()
         soup = BeautifulSoup(html, 'html.parser')
-        # Procura a tabela de ranking
-        tabela = soup.find('table') # Pega a primeira tabela que aparecer após filtrar
+        
+        # Procura a tabela que contém o ranking
+        tabela = soup.find('table')
         
         dados_ranking = []
         if tabela:
             linhas = tabela.find('tbody').find_all('tr')
             for linha in linhas:
                 cols = linha.find_all('td')
+                # Pelo print: Consultor está em cols[1], AA está em cols[4]
                 if len(cols) >= 5:
                     nome = cols[1].get_text(strip=True)
                     aa = cols[4].get_text(strip=True)
-                    if nome and nome != "Total":
+                    if nome and nome != "-" and nome != "Total":
                         dados_ranking.append({'Consultor': nome, 'AA': aa})
         
-        return pd.DataFrame(dados_ranking)
+        df = pd.DataFrame(dados_ranking)
+        print(f"Sucesso: {len(df)} consultores extraídos para o ranking.")
+        return df
+
     except Exception as e:
         print(f"Erro ao extrair ranking: {e}")
         page.screenshot(path="erro_ranking.png")
