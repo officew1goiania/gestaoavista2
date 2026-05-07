@@ -60,16 +60,23 @@ def extrair_dados_da_conta(page, email, senha):
     page.wait_for_timeout(2000)
     
     try:
-        # Clique via JS Puro (mais estável para elementos 'invisíveis')
+        # Clique via JS Puro - Alvo Específico
         page.evaluate("""() => {
-            let b = document.querySelector('button.btn-positive');
-            if (!b) {
+            // Tenta encontrar o botão Filtrar que está perto da seção de 'Escritórios'
+            // Isso evita clicar no botão de Notificações
+            const b = document.querySelector('form button.btn-positive') || 
+                      document.querySelector('.card button.btn-positive');
+            
+            if (b && b.innerText.includes('Filtrar')) {
+                b.click();
+            } else {
+                // Se falhar, tenta o seletor por texto mas garantindo que NÃO é o topo da página
                 const buttons = Array.from(document.querySelectorAll('button'));
-                b = buttons.find(btn => btn.textContent.includes('Filtrar'));
+                const target = buttons.find(btn => btn.textContent.includes('Filtrar') && btn.offsetTop > 300);
+                if (target) target.click();
             }
-            if (b) b.click();
         }""")
-        print("Clique via JavaScript disparado.")
+        print("Clique via JavaScript disparado no alvo específico.")
     except Exception as e:
         print(f"Aviso: Erro no clique JS: {e}. Tentando teclado...")
         page.keyboard.press("Enter")
