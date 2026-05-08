@@ -72,6 +72,9 @@ function renderizarTabela(data) {
         return consultoresAlvo.some(alvo => nome.toLowerCase().includes(alvo.toLowerCase()));
     });
 
+    // Ordenar por PP (coluna Total) decrescente
+    filtrados.sort((a, b) => parseNumero(b['Total']) - parseNumero(a['Total']));
+
     if (filtrados.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 50px;">Aguardando dados...</td></tr>';
         return;
