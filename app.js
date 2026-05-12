@@ -3,7 +3,42 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
     carregarRankingCSV(); 
+    iniciarCicloExibicao();
 });
+
+let currentView = 'results';
+const SWITCH_TIME = 30; // segundos
+let timeLeft = SWITCH_TIME;
+
+function iniciarCicloExibicao() {
+    const progressBar = document.getElementById('progress-bar');
+    const viewResults = document.getElementById('view-results');
+    const viewRanking = document.getElementById('view-ranking');
+
+    setInterval(() => {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) {
+            timeLeft = SWITCH_TIME;
+            alternarVisualizacao(viewResults, viewRanking);
+        }
+        
+        // Atualiza a barra de progresso
+        const percent = ((SWITCH_TIME - timeLeft) / SWITCH_TIME) * 100;
+        if (progressBar) progressBar.style.width = `${percent}%`;
+    }, 100);
+}
+
+function alternarVisualizacao(results, ranking) {
+    if (currentView === 'results') {
+        results.classList.remove('active');
+        ranking.classList.add('active');
+        currentView = 'ranking';
+    } else {
+        ranking.classList.remove('active');
+        results.classList.add('active');
+        currentView = 'results';
+    }
+}
 
 function parseNumero(str) {
     if (!str || str.trim() === '-' || str.trim() === '') return 0;
@@ -72,7 +107,6 @@ function renderizarTabela(data) {
         return consultoresAlvo.some(alvo => nome.toLowerCase().includes(alvo.toLowerCase()));
     });
 
-    // Ordenar por PP (coluna Total) decrescente
     filtrados.sort((a, b) => parseNumero(b['Total']) - parseNumero(a['Total']));
 
     if (filtrados.length === 0) {
@@ -98,7 +132,6 @@ function renderizarTabela(data) {
         totais.pp += valPP;
 
         const tr = document.createElement('tr');
-        // PEGA APENAS O PRIMEIRO NOME
         const nomeCompleto = row['Consultor/Nível'].split(' (')[0].replace(/[^\w\sÀ-ú]/g, '').trim();
         const primeiroNome = nomeCompleto.split(' ')[0];
         
@@ -131,33 +164,59 @@ function renderizarTabela(data) {
 }
 
 function renderizarRanking(data) {
-    const tbody = document.getElementById('rankingBody');
-    if (!tbody) return;
+    const grid = document.getElementById('ranking-grid');
+    if (!grid) return;
     
-    tbody.innerHTML = ''; 
+    grid.innerHTML = ''; 
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 50px;">-</td></tr>';
+        grid.innerHTML = '<div class="loading-text">-</div>';
         return;
     }
 
-    data.forEach((row, index) => {
-        const tr = document.createElement('tr');
-        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
-        
-        // APENAS O PRIMEIRO NOME NO RANKING TAMBÉM
-        const primeiroNomeRanking = row['Consultor'].split(' ')[0];
+    // Dividir os dados em 2 colunas
+    const meio = Math.ceil(data.length / 2);
+    const col1Data = data.slice(0, meio);
+    const col2Data = data.slice(meio);
 
-        tr.innerHTML = `
-            <td class="center">${medal}</td>
-            <td>${primeiroNomeRanking}</td>
-            <td class="center highlight-cell">${row['AA']}</td>
+    function criarTabelaRanking(items, startOffset) {
+        const table = document.createElement('table');
+        table.className = 'ranking-column-table';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th width="60">#</th>
+                    <th>Consultor</th>
+                    <th style="text-align: center;">AA</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
         `;
-        tbody.appendChild(tr);
-    });
+        const tbody = table.querySelector('tbody');
+        
+        items.forEach((row, index) => {
+            const actualIndex = index + startOffset;
+            const tr = document.createElement('tr');
+            const medal = actualIndex === 0 ? '🥇' : actualIndex === 1 ? '🥈' : actualIndex === 2 ? '🥉' : (actualIndex + 1);
+            const primeiroNome = row['Consultor'].split(' ')[0];
+
+            tr.innerHTML = `
+                <td style="text-align: center;">${medal}</td>
+                <td>${primeiroNome}</td>
+                <td style="text-align: center;" class="highlight-cell">${row['AA']}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        return table;
+    }
+
+    grid.appendChild(criarTabelaRanking(col1Data, 0));
+    if (col2Data.length > 0) {
+        grid.appendChild(criarTabelaRanking(col2Data, meio));
+    }
 }
 
-// Auto-refresh a cada 10 minutos para acompanhar o Robô
+// Auto-refresh a cada 10 minutos
 setInterval(() => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();

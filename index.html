@@ -15,6 +15,11 @@
 </head>
 <body class="light-theme">
     <div class="tv-dashboard">
+        <!-- Barra de Progresso Fina -->
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
         <header class="dashboard-header">
             <div class="header-content">
                 <div class="logo-wrapper">W1</div>
@@ -33,79 +38,70 @@
         </header>
 
         <div class="dashboard-layout">
-            <!-- COLUNA ESQUERDA: PRODUÇÃO -->
-            <div class="main-column">
-                <!-- 4 Quadros de Metas conforme rascunho -->
-                <div class="goals-grid-header">
-                    <div class="goal-box ap-semana">
-                        <span class="goal-label">META AP SEMANA</span>
-                        <span class="goal-value">R$ 50.000</span>
+            <!-- VISTA 1: RESULTADOS E METAS -->
+            <div id="view-results" class="view-section active">
+                <div class="main-column">
+                    <!-- 4 Quadros de Metas -->
+                    <div class="goals-grid-header">
+                        <div class="goal-box ap-semana">
+                            <span class="goal-label">META AP SEMANA</span>
+                            <span class="goal-value">R$ 50.000</span>
+                        </div>
+                        <div class="goal-box pp-semana">
+                            <span class="goal-label">META PP SEMANA</span>
+                            <span class="goal-value">925 PPs</span>
+                        </div>
+                        <div class="goal-box ap-mes">
+                            <span class="goal-label">META AP MÊS</span>
+                            <span class="goal-value">R$ 200.000</span>
+                        </div>
+                        <div class="goal-box pp-mes">
+                            <span class="goal-label">META PP MÊS</span>
+                            <span class="goal-value">3.700 PPs</span>
+                        </div>
                     </div>
-                    <div class="goal-box pp-semana">
-                        <span class="goal-label">META PP SEMANA</span>
-                        <span class="goal-value">925 PPs</span>
-                    </div>
-                    <div class="goal-box ap-mes">
-                        <span class="goal-label">META AP MÊS</span>
-                        <span class="goal-value">R$ 200.000</span>
-                    </div>
-                    <div class="goal-box pp-mes">
-                        <span class="goal-label">META PP MÊS</span>
-                        <span class="goal-value">3.700 PPs</span>
-                    </div>
-                </div>
 
-                <div class="section-container">
-                    <h2 class="section-title">Resultados do Mês</h2>
-                    <main class="data-grid">
-                        <table class="w1-table">
-                            <thead>
-                                <tr>
-                                    <th>Equipe</th>
-                                    <th class="center">AA</th>
-                                    <th class="center">AF</th>
-                                    <th class="center">AP</th>
-                                    <th class="center">AP Valor</th>
-                                    <th class="center">REC</th>
-                                    <th class="highlight-header center">PP Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <tr class="loading-row">
-                                    <td colspan="7">Sincronizando...</td>
-                                </tr>
-                            </tbody>
-                            <tfoot id="tableFooter">
-                                <!-- Linha de Totais será inserida aqui -->
-                            </tfoot>
-                        </table>
-                    </main>
-                </div> <!-- FECHAMENTO CORRETO DA SECTION-CONTAINER -->
-            </div> <!-- FECHAMENTO CORRETO DA MAIN-COLUMN -->
+                    <div class="section-container">
+                        <h2 class="section-title">Resultados do Mês</h2>
+                        <main class="data-grid">
+                            <table class="w1-table">
+                                <thead>
+                                    <tr>
+                                        <th>Equipe</th>
+                                        <th class="center">AA</th>
+                                        <th class="center">AF</th>
+                                        <th class="center">AP</th>
+                                        <th class="center">AP Valor</th>
+                                        <th class="center">REC</th>
+                                        <th class="highlight-header center">PP Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    <tr class="loading-row">
+                                        <td colspan="7">Sincronizando...</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot id="tableFooter">
+                                    <!-- Linha de Totais será inserida aqui -->
+                                </tfoot>
+                            </table>
+                        </main>
+                    </div>
+                </div>
+            </div>
 
-            <!-- COLUNA DIREITA: RANKING MUAPD -->
-            <aside class="side-column">
-                <div class="ranking-header">
-                    <h2>RANKING MUAPD</h2>
-                    <p>Agendamentos (AA)</p>
+            <!-- VISTA 2: RANKING MUAPD -->
+            <div id="view-ranking" class="view-section">
+                <div class="ranking-full-container">
+                    <div class="ranking-header">
+                        <h2>RANKING MUAPD - Agendamentos (AA)</h2>
+                    </div>
+                    <div id="ranking-grid" class="ranking-two-columns">
+                        <!-- O conteúdo do ranking será inserido aqui em 2 colunas -->
+                        <div class="loading-text">Carregando Ranking...</div>
+                    </div>
                 </div>
-                <div class="data-grid">
-                    <table class="w1-table ranking-table">
-                        <thead>
-                            <tr>
-                                <th width="60" class="center">#</th>
-                                <th>Consultor</th>
-                                <th class="center highlight-header">AA</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rankingBody">
-                            <tr class="loading-row">
-                                <td colspan="3">Carregando...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </aside>
+            </div>
         </div> <!-- FECHAMENTO DA DASHBOARD-LAYOUT -->
 
         <footer class="dashboard-footer">
