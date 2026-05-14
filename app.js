@@ -2,12 +2,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
-    carregarRankingCSV(); 
+    carregarRankingCSV();
     iniciarCicloExibicao();
 });
 
 let currentView = 'results';
-const SWITCH_TIME = 30; // segundos
+const SWITCH_TIME = 10; // segundos
 let timeLeft = SWITCH_TIME;
 
 function iniciarCicloExibicao() {
@@ -21,7 +21,7 @@ function iniciarCicloExibicao() {
             timeLeft = SWITCH_TIME;
             alternarVisualizacao(viewResults, viewRanking);
         }
-        
+
         // Atualiza a barra de progresso
         const percent = ((SWITCH_TIME - timeLeft) / SWITCH_TIME) * 100;
         if (progressBar) progressBar.style.width = `${percent}%`;
@@ -76,7 +76,7 @@ function carregarDadosCSV() {
         download: true,
         header: true,
         skipEmptyLines: true,
-        complete: function(results) {
+        complete: function (results) {
             renderizarTabela(results.data);
         }
     });
@@ -87,7 +87,7 @@ function carregarRankingCSV() {
         download: true,
         header: true,
         skipEmptyLines: true,
-        complete: function(results) {
+        complete: function (results) {
             renderizarRanking(results.data);
         }
     });
@@ -97,8 +97,8 @@ function renderizarTabela(data) {
     const tbody = document.getElementById('tableBody');
     const tfoot = document.getElementById('tableFooter');
     if (!tbody) return;
-    
-    tbody.innerHTML = ''; 
+
+    tbody.innerHTML = '';
     if (tfoot) tfoot.innerHTML = '';
 
     const consultoresAlvo = ["Gianlucca", "Daniela", "Tarek", "Mario"];
@@ -134,7 +134,7 @@ function renderizarTabela(data) {
         const tr = document.createElement('tr');
         const nomeCompleto = row['Consultor/Nível'].split(' (')[0].replace(/[^\w\sÀ-ú]/g, '').trim();
         const primeiroNome = nomeCompleto.split(' ')[0];
-        
+
         tr.innerHTML = `
             <td>${primeiroNome}</td>
             <td class="center">${aa}</td>
@@ -166,8 +166,8 @@ function renderizarTabela(data) {
 function renderizarRanking(data) {
     const grid = document.getElementById('ranking-grid');
     if (!grid) return;
-    
-    grid.innerHTML = ''; 
+
+    grid.innerHTML = '';
 
     if (!data || data.length === 0) {
         grid.innerHTML = '<div class="loading-text">-</div>';
@@ -193,7 +193,7 @@ function renderizarRanking(data) {
             <tbody></tbody>
         `;
         const tbody = table.querySelector('tbody');
-        
+
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
             const tr = document.createElement('tr');
