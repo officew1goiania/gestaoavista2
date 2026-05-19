@@ -110,16 +110,24 @@ function renderizarTabela(data) {
     if (!data || data.length === 0) return;
 
     let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0 };
+    let metas = { apValor: 0, pp: 0 };
 
     data.forEach(row => {
         const nome = (row['Consultor/Nível'] || '').trim();
-        // Ignora linhas de totais, eficiências, cabeçalho e vazias
         if (!nome) return;
         const nomeLower = nome.toLowerCase();
+
+        // Extrai as metas da linha de TOTAL
+        if (nomeLower === 'total') {
+            metas.apValor = parseNumero(row['Meta AP [R$]']);
+            metas.pp = parseNumero(row['Meta PPs']);
+            return;
+        }
+
+        // Ignora linhas de eficiências, etc.
         if (
             nomeLower.includes('eficiência') ||
             nomeLower.includes('eficiencias') ||
-            nomeLower === 'total' ||
             nomeLower.includes('consultor')
         ) return;
 
@@ -142,6 +150,28 @@ function renderizarTabela(data) {
     set('total-apvalor', formatarNumero(totais.apValor, true));
     set('total-rec',     totais.rec);
     set('total-pp',      formatarNumero(totais.pp));
+
+    // Atualiza barras de progresso
+    const updateProgress = (metric, atual, meta) => {
+        const bgEl = document.getElementById(`bar-${metric}`);
+        const textEl = document.getElementById(`text-${metric}`);
+        if (!bgEl || !textEl) return;
+        
+        const percent = meta > 0 ? (atual / meta) * 100 : 0;
+        bgEl.style.width = `${Math.min(percent, 100)}%`;
+        
+        // Formata a meta para exibição
+        const metaFormatada = metric === 'apvalor' ? formatarNumero(meta, true) : formatarNumero(meta);
+        textEl.innerHTML = `<strong>${percent.toFixed(1)}%</strong> da meta (${metaFormatada})`;
+        
+        // Muda cor caso atinja a meta
+        if (percent >= 100) {
+            bgEl.style.backgroundColor = '#10b981'; // Verde sucesso
+        }
+    };
+
+    updateProgress('apvalor', totais.apValor, metas.apValor);
+    updateProgress('pp', totais.pp, metas.pp);
 }
 
 function renderizarRanking(data) {
