@@ -155,6 +155,14 @@ function renderizarRanking(data) {
         return;
     }
 
+    // Calcular o Total de AA
+    let totalAA = 0;
+    data.forEach(row => {
+        totalAA += parseNumero(row['AA']);
+    });
+    const totalEl = document.getElementById('ranking-total-aa');
+    if (totalEl) totalEl.textContent = totalAA;
+
     // Dividir os dados em 2 colunas
     const meio = Math.ceil(data.length / 2);
     const col1Data = data.slice(0, meio);
