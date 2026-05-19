@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
     carregarRankingCSV();
+    carregarRankingAPCSV();
     iniciarCicloExibicao();
 });
 
@@ -14,12 +15,13 @@ function iniciarCicloExibicao() {
     const progressBar = document.getElementById('progress-bar');
     const viewResults = document.getElementById('view-results');
     const viewRanking = document.getElementById('view-ranking');
+    const viewRankingAP = document.getElementById('view-ranking-ap');
 
     setInterval(() => {
         timeLeft -= 0.1;
         if (timeLeft <= 0) {
             timeLeft = SWITCH_TIME;
-            alternarVisualizacao(viewResults, viewRanking);
+            alternarVisualizacao(viewResults, viewRanking, viewRankingAP);
         }
 
         // Atualiza a barra de progresso
@@ -28,13 +30,18 @@ function iniciarCicloExibicao() {
     }, 100);
 }
 
-function alternarVisualizacao(results, ranking) {
+function alternarVisualizacao(results, ranking, rankingAP) {
+    results.classList.remove('active');
+    ranking.classList.remove('active');
+    rankingAP.classList.remove('active');
+
     if (currentView === 'results') {
-        results.classList.remove('active');
         ranking.classList.add('active');
         currentView = 'ranking';
+    } else if (currentView === 'ranking') {
+        rankingAP.classList.add('active');
+        currentView = 'ranking-ap';
     } else {
-        ranking.classList.remove('active');
         results.classList.add('active');
         currentView = 'results';
     }
@@ -216,9 +223,76 @@ function renderizarRanking(data) {
     }
 }
 
+function carregarRankingAPCSV() {
+    Papa.parse('ranking_ap.csv?t=' + new Date().getTime(), {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+            renderizarRankingAP(results.data);
+        }
+    });
+}
+
+function renderizarRankingAP(data) {
+    const grid = document.getElementById('ranking-ap-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        grid.innerHTML = '<div class="loading-text">-</div>';
+        return;
+    }
+
+    // Dividir os dados em 2 colunas
+    const meio = Math.ceil(data.length / 2);
+    const col1Data = data.slice(0, meio);
+    const col2Data = data.slice(meio);
+
+    function criarTabelaRankingAP(items, startOffset) {
+        const table = document.createElement('table');
+        table.className = 'ranking-column-table';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th width="60">#</th>
+                    <th>Consultor</th>
+                    <th style="text-align: right; padding-right: 1.5vw;">Valor</th>
+                    <th style="text-align: center; width: 80px;">Qtd</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+
+        items.forEach((row, index) => {
+            const actualIndex = index + startOffset;
+            const tr = document.createElement('tr');
+            const medal = actualIndex === 0 ? '🥇' : actualIndex === 1 ? '🥈' : actualIndex === 2 ? '🥉' : (actualIndex + 1);
+            const primeiroNome = row['Consultor'].split(' ')[0];
+
+            tr.innerHTML = `
+                <td style="text-align: center;">${medal}</td>
+                <td>${primeiroNome}</td>
+                <td style="text-align: right; padding-right: 1.5vw;" class="highlight-cell">${row['Valor']}</td>
+                <td style="text-align: center;">${row['Quantidade']}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        return table;
+    }
+
+    grid.appendChild(criarTabelaRankingAP(col1Data, 0));
+    if (col2Data.length > 0) {
+        grid.appendChild(criarTabelaRankingAP(col2Data, meio));
+    }
+}
+
 // Auto-refresh a cada 10 minutos
 setInterval(() => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
     carregarRankingCSV();
+    carregarRankingAPCSV();
 }, 10 * 60 * 1000);

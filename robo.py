@@ -204,7 +204,150 @@ def extrair_ranking_muapd(page):
         page.screenshot(path="erro_ranking.png")
         return None
 
+def extrair_ranking_ap(page):
+    print("Acessando Rankings para AP...")
+    url_ranking = "https://w1nner.w1consultoria.com.br/painel-consultor/indicadores/rankings"
+    
+    try:
+        page.goto(url_ranking)
+        page.wait_for_load_state("networkidle")
+        
+        # 1. Acessa a aba APs
+        print("Selecionando a aba APs...")
+        try:
+            page.get_by_role("link", name="APs", exact=True).click()
+        except Exception:
+            page.get_by_text("APs", exact=True).click()
+        page.wait_for_timeout(2000)
+
+        # 2. Seleciona "W1 Goiânia" no campo Escritório da produção
+        print("Selecionando o escritório W1 Goiânia...")
+        page.evaluate("""() => {
+            const selects = Array.from(document.querySelectorAll('select'));
+            let targetSelect = null;
+            
+            for (const select of selects) {
+                if (select.id) {
+                    const label = document.querySelector(`label[for="${select.id}"]`);
+                    if (label && label.innerText.toLowerCase().includes('escritório')) {
+                        targetSelect = select;
+                        break;
+                    }
+                }
+                if (select.name.toLowerCase().includes('office') || select.id.toLowerCase().includes('office')) {
+                    targetSelect = select;
+                    break;
+                }
+            }
+            
+            if (!targetSelect) {
+                for (const select of selects) {
+                    const options = Array.from(select.options);
+                    if (options.some(opt => opt.text.includes('W1 Goiânia'))) {
+                        targetSelect = select;
+                        break;
+                    }
+                }
+            }
+            
+            if (targetSelect) {
+                const optionToSelect = Array.from(targetSelect.options).find(opt => opt.text.includes('W1 Goiânia'));
+                if (optionToSelect) {
+                    targetSelect.value = optionToSelect.value;
+                    targetSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    if (window.jQuery && window.jQuery(targetSelect).trigger) {
+                        window.jQuery(targetSelect).trigger('chosen:updated');
+                        window.jQuery(targetSelect).trigger('change');
+                    }
+                    console.log("Selecionado Goiânia no select:", targetSelect);
+                }
+            } else {
+                console.error("Select de escritório não encontrado.");
+            }
+        }""")
+        page.wait_for_timeout(1000)
+
+        # 3. Filtra
+        print("Clicando no botão Filtrar...")
+        try:
+            page.evaluate("""() => {
+                const btn = document.querySelector('.js-btn-filter');
+                if (btn) {
+                    btn.click();
+                } else {
+                    const fallback = document.querySelector('button[type="submit"]') || document.querySelector('.btn-positive');
+                    if (fallback) fallback.click();
+                }
+            }""")
+        except Exception as e:
+            print(f"Aviso no clique de filtro AP: {e}")
+            page.keyboard.press("Enter")
+
+        print("Aguardando ranking de AP (15s)...")
+        page.wait_for_timeout(15000)
+
+        # 4. Extração dos dados
+        html = page.content()
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        # Encontra a tabela js-ranking
+        tabela = soup.find('table', class_='js-ranking')
+        if not tabela:
+            tabela = soup.find('table')
+            
+        dados_ranking = []
+        if tabela:
+            # Encontra cabeçalhos para mapeamento dinâmico
+            thead = tabela.find('thead')
+            headers = [th.get_text(strip=True).lower() for th in thead.find_all('th')] if thead else []
+            
+            idx_consultor = 2
+            idx_valor = 5
+            idx_qtd = 6
+            
+            if headers:
+                for idx, h in enumerate(headers):
+                    if 'consultor' in h:
+                        idx_consultor = idx
+                    elif 'valor' in h and 'médio' not in h:
+                        idx_valor = idx
+                    elif 'quantidade' in h or 'qtd' in h:
+                        idx_qtd = idx
+                        
+            tbody = tabela.find('tbody')
+            linhas = tbody.find_all('tr') if tbody else tabela.find_all('tr')[1:]
+            
+            for linha in linhas:
+                cols = linha.find_all('td')
+                if len(cols) > max(idx_consultor, idx_valor, idx_qtd):
+                    nome = cols[idx_consultor].get_text(strip=True)
+                    if nome == "-" or nome == "Total" or not nome:
+                        continue
+                    
+                    valor = cols[idx_valor].get_text(strip=True)
+                    qtd = cols[idx_qtd].get_text(strip=True)
+                    
+                    dados_ranking.append({
+                        'Consultor': nome,
+                        'Valor': valor,
+                        'Quantidade': qtd
+                    })
+                    
+        df = pd.DataFrame(dados_ranking)
+        if not df.empty:
+            print(f"Sucesso: {len(df)} consultores no ranking AP extraídos.")
+        else:
+            print("Aviso: Nenhum dado de ranking AP extraído da tabela.")
+            
+        return df
+
+    except Exception as e:
+        print(f"Erro no Ranking AP: {e}")
+        page.screenshot(path="erro_ranking_ap.png")
+        return None
+
 def extrair_dados_google_sheets():
+
     """Busca dados da equipe externa na planilha do Google Sheets"""
     print("\n[GOOGLE SHEETS] Buscando dados do Time Mario...")
     url_planilha = "https://docs.google.com/spreadsheets/d/1MmoY1eIDApfLynUS3cKKc7OrEekEPEGSZjqz9ViOPW0/export?format=csv&gid=0"
@@ -234,13 +377,14 @@ def executar_robo():
     print("Iniciando o robô...")
     
     # Cria os arquivos vazios logo de cara para evitar erro no Git Add
-    for arq in ["dados_extraidos.csv", "ranking_muapd.csv"]:
+    for arq in ["dados_extraidos.csv", "ranking_muapd.csv", "ranking_ap.csv"]:
         if not os.path.exists(arq):
             with open(arq, "w", encoding="utf-8") as f:
                 f.write("") 
 
     todos_os_dados = []
     rankings_acumulados = []
+    rankings_ap_acumulados = []
     
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -263,6 +407,11 @@ def executar_robo():
                 if df_ranking is not None:
                     rankings_acumulados.append(df_ranking)
 
+                # 3. Extração de Ranking AP (Já logado na conta)
+                df_ranking_ap = extrair_ranking_ap(page)
+                if df_ranking_ap is not None:
+                    rankings_ap_acumulados.append(df_ranking_ap)
+
             except Exception as e:
                 import traceback
                 erro_detalhado = traceback.format_exc()
@@ -276,7 +425,7 @@ def executar_robo():
 
         browser.close()
         
-    # 3. Busca dados externos (Time Mario)
+    # 4. Busca dados externos (Time Mario)
     df_externo = extrair_dados_google_sheets()
     if df_externo is not None:
         todos_os_dados.append(df_externo)
@@ -290,7 +439,7 @@ def executar_robo():
             f.write(datetime.utcnow().isoformat() + "Z")
         print("Dados de produção consolidados e salvos.")
 
-    # Salva Ranking
+    # Salva Ranking MUAPD
     if rankings_acumulados:
         df_ranking_final = pd.concat(rankings_acumulados, ignore_index=True)
         # Limpeza e Ordenação
@@ -298,6 +447,22 @@ def executar_robo():
         df_ranking_final = df_ranking_final.sort_values(by='AA', ascending=False).drop_duplicates(subset=['Consultor'])
         df_ranking_final.to_csv("ranking_muapd.csv", index=False)
         print("Ranking MUAPD salvo com sucesso.")
+
+    # Salva Ranking AP
+    if rankings_ap_acumulados:
+        df_ranking_ap_final = pd.concat(rankings_ap_acumulados, ignore_index=True)
+        # Limpeza e Ordenação por Valor Numérico
+        def parse_valor_ranking(val_str):
+            try:
+                return float(str(val_str).replace('R$', '').replace('.', '').replace(',', '.').strip())
+            except:
+                return 0.0
+        
+        df_ranking_ap_final['Valor_Num'] = df_ranking_ap_final['Valor'].apply(parse_valor_ranking)
+        df_ranking_ap_final = df_ranking_ap_final.sort_values(by='Valor_Num', ascending=False).drop_duplicates(subset=['Consultor'])
+        df_ranking_ap_final = df_ranking_ap_final.drop(columns=['Valor_Num'])
+        df_ranking_ap_final.to_csv("ranking_ap.csv", index=False)
+        print("Ranking AP consolidado e salvo.")
 
 if __name__ == "__main__":
     executar_robo()
