@@ -433,11 +433,11 @@ h1 { font-size: 2.2rem !important; }
 }
 
 .result-sublabel {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    opacity: 0.55;
+    opacity: 0.65;
     margin-top: 0.3vh;
     text-align: center;
 }
@@ -480,8 +480,8 @@ h1 { font-size: 2.2rem !important; }
 }
 
 .card-progress-text {
-    font-size: 0.8rem;
+    font-size: 1.05rem;
     color: inherit;
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
