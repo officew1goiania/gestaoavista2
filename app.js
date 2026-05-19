@@ -106,9 +106,16 @@ function renderizarTabela(data) {
     let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0 };
 
     data.forEach(row => {
-        const nome = row['Consultor/Nível'] || '';
-        // Ignora linhas de cabeçalho ou separadoras
-        if (!nome || nome.trim() === '' || nome.toLowerCase().includes('consultor')) return;
+        const nome = (row['Consultor/Nível'] || '').trim();
+        // Ignora linhas de totais, eficiências, cabeçalho e vazias
+        if (!nome) return;
+        const nomeLower = nome.toLowerCase();
+        if (
+            nomeLower.includes('eficiência') ||
+            nomeLower.includes('eficiencias') ||
+            nomeLower === 'total' ||
+            nomeLower.includes('consultor')
+        ) return;
 
         totais.aa     += parseNumero(row['AA']);
         totais.af     += parseNumero(row['AF']);
