@@ -63,29 +63,39 @@
 
                     <div class="section-container">
                         <h2 class="section-title">Resultados do Mês</h2>
-                        <main class="data-grid">
-                            <table class="w1-table">
-                                <thead>
-                                    <tr>
-                                        <th>Equipe</th>
-                                        <th class="center">AA</th>
-                                        <th class="center">AF</th>
-                                        <th class="center">AP</th>
-                                        <th class="center">AP Valor</th>
-                                        <th class="center">REC</th>
-                                        <th class="highlight-header center">PP Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tableBody">
-                                    <tr class="loading-row">
-                                        <td colspan="7">Sincronizando...</td>
-                                    </tr>
-                                </tbody>
-                                <tfoot id="tableFooter">
-                                    <!-- Linha de Totais será inserida aqui -->
-                                </tfoot>
-                            </table>
-                        </main>
+                        <!-- 6 Quadros de Resultado Total -->
+                        <div class="results-cards-grid">
+                            <div class="result-card result-aa">
+                                <span class="result-label">AA</span>
+                                <span class="result-value" id="total-aa">—</span>
+                                <span class="result-sublabel">Agendamentos</span>
+                            </div>
+                            <div class="result-card result-af">
+                                <span class="result-label">AF</span>
+                                <span class="result-value" id="total-af">—</span>
+                                <span class="result-sublabel">Atendimentos</span>
+                            </div>
+                            <div class="result-card result-ap">
+                                <span class="result-label">AP</span>
+                                <span class="result-value" id="total-ap">—</span>
+                                <span class="result-sublabel">Análises Pagas (Qtd)</span>
+                            </div>
+                            <div class="result-card result-apvalor">
+                                <span class="result-label">AP R$</span>
+                                <span class="result-value" id="total-apvalor">—</span>
+                                <span class="result-sublabel">Análises Pagas (Valor)</span>
+                            </div>
+                            <div class="result-card result-rec">
+                                <span class="result-label">REC</span>
+                                <span class="result-value" id="total-rec">—</span>
+                                <span class="result-sublabel">Recomendações</span>
+                            </div>
+                            <div class="result-card result-pp">
+                                <span class="result-label">PP</span>
+                                <span class="result-value" id="total-pp">—</span>
+                                <span class="result-sublabel">Pontos de Produção</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -101,73 +101,34 @@ function carregarRankingCSV() {
 }
 
 function renderizarTabela(data) {
-    const tbody = document.getElementById('tableBody');
-    const tfoot = document.getElementById('tableFooter');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-    if (tfoot) tfoot.innerHTML = '';
-
-    const consultoresAlvo = ["Gianlucca", "Daniela", "Tarek", "Mario"];
-    const filtrados = data.filter(row => {
-        const nome = row['Consultor/Nível'] || "";
-        return consultoresAlvo.some(alvo => nome.toLowerCase().includes(alvo.toLowerCase()));
-    });
-
-    filtrados.sort((a, b) => parseNumero(b['Total']) - parseNumero(a['Total']));
-
-    if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 50px;">Aguardando dados...</td></tr>';
-        return;
-    }
+    if (!data || data.length === 0) return;
 
     let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0 };
 
-    filtrados.forEach(row => {
-        const aa = parseNumero(row['AA']);
-        const af = parseNumero(row['AF']);
-        const ap = parseNumero(row['AP']);
-        const valAP = parseNumero(row['AP [R$]']);
-        const rec = parseNumero(row['Recs']);
-        const valPP = parseNumero(row['Total']);
+    data.forEach(row => {
+        const nome = row['Consultor/Nível'] || '';
+        // Ignora linhas de cabeçalho ou separadoras
+        if (!nome || nome.trim() === '' || nome.toLowerCase().includes('consultor')) return;
 
-        totais.aa += aa;
-        totais.af += af;
-        totais.ap += ap;
-        totais.apValor += valAP;
-        totais.rec += rec;
-        totais.pp += valPP;
-
-        const tr = document.createElement('tr');
-        const nomeCompleto = row['Consultor/Nível'].split(' (')[0].replace(/[^\w\sÀ-ú]/g, '').trim();
-        const primeiroNome = nomeCompleto.split(' ')[0];
-
-        tr.innerHTML = `
-            <td>${primeiroNome}</td>
-            <td class="center">${aa}</td>
-            <td class="center">${af}</td>
-            <td class="center">${ap}</td>
-            <td class="center highlight-cell">${formatarNumero(valAP, true)}</td>
-            <td class="center">${rec}</td>
-            <td class="center highlight-cell">${formatarNumero(valPP)}</td>
-        `;
-        tbody.appendChild(tr);
+        totais.aa     += parseNumero(row['AA']);
+        totais.af     += parseNumero(row['AF']);
+        totais.ap     += parseNumero(row['AP']);
+        totais.apValor+= parseNumero(row['AP [R$]']);
+        totais.rec    += parseNumero(row['Recs']);
+        totais.pp     += parseNumero(row['Total']);
     });
 
-    if (tfoot) {
-        const trTotal = document.createElement('tr');
-        trTotal.className = 'total-row';
-        trTotal.innerHTML = `
-            <td><strong>TOTAL</strong></td>
-            <td class="center"><strong>${totais.aa}</strong></td>
-            <td class="center"><strong>${totais.af}</strong></td>
-            <td class="center"><strong>${totais.ap}</strong></td>
-            <td class="center highlight-cell"><strong>${formatarNumero(totais.apValor, true)}</strong></td>
-            <td class="center"><strong>${totais.rec}</strong></td>
-            <td class="center highlight-cell"><strong>${formatarNumero(totais.pp)}</strong></td>
-        `;
-        tfoot.appendChild(trTotal);
-    }
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+    };
+
+    set('total-aa',      totais.aa);
+    set('total-af',      totais.af);
+    set('total-ap',      totais.ap);
+    set('total-apvalor', formatarNumero(totais.apValor, true));
+    set('total-rec',     totais.rec);
+    set('total-pp',      formatarNumero(totais.pp));
 }
 
 function renderizarRanking(data) {

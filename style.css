@@ -392,3 +392,60 @@ h1 { font-size: 2.2rem !important; }
 .ranking-table tr:nth-child(1) td { color: #FFD700; font-weight: 800; font-size: 0.95rem; }
 .ranking-table tr:nth-child(2) td { color: #C0C0C0; }
 .ranking-table tr:nth-child(3) td { color: #CD7F32; }
+
+/* ====================================================
+   6 QUADROS DE RESULTADO TOTAL - VISTA 1
+   ==================================================== */
+.results-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1.5vw;
+    margin-top: 1vh;
+}
+
+.result-card {
+    border-radius: 18px;
+    padding: 3vh 2vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5vh;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+    border: 2px solid transparent;
+    transition: transform 0.2s ease;
+}
+
+.result-label {
+    font-size: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.7;
+}
+
+.result-value {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1px;
+}
+
+.result-sublabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.55;
+    margin-top: 0.3vh;
+}
+
+/* Cores individuais por métrica */
+.result-aa     { background: #ccfbf1; color: #0f766e; border-color: #99f6e4; }
+.result-af     { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+.result-ap     { background: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
+.result-apvalor{ background: #fef9c3; color: #854d0e; border-color: #fde047; }
+.result-rec    { background: #fce7f3; color: #9d174d; border-color: #f9a8d4; }
+.result-pp     { background: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
+
