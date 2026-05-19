@@ -48,15 +48,31 @@ def extrair_dados_da_conta(page, email, senha):
 
     print("Aplicando filtros...")
     try:
-        page.get_by_text("Selecionar todos", exact=False).first.click()
-        time.sleep(1)
+        # Lógica inteligente para lidar com o estado residual da sessão (toggle problem)
+        page.evaluate("""() => {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                const label = cb.parentElement ? cb.parentElement.innerText.toLowerCase() : '';
+                
+                // Se for "Selecionar todos" e estiver marcado, desmarca
+                if (label.includes('selecionar todos') && cb.checked) {
+                    cb.click();
+                }
+            });
+            
+            // Depois de limpar o 'todos', garantir que Goiânia esteja marcado
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                const label = cb.parentElement ? cb.parentElement.innerText.toLowerCase() : '';
+                if (label.includes('w1 goiânia') && !cb.checked) {
+                    cb.click();
+                }
+                // Garante que os outros não estejam marcados
+                if (!label.includes('w1 goiânia') && !label.includes('selecionar todos') && cb.checked) {
+                    cb.click();
+                }
+            });
+        }""")
     except Exception as e:
-        print("Aviso: 'Selecionar todos' não encontrado ou não clicável.")
-
-    try:
-        page.get_by_text("W1 Goiânia", exact=False).first.click()
-    except Exception as e:
-        print("Aviso: 'W1 Goiânia' não encontrado.")
+        print(f"Aviso: Erro no filtro inteligente JS: {e}")
 
     print("Clicando no botão Filtrar...")
     page.wait_for_timeout(2000)
@@ -147,7 +163,10 @@ def extrair_dados_semana_conta(page, email):
 
     print("Preenchendo datas...")
     try:
-        # Preenche os campos de data informados pelo usuário
+        # Preenche as datas forçando o valor via JavaScript para garantir que o componente do site aceite
+        page.evaluate(f"document.getElementById('economy_center_start_date').value = '{str_domingo}'")
+        page.evaluate(f"document.getElementById('economy_center_end_date').value = '{str_sabado}'")
+        # Também usamos o Playwright para disparar eventos caso necessário
         page.fill("#economy_center_start_date", str_domingo)
         page.fill("#economy_center_end_date", str_sabado)
     except Exception as e:
@@ -155,17 +174,31 @@ def extrair_dados_semana_conta(page, email):
 
     print("Aplicando filtros de escritório...")
     try:
-        # Limpa todos os escritórios
-        page.get_by_text("Selecionar todos", exact=False).first.click()
-        page.wait_for_timeout(1000)
+        # Lógica inteligente para lidar com o estado residual da sessão (toggle problem)
+        page.evaluate("""() => {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                const label = cb.parentElement ? cb.parentElement.innerText.toLowerCase() : '';
+                
+                // Se for "Selecionar todos" e estiver marcado, desmarca
+                if (label.includes('selecionar todos') && cb.checked) {
+                    cb.click();
+                }
+            });
+            
+            // Depois de limpar o 'todos', garantir que Goiânia esteja marcado
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                const label = cb.parentElement ? cb.parentElement.innerText.toLowerCase() : '';
+                if (label.includes('w1 goiânia') && !cb.checked) {
+                    cb.click();
+                }
+                // Garante que os outros não estejam marcados
+                if (!label.includes('w1 goiânia') && !label.includes('selecionar todos') && cb.checked) {
+                    cb.click();
+                }
+            });
+        }""")
     except Exception as e:
-        pass
-
-    try:
-        # Marca apenas W1 Goiânia
-        page.get_by_text("W1 Goiânia", exact=False).first.click()
-    except Exception as e:
-        print("Aviso: 'W1 Goiânia' não encontrado.")
+        print(f"Aviso: Erro no filtro inteligente JS: {e}")
 
     print("Clicando no botão Filtrar (Semana)...")
     page.wait_for_timeout(2000)
