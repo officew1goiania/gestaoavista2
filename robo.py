@@ -222,49 +222,75 @@ def extrair_ranking_ap(page):
 
         # 2. Seleciona "W1 Goiânia" no campo Escritório da produção
         print("Selecionando o escritório W1 Goiânia...")
-        page.evaluate("""() => {
-            const selects = Array.from(document.querySelectorAll('select'));
-            let targetSelect = null;
-            
-            for (const select of selects) {
-                if (select.id) {
-                    const label = document.querySelector(`label[for="${select.id}"]`);
-                    if (label && label.innerText.toLowerCase().includes('escritório')) {
-                        targetSelect = select;
-                        break;
-                    }
-                }
-                if (select.name.toLowerCase().includes('office') || select.id.toLowerCase().includes('office')) {
-                    targetSelect = select;
-                    break;
-                }
-            }
-            
-            if (!targetSelect) {
+        try:
+            # Primeiro tenta via JavaScript (mais robusto no HTML subjacente)
+            page.evaluate("""() => {
+                const selects = Array.from(document.querySelectorAll('select'));
+                let targetSelect = null;
+                
                 for (const select of selects) {
-                    const options = Array.from(select.options);
-                    if (options.some(opt => opt.text.includes('W1 Goiânia'))) {
+                    if (select.id) {
+                        const label = document.querySelector(`label[for="${select.id}"]`);
+                        if (label && label.innerText.toLowerCase().includes('escritório')) {
+                            targetSelect = select;
+                            break;
+                        }
+                    }
+                    if (select.name.toLowerCase().includes('office') || select.id.toLowerCase().includes('office')) {
                         targetSelect = select;
                         break;
                     }
                 }
-            }
-            
-            if (targetSelect) {
-                const optionToSelect = Array.from(targetSelect.options).find(opt => opt.text.includes('W1 Goiânia'));
-                if (optionToSelect) {
-                    targetSelect.value = optionToSelect.value;
-                    targetSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                    if (window.jQuery && window.jQuery(targetSelect).trigger) {
-                        window.jQuery(targetSelect).trigger('chosen:updated');
-                        window.jQuery(targetSelect).trigger('change');
+                
+                if (!targetSelect) {
+                    for (const select of selects) {
+                        const options = Array.from(select.options);
+                        if (options.some(opt => opt.text.includes('W1 Goiânia'))) {
+                            targetSelect = select;
+                            break;
+                        }
                     }
-                    console.log("Selecionado Goiânia no select:", targetSelect);
                 }
-            } else {
-                console.error("Select de escritório não encontrado.");
-            }
-        }""")
+                
+                if (targetSelect) {
+                    // Desmarca todas as opções para limpar escolhas anteriores
+                    Array.from(targetSelect.options).forEach(opt => {
+                        opt.selected = false;
+                    });
+                    
+                    const optionToSelect = Array.from(targetSelect.options).find(opt => opt.text.includes('W1 Goiânia'));
+                    if (optionToSelect) {
+                        optionToSelect.selected = true;
+                        targetSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        // Atualiza a UI do Chosen
+                        if (window.jQuery && window.jQuery(targetSelect).trigger) {
+                            window.jQuery(targetSelect).trigger('chosen:updated');
+                            window.jQuery(targetSelect).trigger('change');
+                        }
+                    }
+                }
+            }""")
+            page.wait_for_timeout(500)
+        except Exception as e:
+            print(f"Aviso ao selecionar via JS: {e}")
+
+        # Como garantia, se for um Chosen Multi-Select que necessita de clique na interface:
+        try:
+            chosen_choices = page.locator(".chosen-choices")
+            if chosen_choices.count() > 0:
+                print("Interagindo diretamente com a interface do Chosen...")
+                search_input = page.locator(".chosen-choices input.chosen-search-input")
+                if search_input.count() > 0:
+                    search_input.first.click()
+                    page.wait_for_timeout(500)
+                    search_input.first.fill("W1 Goiânia")
+                    page.wait_for_timeout(500)
+                    page.keyboard.press("Enter")
+                    print("Digitado e selecionado W1 Goiânia via interface Chosen.")
+        except Exception as e:
+            print(f"Aviso ao tentar interface física do Chosen: {e}")
+            
         page.wait_for_timeout(1000)
 
         # 3. Filtra
@@ -307,7 +333,7 @@ def extrair_ranking_ap(page):
             
             if headers:
                 for idx, h in enumerate(headers):
-                    if 'consultor' in h:
+                    if h == 'consultor':
                         idx_consultor = idx
                     elif 'valor' in h and 'médio' not in h:
                         idx_valor = idx
@@ -461,6 +487,7 @@ def executar_robo():
         df_ranking_ap_final['Valor_Num'] = df_ranking_ap_final['Valor'].apply(parse_valor_ranking)
         df_ranking_ap_final = df_ranking_ap_final.sort_values(by='Valor_Num', ascending=False).drop_duplicates(subset=['Consultor'])
         df_ranking_ap_final = df_ranking_ap_final.drop(columns=['Valor_Num'])
+        df_ranking_ap_final = df_ranking_ap_final.head(5)
         df_ranking_ap_final.to_csv("ranking_ap.csv", index=False)
         print("Ranking AP consolidado e salvo.")
 

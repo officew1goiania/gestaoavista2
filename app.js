@@ -245,10 +245,13 @@ function renderizarRankingAP(data) {
         return;
     }
 
+    // Pega apenas os 5 primeiros
+    const top5 = data.slice(0, 5);
+
     // Dividir os dados em 2 colunas
-    const meio = Math.ceil(data.length / 2);
-    const col1Data = data.slice(0, meio);
-    const col2Data = data.slice(meio);
+    const meio = Math.ceil(top5.length / 2);
+    const col1Data = top5.slice(0, meio);
+    const col2Data = top5.slice(meio);
 
     function criarTabelaRankingAP(items, startOffset) {
         const table = document.createElement('table');
