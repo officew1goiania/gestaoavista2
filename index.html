@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>W1 Gestão à Vista - Office Goiânia</title>
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,10 +80,16 @@
                                 <span class="result-value" id="total-ap">—</span>
                                 <span class="result-sublabel">Análises Pagas (Qtd)</span>
                             </div>
+                            <div class="result-card result-rec">
+                                <span class="result-label">REC</span>
+                                <span class="result-value" id="total-rec">—</span>
+                                <span class="result-sublabel">Recomendações</span>
+                            </div>
+
                             <div class="result-card result-apvalor">
                                 <span class="result-label">AP R$</span>
                                 <span class="result-value" id="total-apvalor">—</span>
-                                <span class="result-sublabel">Análises Pagas (Valor)</span>
+                                <span class="result-sublabel">Mês (Valor)</span>
                                 <div class="card-progress-wrapper">
                                     <div class="card-progress-bg">
                                         <div class="card-progress-fill" id="bar-apvalor" style="width: 0%;"></div>
@@ -91,20 +97,38 @@
                                     <span class="card-progress-text" id="text-apvalor">0% da meta</span>
                                 </div>
                             </div>
-                            <div class="result-card result-rec">
-                                <span class="result-label">REC</span>
-                                <span class="result-value" id="total-rec">—</span>
-                                <span class="result-sublabel">Recomendações</span>
+                            <div class="result-card result-apvalor-semana">
+                                <span class="result-label">AP R$</span>
+                                <span class="result-value" id="total-apvalor-semana">—</span>
+                                <span class="result-sublabel">Semana (Valor)</span>
+                                <div class="card-progress-wrapper">
+                                    <div class="card-progress-bg">
+                                        <div class="card-progress-fill" id="bar-apvalor-semana" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="card-progress-text" id="text-apvalor-semana">0% da meta</span>
+                                </div>
                             </div>
+
                             <div class="result-card result-pp">
                                 <span class="result-label">PP</span>
                                 <span class="result-value" id="total-pp">—</span>
-                                <span class="result-sublabel">Pontos de Produção</span>
+                                <span class="result-sublabel">Mês (Produção)</span>
                                 <div class="card-progress-wrapper">
                                     <div class="card-progress-bg">
                                         <div class="card-progress-fill" id="bar-pp" style="width: 0%;"></div>
                                     </div>
                                     <span class="card-progress-text" id="text-pp">0% da meta</span>
+                                </div>
+                            </div>
+                            <div class="result-card result-pp-semana">
+                                <span class="result-label">PP</span>
+                                <span class="result-value" id="total-pp-semana">—</span>
+                                <span class="result-sublabel">Semana (Produção)</span>
+                                <div class="card-progress-wrapper">
+                                    <div class="card-progress-bg">
+                                        <div class="card-progress-fill" id="bar-pp-semana" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="card-progress-text" id="text-pp-semana">0% da meta</span>
                                 </div>
                             </div>
                         </div>
@@ -160,6 +184,6 @@
         </footer>
     </div> <!-- FECHAMENTO DA TV-DASHBOARD -->
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>

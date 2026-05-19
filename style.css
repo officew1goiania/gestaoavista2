@@ -394,11 +394,11 @@ h1 { font-size: 2.2rem !important; }
 .ranking-table tr:nth-child(3) td { color: #CD7F32; }
 
 /* ====================================================
-   6 QUADROS DE RESULTADO TOTAL - VISTA 1
+   8 QUADROS DE RESULTADO TOTAL - VISTA 1
    ==================================================== */
 .results-cards-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 1.5vw;
     margin-top: 1vh;
@@ -439,6 +439,7 @@ h1 { font-size: 2.2rem !important; }
     letter-spacing: 1px;
     opacity: 0.55;
     margin-top: 0.3vh;
+    text-align: center;
 }
 
 /* Cores individuais por métrica */
@@ -448,6 +449,10 @@ h1 { font-size: 2.2rem !important; }
 .result-apvalor{ background: #fef9c3; color: #854d0e; border-color: #fde047; }
 .result-rec    { background: #fce7f3; color: #9d174d; border-color: #f9a8d4; }
 .result-pp     { background: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
+
+/* Cores semanais (tons um pouco mais marcantes ou similares) */
+.result-apvalor-semana { background: #fef08a; color: #a16207; border-color: #fde047; }
+.result-pp-semana      { background: #e9d5ff; color: #6b21a8; border-color: #d8b4fe; }
 
 /* Barras de Progresso nos Quadros de AP e PP */
 .card-progress-wrapper {

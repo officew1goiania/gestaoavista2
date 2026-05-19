@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarRankingCSV();
     carregarRankingAPCSV();
     carregarRankingRECCSV();
+    carregarDadosSemanaCSV();
     iniciarCicloExibicao();
 });
 
@@ -172,6 +173,73 @@ function renderizarTabela(data) {
 
     updateProgress('apvalor', totais.apValor, metas.apValor);
     updateProgress('pp', totais.pp, metas.pp);
+}
+
+function carregarDadosSemanaCSV() {
+    Papa.parse('dados_semana.csv?t=' + new Date().getTime(), {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+            renderizarTabelaSemana(results.data);
+        }
+    });
+}
+
+function renderizarTabelaSemana(data) {
+    if (!data || data.length === 0) return;
+
+    let totaisSemana = { apValor: 0, pp: 0 };
+    let metasSemana = { apValor: 0, pp: 0 };
+
+    // Extrai as metas da semana diretamente dos quadros do topo da tela
+    const elApSemana = document.querySelector('.goal-box.ap-semana .goal-value');
+    const elPpSemana = document.querySelector('.goal-box.pp-semana .goal-value');
+    if (elApSemana) metasSemana.apValor = parseNumero(elApSemana.textContent);
+    if (elPpSemana) metasSemana.pp = parseNumero(elPpSemana.textContent);
+
+    data.forEach(row => {
+        const nome = (row['Consultor/Nível'] || '').trim();
+        if (!nome) return;
+        const nomeLower = nome.toLowerCase();
+
+        if (
+            nomeLower.includes('eficiência') ||
+            nomeLower.includes('eficiencias') ||
+            nomeLower === 'total' ||
+            nomeLower.includes('consultor')
+        ) return;
+
+        totaisSemana.apValor += parseNumero(row['AP [R$]']);
+        totaisSemana.pp += parseNumero(row['Total']);
+    });
+
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+    };
+
+    set('total-apvalor-semana', formatarNumero(totaisSemana.apValor, true));
+    set('total-pp-semana', formatarNumero(totaisSemana.pp));
+
+    const updateProgressSemana = (metric, atual, meta) => {
+        const bgEl = document.getElementById(`bar-${metric}-semana`);
+        const textEl = document.getElementById(`text-${metric}-semana`);
+        if (!bgEl || !textEl) return;
+        
+        const percent = meta > 0 ? (atual / meta) * 100 : 0;
+        bgEl.style.width = `${Math.min(percent, 100)}%`;
+        
+        const metaFormatada = metric === 'apvalor' ? formatarNumero(meta, true) : formatarNumero(meta);
+        textEl.innerHTML = `<strong>${percent.toFixed(1)}%</strong> da meta (${metaFormatada})`;
+        
+        if (percent >= 100) {
+            bgEl.style.backgroundColor = '#10b981'; // Verde sucesso
+        }
+    };
+
+    updateProgressSemana('apvalor', totaisSemana.apValor, metasSemana.apValor);
+    updateProgressSemana('pp', totaisSemana.pp, metasSemana.pp);
 }
 
 function renderizarRanking(data) {
@@ -378,4 +446,5 @@ setInterval(() => {
     carregarRankingCSV();
     carregarRankingAPCSV();
     carregarRankingRECCSV();
+    carregarDadosSemanaCSV();
 }, 10 * 60 * 1000);

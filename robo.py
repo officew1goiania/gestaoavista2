@@ -130,6 +130,102 @@ def extrair_dados_da_conta(page, email, senha):
     print(f"SUCESSO! {len(df)} linhas formatadas e extraídas da conta {email}.")
     return df
 
+def extrair_dados_semana_conta(page, email):
+    from datetime import datetime, timedelta
+    print(f"Acessando a página de dados para extração semanal: {URL_DADOS}")
+    page.goto(URL_DADOS)
+    page.wait_for_load_state("networkidle")
+
+    # Calcula as datas da semana atual (Domingo a Sábado)
+    hoje = datetime.now()
+    idx = (hoje.weekday() + 1) % 7 # 0 para Domingo
+    domingo = hoje - timedelta(days=idx)
+    sabado = domingo + timedelta(days=6)
+    str_domingo = domingo.strftime("%d/%m/%Y")
+    str_sabado = sabado.strftime("%d/%m/%Y")
+    print(f"Filtrando semana: {str_domingo} até {str_sabado}")
+
+    print("Preenchendo datas...")
+    try:
+        # Preenche os campos de data informados pelo usuário
+        page.fill("#economy_center_start_date", str_domingo)
+        page.fill("#economy_center_end_date", str_sabado)
+    except Exception as e:
+        print(f"Erro ao preencher datas: {e}")
+
+    print("Aplicando filtros de escritório...")
+    try:
+        # Limpa todos os escritórios
+        page.get_by_text("Selecionar todos", exact=False).first.click()
+        page.wait_for_timeout(1000)
+    except Exception as e:
+        pass
+
+    try:
+        # Marca apenas W1 Goiânia
+        page.get_by_text("W1 Goiânia", exact=False).first.click()
+    except Exception as e:
+        print("Aviso: 'W1 Goiânia' não encontrado.")
+
+    print("Clicando no botão Filtrar (Semana)...")
+    page.wait_for_timeout(2000)
+    
+    try:
+        page.evaluate("""() => {
+            const btn = document.querySelector('button.js-btn-filter');
+            if (btn) {
+                btn.click();
+            } else {
+                const fallback = document.querySelector('form.economy_center button.btn-positive');
+                if (fallback) fallback.click();
+            }
+        }""")
+    except Exception as e:
+        page.keyboard.press("Enter")
+
+    print("Aguardando carregamento da tabela semanal (pausa fixa de 15 segundos)...")
+    time.sleep(15)
+
+    print("Extraindo dados da página (Semana)...")
+    html_da_pagina = page.content()
+    
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html_da_pagina, 'html.parser')
+    tabela = soup.find('table', {'id': 'js-economy-center-table'})
+    
+    if not tabela:
+        print("ERRO: Tabela semanal não encontrada.")
+        return None
+        
+    colunas = [
+        "Consultor/Nível", "Meta AA", "AA", "Meta AF", "AF", "Meta AP", "AP", 
+        "Meta AP [R$]", "AP [R$]", "Meta Recs", "Recs", "Meta AC", "AC", "Meta C", "C", 
+        "Meta CL", "CL", "Meta PPs C", "PPs C", "Meta SAC", "SA", "SF", "Meta PPs S", 
+        "PPs S", "Meta AE", "AE", "E", "Meta PPs", "Previstos", "Período", "Total"
+    ]
+    
+    corpo = tabela.find('tbody')
+    linhas = corpo.find_all('tr') if corpo else tabela.find_all('tr')[2:]
+    
+    dados_extraidos = []
+    for linha in linhas:
+        tds = linha.find_all(['td', 'th'])
+        if not tds or len(tds) < 5: 
+            continue
+            
+        valores = [td.text.strip().replace('\\n', '').replace('\\t', '') for td in tds]
+        while len(valores) < len(colunas):
+            valores.append("")
+        valores = valores[:len(colunas)]
+        
+        row_dict = dict(zip(colunas, valores))
+        row_dict['Conta_Origem'] = email
+        dados_extraidos.append(row_dict)
+        
+    df = pd.DataFrame(dados_extraidos)
+    print(f"SUCESSO SEMANAL! {len(df)} linhas extraídas da conta {email}.")
+    return df
+
 def extrair_ranking_muapd(page):
     print("Acessando Rankings...")
     url_ranking = "https://w1nner.w1consultoria.com.br/painel-consultor/indicadores/rankings"
@@ -510,6 +606,7 @@ def executar_robo():
                 f.write("") 
 
     todos_os_dados = []
+    todos_os_dados_semana = []
     rankings_acumulados = []
     rankings_ap_acumulados = []
     rankings_rec_acumulados = []
@@ -545,6 +642,11 @@ def executar_robo():
                 if df_ranking_rec is not None:
                     rankings_rec_acumulados.append(df_ranking_rec)
 
+                # 5. Extração de Produção Semanal (Já logado na conta)
+                df_semana = extrair_dados_semana_conta(page, conta["email"])
+                if df_semana is not None:
+                    todos_os_dados_semana.append(df_semana)
+
             except Exception as e:
                 import traceback
                 erro_detalhado = traceback.format_exc()
@@ -571,6 +673,12 @@ def executar_robo():
         with open("last_update.txt", "w", encoding="utf-8") as f:
             f.write(datetime.utcnow().isoformat() + "Z")
         print("Dados de produção consolidados e salvos.")
+
+    # Salva Produção Semanal
+    if todos_os_dados_semana:
+        df_semana_final = pd.concat(todos_os_dados_semana, ignore_index=True)
+        df_semana_final.to_csv("dados_semana.csv", index=False)
+        print("Dados semanais consolidados e salvos.")
 
     # Salva Ranking MUAPD
     if rankings_acumulados:
