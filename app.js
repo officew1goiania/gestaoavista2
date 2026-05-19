@@ -112,22 +112,22 @@ function renderizarTabela(data) {
     let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0 };
     let metas = { apValor: 0, pp: 0 };
 
+    // Extrai as metas diretamente dos quadros do topo da tela
+    const elApMes = document.querySelector('.goal-box.ap-mes .goal-value');
+    const elPpMes = document.querySelector('.goal-box.pp-mes .goal-value');
+    if (elApMes) metas.apValor = parseNumero(elApMes.textContent);
+    if (elPpMes) metas.pp = parseNumero(elPpMes.textContent);
+
     data.forEach(row => {
         const nome = (row['Consultor/Nível'] || '').trim();
         if (!nome) return;
         const nomeLower = nome.toLowerCase();
 
-        // Extrai as metas da linha de TOTAL
-        if (nomeLower === 'total') {
-            metas.apValor = parseNumero(row['Meta AP [R$]']);
-            metas.pp = parseNumero(row['Meta PPs']);
-            return;
-        }
-
-        // Ignora linhas de eficiências, etc.
+        // Ignora linhas de eficiências, TOTAL, etc.
         if (
             nomeLower.includes('eficiência') ||
             nomeLower.includes('eficiencias') ||
+            nomeLower === 'total' ||
             nomeLower.includes('consultor')
         ) return;
 
