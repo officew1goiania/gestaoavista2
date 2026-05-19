@@ -204,6 +204,107 @@ def extrair_ranking_muapd(page):
         page.screenshot(path="erro_ranking.png")
         return None
 
+def extrair_ranking_rec(page):
+    """Clica em cada partner (P) para expandir tabela filha e extrai RECs por consultor."""
+    print("Extraindo Ranking de RECs por consultor...")
+
+    try:
+        page.goto(URL_DADOS)
+        page.wait_for_load_state("networkidle")
+
+        # Aplica filtro W1 Goiânia
+        try:
+            page.get_by_text("Selecionar todos", exact=False).first.click()
+            time.sleep(1)
+        except Exception:
+            pass
+        try:
+            page.get_by_text("W1 Goiânia", exact=False).first.click()
+        except Exception:
+            pass
+
+        page.wait_for_timeout(2000)
+        page.evaluate("""() => {
+            const btn = document.querySelector('button.js-btn-filter');
+            if (btn) btn.click();
+        }""")
+
+        print("Aguardando tabela principal (15s)...")
+        time.sleep(15)
+
+        # Clica em cada linha de Partner (P) para expandir a sub-tabela de consultores
+        print("Expandindo linhas de Partner (P)...")
+        n_clicados = page.evaluate("""() => {
+            const tabela = document.getElementById('js-economy-center-table');
+            if (!tabela) return 0;
+            let clicados = 0;
+            tabela.querySelectorAll('tbody tr').forEach(tr => {
+                const td = tr.querySelector('td');
+                if (td && td.innerText.includes('(P)')) {
+                    td.click();
+                    clicados++;
+                }
+            });
+            return clicados;
+        }""")
+        print(f"Clicou em {n_clicados} Partner(s). Aguardando expansão (5s)...")
+        page.wait_for_timeout(5000)
+
+        # Extrai o HTML já expandido
+        html = page.content()
+        soup = BeautifulSoup(html, 'html.parser')
+        tabela = soup.find('table', {'id': 'js-economy-center-table'})
+
+        if not tabela:
+            print("ERRO: Tabela não encontrada para ranking RECs.")
+            return None
+
+        # Índices baseados nas colunas do CSV (0-indexed)
+        # Consultor/Nível=0, Recs=10
+        IDX_NOME = 0
+        IDX_RECS = 10
+
+        dados = []
+        corpo = tabela.find('tbody')
+        linhas = corpo.find_all('tr') if corpo else []
+
+        for linha in linhas:
+            cols = linha.find_all('td')
+            if len(cols) <= IDX_RECS:
+                continue
+            nome = cols[IDX_NOME].get_text(strip=True)
+            nome_lower = nome.lower()
+            # Pula partners, eficiências, totais e vazios
+            if (not nome or '(p)' in nome_lower or
+                    'eficiência' in nome_lower or 'eficiencias' in nome_lower or
+                    nome_lower == 'total'):
+                continue
+            # Remove prefixo de indentação de linhas filhas (◦, •, etc.)
+            nome_limpo = nome.replace('◦', '').replace('•', '').strip()
+            # Pega apenas o primeiro nome para exibição
+            recs_str = cols[IDX_RECS].get_text(strip=True)
+            try:
+                recs = int(recs_str)
+            except Exception:
+                recs = 0
+            if recs > 0 and nome_limpo:
+                dados.append({'Consultor': nome_limpo, 'Recs': recs})
+
+        df = pd.DataFrame(dados)
+        if not df.empty:
+            print(f"Ranking REC extraído: {len(df)} consultores.")
+        else:
+            print("Aviso: Nenhum dado de REC por consultor encontrado.")
+        return df
+
+    except Exception as e:
+        import traceback
+        print(f"Erro ao extrair ranking REC: {e}")
+        print(traceback.format_exc())
+        page.screenshot(path="erro_ranking_rec.png")
+        return None
+
+
 def extrair_ranking_ap(page):
     print("Acessando Rankings para AP...")
     url_ranking = "https://w1nner.w1consultoria.com.br/painel-consultor/indicadores/rankings"
@@ -411,6 +512,7 @@ def executar_robo():
     todos_os_dados = []
     rankings_acumulados = []
     rankings_ap_acumulados = []
+    rankings_rec_acumulados = []
     
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -437,6 +539,11 @@ def executar_robo():
                 df_ranking_ap = extrair_ranking_ap(page)
                 if df_ranking_ap is not None:
                     rankings_ap_acumulados.append(df_ranking_ap)
+
+                # 4. Extração de Ranking REC (Já logado na conta)
+                df_ranking_rec = extrair_ranking_rec(page)
+                if df_ranking_rec is not None:
+                    rankings_rec_acumulados.append(df_ranking_rec)
 
             except Exception as e:
                 import traceback
@@ -490,6 +597,16 @@ def executar_robo():
         df_ranking_ap_final = df_ranking_ap_final.head(5)
         df_ranking_ap_final.to_csv("ranking_ap.csv", index=False)
         print("Ranking AP consolidado e salvo.")
+
+    # Salva Ranking REC
+    if rankings_rec_acumulados:
+        df_ranking_rec_final = pd.concat(rankings_rec_acumulados, ignore_index=True)
+        # Limpeza e Ordenação
+        df_ranking_rec_final['Recs'] = pd.to_numeric(df_ranking_rec_final['Recs'], errors='coerce').fillna(0).astype(int)
+        df_ranking_rec_final = df_ranking_rec_final.sort_values(by='Recs', ascending=False).drop_duplicates(subset=['Consultor'])
+        df_ranking_rec_final = df_ranking_rec_final.head(5)
+        df_ranking_rec_final.to_csv("ranking_rec.csv", index=False)
+        print("Ranking REC consolidado e salvo.")
 
 if __name__ == "__main__":
     executar_robo()
