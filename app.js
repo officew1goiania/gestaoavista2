@@ -110,7 +110,7 @@ function carregarRankingCSV() {
 function renderizarTabela(data) {
     if (!data || data.length === 0) return;
 
-    let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0 };
+    let totais = { aa: 0, af: 0, ap: 0, apValor: 0, rec: 0, pp: 0, c: 0, sf: 0 };
     let metas = { apValor: 0, pp: 0 };
 
     // Extrai as metas diretamente dos quadros do topo da tela
@@ -138,6 +138,8 @@ function renderizarTabela(data) {
         totais.apValor+= parseNumero(row['AP [R$]']);
         totais.rec    += parseNumero(row['Recs']);
         totais.pp     += parseNumero(row['Total']);
+        totais.c      += parseNumero(row['C']);
+        totais.sf     += parseNumero(row['SF']);
     });
 
     const set = (id, val) => {
@@ -171,8 +173,11 @@ function renderizarTabela(data) {
         }
     };
 
+    const metaRec = (totais.af + totais.c + totais.sf) * 5;
+
     updateProgress('apvalor', totais.apValor, metas.apValor);
     updateProgress('pp', totais.pp, metas.pp);
+    updateProgress('rec', totais.rec, metaRec);
 }
 
 function carregarDadosSemanaCSV() {
