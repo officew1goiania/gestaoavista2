@@ -276,7 +276,18 @@ function renderizarRanking(data) {
     grid.innerHTML = '';
 
     if (!data || data.length === 0) {
-        grid.innerHTML = '<div class="loading-text">-</div>';
+        grid.innerHTML = `
+            <div class="alert-empty-ranking">
+                <div class="alert-empty-icon-wrapper">
+                    <div class="alert-empty-pulse"></div>
+                    <div class="alert-empty-icon">⚠️</div>
+                </div>
+                <div>
+                    <h3 class="alert-empty-title">Atenção!</h3>
+                    <p class="alert-empty-desc">Ninguém fez MUAPD hoje!</p>
+                </div>
+            </div>
+        `;
         return;
     }
 

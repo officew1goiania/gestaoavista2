@@ -319,7 +319,7 @@ def extrair_ranking_muapd(page):
                         except:
                             continue
         
-        df = pd.DataFrame(dados_ranking)
+        df = pd.DataFrame(dados_ranking, columns=['Consultor', 'AA'])
         if not df.empty:
             df = df.sort_values(by='AA', ascending=False)
             print(f"Sucesso: {len(df)} consultores de Goiânia filtrados.")
@@ -419,7 +419,7 @@ def extrair_ranking_rec(page):
             if recs > 0 and nome_limpo:
                 dados.append({'Consultor': nome_limpo, 'Recs': recs})
 
-        df = pd.DataFrame(dados)
+        df = pd.DataFrame(dados, columns=['Consultor', 'Recs'])
         if not df.empty:
             print(f"Ranking REC extraído: {len(df)} consultores.")
         else:
@@ -589,7 +589,7 @@ def extrair_ranking_ap(page):
                         'Quantidade': qtd
                     })
                     
-        df = pd.DataFrame(dados_ranking)
+        df = pd.DataFrame(dados_ranking, columns=['Consultor', 'Valor', 'Quantidade'])
         if not df.empty:
             print(f"Sucesso: {len(df)} consultores no ranking AP extraídos.")
         else:
