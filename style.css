@@ -51,8 +51,12 @@ html, body {
 .dashboard-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    background-color: var(--w1-dark);
+    padding: 1.5vh 2vw;
+    border-radius: 16px;
     margin-bottom: 2.5vh;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
@@ -62,8 +66,8 @@ html, body {
 }
 
 .logo-wrapper {
-    background: var(--w1-dark);
-    color: var(--w1-white);
+    background: var(--w1-teal);
+    color: var(--w1-dark);
     width: 60px;
     height: 60px;
     border-radius: 12px;
@@ -78,7 +82,7 @@ html, body {
     font-size: 2.8rem;
     font-weight: 800;
     letter-spacing: -0.5px;
-    color: var(--w1-dark);
+    color: var(--w1-white);
 }
 
 .subtitle {
@@ -90,13 +94,14 @@ html, body {
 }
 
 .update-status {
-    background: var(--w1-gray-light);
+    background: rgba(255, 255, 255, 0.08);
     padding: 12px 20px;
     border-radius: 50px;
-    border: 1px solid var(--w1-gray-border);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     gap: 12px;
+    color: var(--w1-white);
 }
 
 .status-dot {
