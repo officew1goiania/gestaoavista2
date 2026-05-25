@@ -394,18 +394,20 @@ function renderizarRankingAP(data) {
 
     grid.innerHTML = '';
 
-    if (!data || data.length === 0) {
+    const dadosFiltrados = (data || []).filter(row => parseNumero(row['Quantidade']) > 0);
+
+    if (dadosFiltrados.length === 0) {
         grid.innerHTML = '<div class="loading-text">-</div>';
         return;
     }
 
-    // Pega apenas os 5 primeiros
-    const top5 = data.slice(0, 5);
+    // Pega apenas os 10 primeiros
+    const top10 = dadosFiltrados.slice(0, 10);
 
     // Dividir os dados em 2 colunas
-    const meio = Math.ceil(top5.length / 2);
-    const col1Data = top5.slice(0, meio);
-    const col2Data = top5.slice(meio);
+    const meio = Math.ceil(top10.length / 2);
+    const col1Data = top10.slice(0, meio);
+    const col2Data = top10.slice(meio);
 
     function criarListaLeaderboardAP(items, startOffset) {
         const listContainer = document.createElement('div');
@@ -471,18 +473,20 @@ function renderizarRankingREC(data) {
 
     grid.innerHTML = '';
 
-    if (!data || data.length === 0) {
+    const dadosFiltrados = (data || []).filter(row => parseNumero(row['Recs']) > 0);
+
+    if (dadosFiltrados.length === 0) {
         grid.innerHTML = '<div class="loading-text">-</div>';
         return;
     }
 
-    // Pega os 5 primeiros
-    const top5 = data.slice(0, 5);
+    // Pega os 10 primeiros
+    const top10 = dadosFiltrados.slice(0, 10);
 
     // Dividir os dados em 2 colunas
-    const meio = Math.ceil(top5.length / 2);
-    const col1Data = top5.slice(0, meio);
-    const col2Data = top5.slice(meio);
+    const meio = Math.ceil(top10.length / 2);
+    const col1Data = top10.slice(0, meio);
+    const col2Data = top10.slice(meio);
 
     function criarListaLeaderboardREC(items, startOffset) {
         const listContainer = document.createElement('div');

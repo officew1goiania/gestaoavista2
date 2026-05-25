@@ -734,9 +734,10 @@ def executar_robo():
                 return 0.0
         
         df_ranking_ap_final['Valor_Num'] = df_ranking_ap_final['Valor'].apply(parse_valor_ranking)
+        df_ranking_ap_final = df_ranking_ap_final[df_ranking_ap_final['Valor_Num'] > 0]
         df_ranking_ap_final = df_ranking_ap_final.sort_values(by='Valor_Num', ascending=False).drop_duplicates(subset=['Consultor'])
         df_ranking_ap_final = df_ranking_ap_final.drop(columns=['Valor_Num'])
-        df_ranking_ap_final = df_ranking_ap_final.head(5)
+        df_ranking_ap_final = df_ranking_ap_final.head(10)
         df_ranking_ap_final.to_csv("ranking_ap.csv", index=False)
         print("Ranking AP consolidado e salvo.")
 
@@ -745,8 +746,9 @@ def executar_robo():
         df_ranking_rec_final = pd.concat(rankings_rec_acumulados, ignore_index=True)
         # Limpeza e Ordenação
         df_ranking_rec_final['Recs'] = pd.to_numeric(df_ranking_rec_final['Recs'], errors='coerce').fillna(0).astype(int)
+        df_ranking_rec_final = df_ranking_rec_final[df_ranking_rec_final['Recs'] > 0]
         df_ranking_rec_final = df_ranking_rec_final.sort_values(by='Recs', ascending=False).drop_duplicates(subset=['Consultor'])
-        df_ranking_rec_final = df_ranking_rec_final.head(5)
+        df_ranking_rec_final = df_ranking_rec_final.head(10)
         df_ranking_rec_final.to_csv("ranking_rec.csv", index=False)
         print("Ranking REC consolidado e salvo.")
 
