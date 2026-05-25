@@ -275,7 +275,13 @@ function renderizarRanking(data) {
 
     grid.innerHTML = '';
 
-    if (!data || data.length === 0) {
+    // Filtrar para remover quem está com 0 ou menos agendamentos (AA)
+    const dadosFiltrados = (data || []).filter(row => parseNumero(row['AA']) > 0);
+
+    if (dadosFiltrados.length === 0) {
+        const totalEl = document.getElementById('ranking-total-aa');
+        if (totalEl) totalEl.textContent = 0;
+
         grid.innerHTML = `
             <div class="alert-empty-ranking">
                 <div class="alert-empty-icon-wrapper">
@@ -293,33 +299,16 @@ function renderizarRanking(data) {
 
     // Calcular o Total de AA
     let totalAA = 0;
-    data.forEach(row => {
+    dadosFiltrados.forEach(row => {
         totalAA += parseNumero(row['AA']);
     });
     const totalEl = document.getElementById('ranking-total-aa');
     if (totalEl) totalEl.textContent = totalAA;
 
-    // Se todos os resultados forem 0, não mostra o ranking e coloca um recado de atenção
-    if (totalAA === 0) {
-        grid.innerHTML = `
-            <div class="alert-empty-ranking">
-                <div class="alert-empty-icon-wrapper">
-                    <div class="alert-empty-pulse"></div>
-                    <div class="alert-empty-icon">⚠️</div>
-                </div>
-                <div>
-                    <h3 class="alert-empty-title">Atenção!</h3>
-                    <p class="alert-empty-desc">Ninguém fez MUAPD hoje!</p>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
     // Dividir os dados em 2 colunas
-    const meio = Math.ceil(data.length / 2);
-    const col1Data = data.slice(0, meio);
-    const col2Data = data.slice(meio);
+    const meio = Math.ceil(dadosFiltrados.length / 2);
+    const col1Data = dadosFiltrados.slice(0, meio);
+    const col2Data = dadosFiltrados.slice(meio);
 
     function criarListaLeaderboard(items, startOffset) {
         const listContainer = document.createElement('div');

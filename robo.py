@@ -718,6 +718,7 @@ def executar_robo():
         df_ranking_final = pd.concat(rankings_acumulados, ignore_index=True)
         # Limpeza e Ordenação
         df_ranking_final['AA'] = pd.to_numeric(df_ranking_final['AA'], errors='coerce').fillna(0)
+        df_ranking_final = df_ranking_final[df_ranking_final['AA'] > 0]
         df_ranking_final = df_ranking_final.sort_values(by='AA', ascending=False).drop_duplicates(subset=['Consultor'])
         df_ranking_final.to_csv("ranking_muapd.csv", index=False)
         print("Ranking MUAPD salvo com sucesso.")
