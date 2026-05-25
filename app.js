@@ -1,43 +1,11 @@
 // Script Dashboard W1 - TV Version
-let fotosMap = {};
-
-function normalizeName(name) {
-    if (!name) return "";
-    let cleaned = name.replace(/\s*\(.*\)\s*/g, '').trim().toLowerCase();
-    cleaned = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    cleaned = cleaned.replace(/\s+/g, ' ');
-    return cleaned;
-}
-
-function carregarFotos() {
-    return fetch('fotos.json?t=' + new Date().getTime())
-        .then(response => response.json())
-        .then(data => {
-            fotosMap = data;
-        })
-        .catch(err => {
-            console.error("Erro ao carregar fotos.json:", err);
-        });
-}
-
-function obterAvatarHtml(nomeCompleto, iniciais) {
-    const nomeNorm = normalizeName(nomeCompleto);
-    const fotoUrl = fotosMap[nomeNorm];
-    if (fotoUrl) {
-        return `<div class="leaderboard-avatar img-avatar"><img src="${fotoUrl}" alt="${iniciais}" onerror="this.parentElement.innerHTML='${iniciais}'; this.parentElement.classList.remove('img-avatar');"></div>`;
-    }
-    return `<div class="leaderboard-avatar">${iniciais}</div>`;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     carregarUltimaAtualizacao();
-    carregarFotos().finally(() => {
-        carregarDadosCSV();
-        carregarRankingCSV();
-        carregarRankingAPCSV();
-        carregarRankingRECCSV();
-        carregarDadosSemanaCSV();
-    });
+    carregarDadosCSV();
+    carregarRankingCSV();
+    carregarRankingAPCSV();
+    carregarRankingRECCSV();
+    carregarDadosSemanaCSV();
     iniciarCicloExibicao();
 });
 
@@ -379,7 +347,6 @@ function renderizarRanking(data) {
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
-                ${obterAvatarHtml(nomeCompleto, iniciais)}
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">${sublabel}</span>
@@ -478,7 +445,6 @@ function renderizarRankingAP(data) {
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
-                ${obterAvatarHtml(nomeCompleto, iniciais)}
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">${sublabel}</span>
@@ -555,7 +521,6 @@ function renderizarRankingREC(data) {
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
-                ${obterAvatarHtml(nomeCompleto, iniciais)}
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">${sublabel}</span>
@@ -578,11 +543,9 @@ function renderizarRankingREC(data) {
 // Auto-refresh a cada 10 minutos
 setInterval(() => {
     carregarUltimaAtualizacao();
-    carregarFotos().finally(() => {
-        carregarDadosCSV();
-        carregarRankingCSV();
-        carregarRankingAPCSV();
-        carregarRankingRECCSV();
-        carregarDadosSemanaCSV();
-    });
+    carregarDadosCSV();
+    carregarRankingCSV();
+    carregarRankingAPCSV();
+    carregarRankingRECCSV();
+    carregarDadosSemanaCSV();
 }, 10 * 60 * 1000);

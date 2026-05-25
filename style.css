@@ -515,15 +515,15 @@ h1 { font-size: 2.2rem !important; }
 
 /* Rank Badge styling */
 .leaderboard-rank {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 1.1rem;
-    margin-right: 1vw;
+    font-size: 1.4rem;
+    margin-right: 1.5vw;
     flex-shrink: 0;
 }
 
@@ -536,7 +536,7 @@ h1 { font-size: 2.2rem !important; }
 .leaderboard-card.rank-1 .leaderboard-rank {
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
     color: #FFFFFF;
-    font-size: 1.3rem;
+    font-size: 1.7rem;
 }
 
 .leaderboard-card.rank-2 {
@@ -547,7 +547,7 @@ h1 { font-size: 2.2rem !important; }
 .leaderboard-card.rank-2 .leaderboard-rank {
     background: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%);
     color: #FFFFFF;
-    font-size: 1.3rem;
+    font-size: 1.7rem;
 }
 
 .leaderboard-card.rank-3 {
@@ -558,41 +558,12 @@ h1 { font-size: 2.2rem !important; }
 .leaderboard-card.rank-3 .leaderboard-rank {
     background: linear-gradient(135deg, #FDBA74 0%, #C2410C 100%);
     color: #FFFFFF;
-    font-size: 1.3rem;
+    font-size: 1.7rem;
 }
 
 .leaderboard-card.rank-other .leaderboard-rank {
     background: #F3F4F6;
     color: #4B5563;
-}
-
-/* Avatar Initials Circle */
-.leaderboard-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #FFFFFF;
-    font-size: 1.1rem;
-    margin-right: 1.2vw;
-    text-transform: uppercase;
-    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.15);
-    flex-shrink: 0;
-    overflow: hidden; /* Garante que a imagem não transborde */
-}
-
-.leaderboard-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.leaderboard-avatar.img-avatar {
-    background: transparent !important;
-    box-shadow: none !important;
 }
 
 /* Consultor details */
@@ -603,13 +574,13 @@ h1 { font-size: 2.2rem !important; }
 }
 
 .leaderboard-name {
-    font-size: 1.2rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: var(--w1-dark);
 }
 
 .leaderboard-subdetails {
-    font-size: 0.95rem;
+    font-size: 1.2rem;
     color: #6B7280;
     margin-top: 2px;
 }
@@ -624,19 +595,16 @@ h1 { font-size: 2.2rem !important; }
 }
 
 .leaderboard-score {
-    padding: 6px 14px;
+    padding: 8px 18px;
     border-radius: 12px;
     font-weight: 900;
-    font-size: 1.3rem;
+    font-size: 1.8rem;
     text-align: center;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 /* Colors for specific metric rankings */
 /* MUAPD (AA) - Teal */
-.view-section[id="view-ranking"] .leaderboard-avatar {
-    background: linear-gradient(135deg, #00D2C8 0%, #0d9488 100%);
-}
 .view-section[id="view-ranking"] .leaderboard-score {
     background: #ccfbf1;
     color: #0f766e;
@@ -644,9 +612,6 @@ h1 { font-size: 2.2rem !important; }
 }
 
 /* AP - Indigo */
-.view-section[id="view-ranking-ap"] .leaderboard-avatar {
-    background: linear-gradient(135deg, #818CF8 0%, #4338ca 100%);
-}
 .view-section[id="view-ranking-ap"] .leaderboard-score {
     background: #e0e7ff;
     color: #4338ca;
@@ -657,14 +622,11 @@ h1 { font-size: 2.2rem !important; }
     color: #4b5563;
     padding: 6px 12px;
     border-radius: 8px;
-    font-size: 1.05rem;
+    font-size: 1.4rem;
     font-weight: 700;
 }
 
 /* REC - Pink/Rose */
-.view-section[id="view-ranking-rec"] .leaderboard-avatar {
-    background: linear-gradient(135deg, #F472B6 0%, #be185d 100%);
-}
 .view-section[id="view-ranking-rec"] .leaderboard-score {
     background: #fce7f3;
     color: #9d174d;
