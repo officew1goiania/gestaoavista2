@@ -750,5 +750,38 @@ def executar_robo():
         df_ranking_rec_final.to_csv("ranking_rec.csv", index=False)
         print("Ranking REC consolidado e salvo.")
 
+    # Gera fotos.json a partir de Fotos.xlsx se existir
+    if os.path.exists("Fotos.xlsx"):
+        try:
+            import json
+            import unicodedata
+            import re
+            
+            def normalize_name(name):
+                if not name or not isinstance(name, str):
+                    return ""
+                name = re.sub(r'\s*\(.*\)\s*', '', name)
+                name = name.strip().lower()
+                name = "".join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
+                name = re.sub(r'\s+', ' ', name)
+                return name
+
+            df_fotos = pd.read_excel("Fotos.xlsx", header=None)
+            df_fotos.columns = ['Consultor', 'Foto']
+            fotos_dict = {}
+            for _, row in df_fotos.iterrows():
+                consultor = row.get('Consultor')
+                foto_url = row.get('Foto')
+                if pd.notna(consultor) and pd.notna(foto_url):
+                    norm = normalize_name(str(consultor))
+                    if norm:
+                        fotos_dict[norm] = str(foto_url).strip()
+            
+            with open("fotos.json", "w", encoding="utf-8") as f:
+                json.dump(fotos_dict, f, ensure_ascii=False, indent=4)
+            print("fotos.json gerado com sucesso a partir de Fotos.xlsx.")
+        except Exception as e:
+            print(f"Erro ao gerar fotos.json: {e}")
+
 if __name__ == "__main__":
     executar_robo()

@@ -581,6 +581,18 @@ h1 { font-size: 2.2rem !important; }
     text-transform: uppercase;
     box-shadow: inset 0 -2px 4px rgba(0,0,0,0.15);
     flex-shrink: 0;
+    overflow: hidden; /* Garante que a imagem não transborde */
+}
+
+.leaderboard-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.leaderboard-avatar.img-avatar {
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 /* Consultor details */
