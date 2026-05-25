@@ -485,3 +485,249 @@ h1 { font-size: 2.2rem !important; }
     opacity: 0.85;
 }
 
+/* ====================================================
+   MODERN LEADERBOARD STYLING
+   ==================================================== */
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2vh;
+    width: 100%;
+}
+
+.leaderboard-card {
+    display: flex;
+    align-items: center;
+    background: var(--w1-white);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    padding: 1.2vh 1.5vw;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.leaderboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Rank Badge styling */
+.leaderboard-rank {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-right: 1vw;
+    flex-shrink: 0;
+}
+
+/* Podium Rank Styling */
+.leaderboard-card.rank-1 {
+    border: 2px solid #FFD700;
+    background: linear-gradient(90deg, #FFFFFF 0%, #FFFDF0 100%);
+    box-shadow: 0 6px 16px rgba(255, 215, 0, 0.15);
+}
+.leaderboard-card.rank-1 .leaderboard-rank {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #FFFFFF;
+    font-size: 1.3rem;
+}
+
+.leaderboard-card.rank-2 {
+    border: 2px solid #C0C0C0;
+    background: linear-gradient(90deg, #FFFFFF 0%, #F5F5F5 100%);
+    box-shadow: 0 6px 16px rgba(192, 192, 192, 0.12);
+}
+.leaderboard-card.rank-2 .leaderboard-rank {
+    background: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%);
+    color: #FFFFFF;
+    font-size: 1.3rem;
+}
+
+.leaderboard-card.rank-3 {
+    border: 2px solid #CD7F32;
+    background: linear-gradient(90deg, #FFFFFF 0%, #FAF0E6 100%);
+    box-shadow: 0 6px 16px rgba(205, 127, 50, 0.1);
+}
+.leaderboard-card.rank-3 .leaderboard-rank {
+    background: linear-gradient(135deg, #FDBA74 0%, #C2410C 100%);
+    color: #FFFFFF;
+    font-size: 1.3rem;
+}
+
+.leaderboard-card.rank-other .leaderboard-rank {
+    background: #F3F4F6;
+    color: #4B5563;
+}
+
+/* Avatar Initials Circle */
+.leaderboard-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    margin-right: 1.2vw;
+    text-transform: uppercase;
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+}
+
+/* Consultor details */
+.leaderboard-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.leaderboard-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--w1-dark);
+}
+
+.leaderboard-subdetails {
+    font-size: 0.95rem;
+    color: #6B7280;
+    margin-top: 2px;
+}
+
+/* Score displays */
+.leaderboard-score-container {
+    display: flex;
+    align-items: center;
+    gap: 0.8vw;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.leaderboard-score {
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 1.3rem;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Colors for specific metric rankings */
+/* MUAPD (AA) - Teal */
+.view-section[id="view-ranking"] .leaderboard-avatar {
+    background: linear-gradient(135deg, #00D2C8 0%, #0d9488 100%);
+}
+.view-section[id="view-ranking"] .leaderboard-score {
+    background: #ccfbf1;
+    color: #0f766e;
+    border: 1px solid #99f6e4;
+}
+
+/* AP - Indigo */
+.view-section[id="view-ranking-ap"] .leaderboard-avatar {
+    background: linear-gradient(135deg, #818CF8 0%, #4338ca 100%);
+}
+.view-section[id="view-ranking-ap"] .leaderboard-score {
+    background: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+.leaderboard-secondary-score {
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+/* REC - Pink/Rose */
+.view-section[id="view-ranking-rec"] .leaderboard-avatar {
+    background: linear-gradient(135deg, #F472B6 0%, #be185d 100%);
+}
+.view-section[id="view-ranking-rec"] .leaderboard-score {
+    background: #fce7f3;
+    color: #9d174d;
+    border: 1px solid #f9a8d4;
+}
+
+/* Zero results Warning Banner */
+.alert-empty-ranking {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+    border: 2px dashed #F59E0B;
+    border-radius: 24px;
+    padding: 5vh 4vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5vh;
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);
+    animation: floatAlert 4s ease-in-out infinite;
+    text-align: center;
+    max-width: 700px;
+    margin: 4vh auto;
+    width: 100%;
+}
+
+@keyframes floatAlert {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.alert-empty-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #FBBF24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+    position: relative;
+}
+
+.alert-empty-icon {
+    font-size: 2.8rem;
+    color: #78350F;
+}
+
+.alert-empty-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #FBBF24;
+    animation: alertPulse 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+@keyframes alertPulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.4); opacity: 0; }
+}
+
+.alert-empty-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #78350F;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.alert-empty-desc {
+    font-size: 1.2rem;
+    color: #92400E;
+    font-weight: 600;
+    margin: 0;
+}
+
+

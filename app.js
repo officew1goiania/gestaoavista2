@@ -73,6 +73,28 @@ function formatarNumero(num, ehMoeda = false) {
     return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function obterIniciais(nome) {
+    if (!nome) return 'W1';
+    // Remove parênteses como "(FA I)", "(FA II)"
+    const nomeLimpo = nome.replace(/\s*\(.*\)\s*/g, '').trim();
+    const partes = nomeLimpo.split(/\s+/);
+    if (partes.length === 0) return 'W1';
+    if (partes.length === 1) {
+        return partes[0].substring(0, 2).toUpperCase();
+    }
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
+
+function obterNomeExibicao(nome) {
+    if (!nome) return '';
+    // Remove parênteses como "(FA I)", "(FA II)"
+    const nomeLimpo = nome.replace(/\s*\(.*\)\s*/g, '').trim();
+    const partes = nomeLimpo.split(/\s+/);
+    if (partes.length === 0) return '';
+    if (partes.length === 1) return partes[0];
+    return partes[0] + ' ' + partes[partes.length - 1];
+}
+
 function carregarUltimaAtualizacao() {
     fetch('last_update.txt?t=' + new Date().getTime())
         .then(response => response.text())
@@ -266,45 +288,82 @@ function renderizarRanking(data) {
     const totalEl = document.getElementById('ranking-total-aa');
     if (totalEl) totalEl.textContent = totalAA;
 
+    // Se todos os resultados forem 0, não mostra o ranking e coloca um recado de atenção
+    if (totalAA === 0) {
+        grid.innerHTML = `
+            <div class="alert-empty-ranking">
+                <div class="alert-empty-icon-wrapper">
+                    <div class="alert-empty-pulse"></div>
+                    <div class="alert-empty-icon">⚠️</div>
+                </div>
+                <div>
+                    <h3 class="alert-empty-title">Atenção!</h3>
+                    <p class="alert-empty-desc">Ninguém fez MUAPD hoje!</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
     // Dividir os dados em 2 colunas
     const meio = Math.ceil(data.length / 2);
     const col1Data = data.slice(0, meio);
     const col2Data = data.slice(meio);
 
-    function criarTabelaRanking(items, startOffset) {
-        const table = document.createElement('table');
-        table.className = 'ranking-column-table';
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th width="60">#</th>
-                    <th>Consultor</th>
-                    <th style="text-align: center;">AA</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `;
-        const tbody = table.querySelector('tbody');
+    function criarListaLeaderboard(items, startOffset) {
+        const listContainer = document.createElement('div');
+        listContainer.className = 'leaderboard-list';
 
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
-            const tr = document.createElement('tr');
-            const medal = actualIndex === 0 ? '🥇' : actualIndex === 1 ? '🥈' : actualIndex === 2 ? '🥉' : (actualIndex + 1);
-            const primeiroNome = row['Consultor'].split(' ')[0];
+            const card = document.createElement('div');
+            
+            let rankClass = 'rank-other';
+            let medal = actualIndex + 1;
+            if (actualIndex === 0) {
+                rankClass = 'rank-1';
+                medal = '🥇';
+            } else if (actualIndex === 1) {
+                rankClass = 'rank-2';
+                medal = '🥈';
+            } else if (actualIndex === 2) {
+                rankClass = 'rank-3';
+                medal = '🥉';
+            }
 
-            tr.innerHTML = `
-                <td style="text-align: center;">${medal}</td>
-                <td>${primeiroNome}</td>
-                <td style="text-align: center;" class="highlight-cell">${row['AA']}</td>
+            card.className = `leaderboard-card ${rankClass}`;
+            
+            const nomeCompleto = row['Consultor'] || '';
+            const nomeExibicao = obterNomeExibicao(nomeCompleto);
+            const iniciais = obterIniciais(nomeCompleto);
+            
+            let sublabel = 'Consultor';
+            const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
+            if (matchCargo) {
+                sublabel = matchCargo[1];
+            }
+
+            const valor = row['AA'] || '0';
+
+            card.innerHTML = `
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-avatar">${iniciais}</div>
+                <div class="leaderboard-details">
+                    <span class="leaderboard-name">${nomeExibicao}</span>
+                    <span class="leaderboard-subdetails">${sublabel}</span>
+                </div>
+                <div class="leaderboard-score-container">
+                    <div class="leaderboard-score">${valor}</div>
+                </div>
             `;
-            tbody.appendChild(tr);
+            listContainer.appendChild(card);
         });
-        return table;
+        return listContainer;
     }
 
-    grid.appendChild(criarTabelaRanking(col1Data, 0));
+    grid.appendChild(criarListaLeaderboard(col1Data, 0));
     if (col2Data.length > 0) {
-        grid.appendChild(criarTabelaRanking(col2Data, meio));
+        grid.appendChild(criarListaLeaderboard(col2Data, meio));
     }
 }
 
@@ -349,42 +408,62 @@ function renderizarRankingAP(data) {
     const col1Data = top5.slice(0, meio);
     const col2Data = top5.slice(meio);
 
-    function criarTabelaRankingAP(items, startOffset) {
-        const table = document.createElement('table');
-        table.className = 'ranking-column-table';
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th width="60">#</th>
-                    <th>Consultor</th>
-                    <th style="text-align: right; padding-right: 1.5vw;">Valor</th>
-                    <th style="text-align: center; width: 80px;">Qtd</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `;
-        const tbody = table.querySelector('tbody');
+    function criarListaLeaderboardAP(items, startOffset) {
+        const listContainer = document.createElement('div');
+        listContainer.className = 'leaderboard-list';
 
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
-            const tr = document.createElement('tr');
-            const medal = actualIndex === 0 ? '🥇' : actualIndex === 1 ? '🥈' : actualIndex === 2 ? '🥉' : (actualIndex + 1);
-            const primeiroNome = row['Consultor'].split(' ')[0];
+            const card = document.createElement('div');
+            
+            let rankClass = 'rank-other';
+            let medal = actualIndex + 1;
+            if (actualIndex === 0) {
+                rankClass = 'rank-1';
+                medal = '🥇';
+            } else if (actualIndex === 1) {
+                rankClass = 'rank-2';
+                medal = '🥈';
+            } else if (actualIndex === 2) {
+                rankClass = 'rank-3';
+                medal = '🥉';
+            }
 
-            tr.innerHTML = `
-                <td style="text-align: center;">${medal}</td>
-                <td>${primeiroNome}</td>
-                <td style="text-align: right; padding-right: 1.5vw;" class="highlight-cell">${row['Valor']}</td>
-                <td style="text-align: center;">${row['Quantidade']}</td>
+            card.className = `leaderboard-card ${rankClass}`;
+            
+            const nomeCompleto = row['Consultor'] || '';
+            const nomeExibicao = obterNomeExibicao(nomeCompleto);
+            const iniciais = obterIniciais(nomeCompleto);
+            
+            let sublabel = 'Consultor';
+            const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
+            if (matchCargo) {
+                sublabel = matchCargo[1];
+            }
+
+            const valor = row['Valor'] || 'R$ 0';
+            const qtd = row['Quantidade'] || '0';
+
+            card.innerHTML = `
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-avatar">${iniciais}</div>
+                <div class="leaderboard-details">
+                    <span class="leaderboard-name">${nomeExibicao}</span>
+                    <span class="leaderboard-subdetails">${sublabel}</span>
+                </div>
+                <div class="leaderboard-score-container">
+                    <div class="leaderboard-secondary-score">${qtd} APs</div>
+                    <div class="leaderboard-score">${valor}</div>
+                </div>
             `;
-            tbody.appendChild(tr);
+            listContainer.appendChild(card);
         });
-        return table;
+        return listContainer;
     }
 
-    grid.appendChild(criarTabelaRankingAP(col1Data, 0));
+    grid.appendChild(criarListaLeaderboardAP(col1Data, 0));
     if (col2Data.length > 0) {
-        grid.appendChild(criarTabelaRankingAP(col2Data, meio));
+        grid.appendChild(criarListaLeaderboardAP(col2Data, meio));
     }
 }
 
@@ -407,40 +486,60 @@ function renderizarRankingREC(data) {
     const col1Data = top5.slice(0, meio);
     const col2Data = top5.slice(meio);
 
-    function criarTabelaRankingREC(items, startOffset) {
-        const table = document.createElement('table');
-        table.className = 'ranking-column-table';
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th width="60">#</th>
-                    <th>Consultor</th>
-                    <th style="text-align: center; width: 100px;">RECs</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `;
-        const tbody = table.querySelector('tbody');
+    function criarListaLeaderboardREC(items, startOffset) {
+        const listContainer = document.createElement('div');
+        listContainer.className = 'leaderboard-list';
 
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
-            const tr = document.createElement('tr');
-            const medal = actualIndex === 0 ? '🥇' : actualIndex === 1 ? '🥈' : actualIndex === 2 ? '🥉' : (actualIndex + 1);
-            const primeiroNome = row['Consultor'].split(' ')[0];
+            const card = document.createElement('div');
+            
+            let rankClass = 'rank-other';
+            let medal = actualIndex + 1;
+            if (actualIndex === 0) {
+                rankClass = 'rank-1';
+                medal = '🥇';
+            } else if (actualIndex === 1) {
+                rankClass = 'rank-2';
+                medal = '🥈';
+            } else if (actualIndex === 2) {
+                rankClass = 'rank-3';
+                medal = '🥉';
+            }
 
-            tr.innerHTML = `
-                <td style="text-align: center;">${medal}</td>
-                <td>${primeiroNome}</td>
-                <td style="text-align: center;" class="highlight-cell">${row['Recs']}</td>
+            card.className = `leaderboard-card ${rankClass}`;
+            
+            const nomeCompleto = row['Consultor'] || '';
+            const nomeExibicao = obterNomeExibicao(nomeCompleto);
+            const iniciais = obterIniciais(nomeCompleto);
+            
+            let sublabel = 'Consultor';
+            const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
+            if (matchCargo) {
+                sublabel = matchCargo[1];
+            }
+
+            const recs = row['Recs'] || '0';
+
+            card.innerHTML = `
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-avatar">${iniciais}</div>
+                <div class="leaderboard-details">
+                    <span class="leaderboard-name">${nomeExibicao}</span>
+                    <span class="leaderboard-subdetails">${sublabel}</span>
+                </div>
+                <div class="leaderboard-score-container">
+                    <div class="leaderboard-score">${recs} RECs</div>
+                </div>
             `;
-            tbody.appendChild(tr);
+            listContainer.appendChild(card);
         });
-        return table;
+        return listContainer;
     }
 
-    grid.appendChild(criarTabelaRankingREC(col1Data, 0));
+    grid.appendChild(criarListaLeaderboardREC(col1Data, 0));
     if (col2Data.length > 0) {
-        grid.appendChild(criarTabelaRankingREC(col2Data, meio));
+        grid.appendChild(criarListaLeaderboardREC(col2Data, meio));
     }
 }
 
