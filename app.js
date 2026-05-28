@@ -1,4 +1,57 @@
 // Script Dashboard W1 - TV Version
+
+// Mapeamento manual de fotos para os consultores (opcional)
+// Chave: Nome Completo do Consultor (como aparece no CSV)
+// Valor: Caminho relativo do arquivo de imagem (ex: 'fotos/joao.jpg')
+const CONFIG_FOTOS = {
+    // Exemplo: "João Pedro de Araújo Pitaluga Dagfal": "fotos/joao_pedro.jpg"
+};
+
+// Gera a URL da foto do consultor com base no seu nome completo
+function obterFotoUrl(nomeCompleto) {
+    if (!nomeCompleto) return '';
+    
+    // Remove parênteses como "(FA I)", "(FA II)"
+    const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
+    
+    // Se existir mapeamento explícito na configuração, usa-o
+    if (CONFIG_FOTOS[nomeLimpo]) {
+        return CONFIG_FOTOS[nomeLimpo];
+    }
+    
+    // Fallback: normaliza o nome para gerar o padrão "fotos/nome_sobrenome.jpg"
+    const nomeNormalizado = nomeLimpo
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // remove acentos
+        .replace(/[^a-z0-9\s]/g, '')     // remove caracteres especiais
+        .trim()
+        .replace(/\s+/g, '_');          // substitui espaços por _
+        
+    return `fotos/${nomeNormalizado}.jpg`;
+}
+
+// Gera um gradiente dinâmico com base no nome do consultor para o avatar de fallback
+function obterCorGradiente(nome) {
+    if (!nome) return 'linear-gradient(135deg, var(--w1-teal) 0%, var(--w1-dark) 100%)';
+    const cores = [
+        ['#00D2C8', '#05171E'], // Teal -> Dark
+        ['#3B82F6', '#1E40AF'], // Blue -> Dark Blue
+        ['#EC4899', '#9D174D'], // Pink -> Dark Pink
+        ['#10B981', '#065F46'], // Green -> Dark Green
+        ['#8B5CF6', '#5B21B6'], // Purple -> Dark Purple
+        ['#F59E0B', '#92400E'], // Amber -> Dark Amber
+        ['#F43F5E', '#9F1239'], // Rose -> Dark Rose
+        ['#06B6D4', '#0891B2']  // Cyan -> Dark Cyan
+    ];
+    let hash = 0;
+    for (let i = 0; i < nome.length; i++) {
+        hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % cores.length;
+    return `linear-gradient(135deg, ${cores[index][0]} 0%, ${cores[index][1]} 100%)`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     carregarUltimaAtualizacao();
     carregarDadosCSV();
@@ -347,6 +400,10 @@ function renderizarRanking(data) {
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-avatar-container">
+                    <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
+                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                </div>
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">${sublabel}</span>
@@ -447,6 +504,10 @@ function renderizarRankingAP(data) {
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-avatar-container">
+                    <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
+                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                </div>
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">${sublabel}</span>
@@ -525,6 +586,10 @@ function renderizarRankingREC(data) {
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-avatar-container">
+                    <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
+                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                </div>
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">${sublabel}</span>

@@ -1,0 +1,17 @@
+Instruções para adicionar as fotos dos consultores no painel de rankings:
+
+1. Salve as fotos nesta pasta com formato JPG ou PNG.
+2. Nomeie os arquivos com base no nome completo do consultor (conforme aparece nos rankings).
+3. O nome do arquivo deve ser em minúsculo, sem acentos e com espaços substituídos por underline (_).
+
+Exemplos de nomenclatura padrão:
+- "João Pedro de Araújo Pitaluga Dagfal" -> salvar como "joao_pedro_de_araujo_pitaluga_dagfal.jpg" ou "joao_pedro_de_araujo_pitaluga_dagfal.png"
+- "Gustavo Gomes de Alencar Cruz" -> salvar como "gustavo_gomes_de_alencar_cruz.jpg" ou "gustavo_gomes_de_alencar_cruz.png"
+
+Mapeamento Personalizado:
+Se preferir usar nomes de arquivos mais simples/curtos (ex: "joao_dagfal.jpg"), você pode abrir o arquivo `app.js` e adicionar no objeto `CONFIG_FOTOS` no topo da seguinte forma:
+
+const CONFIG_FOTOS = {
+    "João Pedro de Araújo Pitaluga Dagfal": "fotos/joao_dagfal.jpg",
+    "Gustavo Gomes de Alencar Cruz": "fotos/gustavo_alencar.jpg"
+};
