@@ -4,7 +4,9 @@
 // Chave: Nome Completo do Consultor (como aparece no CSV)
 // Valor: Caminho relativo do arquivo de imagem (ex: 'fotos/joao.jpg')
 const CONFIG_FOTOS = {
-    // Exemplo: "João Pedro de Araújo Pitaluga Dagfal": "fotos/joao_pedro.jpg"
+    "Jallyson Henrique Alves Sobrinho": "fotos/jallyson_henrique_alves_sobrinho.png",
+    "Marconiedson Rocha Paraguassú": "fotos/marconiedson_rocha_paraguassu.png",
+    "Victor Hugo Rocha Martins": "fotos/victor_hugo_rocha_martins.jpeg"
 };
 
 // Gera a URL da foto do consultor com base no seu nome completo
@@ -402,7 +404,7 @@ function renderizarRanking(data) {
                 <div class="leaderboard-rank">${medal}</div>
                 <div class="leaderboard-avatar-container">
                     <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
-                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
                 </div>
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
@@ -506,7 +508,7 @@ function renderizarRankingAP(data) {
                 <div class="leaderboard-rank">${medal}</div>
                 <div class="leaderboard-avatar-container">
                     <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
-                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
                 </div>
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
@@ -588,7 +590,7 @@ function renderizarRankingREC(data) {
                 <div class="leaderboard-rank">${medal}</div>
                 <div class="leaderboard-avatar-container">
                     <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
-                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.previousElementSibling.style.display='none'; this.style.display='block';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
                 </div>
                 <div class="leaderboard-details">
                     <span class="leaderboard-name">${nomeExibicao}</span>
