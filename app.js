@@ -12,7 +12,10 @@ const CONFIG_FOTOS = {
     "Eduardo Verano Chaves Soares": "fotos/eduardo_verano_chaves_soares.jpeg",
     "Felipe Henrique Nunes Ungarelli": "fotos/felipe_henrique_nunes_ungarelli.png",
     "Gustavo Gomes de Alencar Cruz": "fotos/gustavo_cruz.png",
-    "Micael Vinicius Bragança": "fotos/micael_vinicius_braganca.jpeg"
+    "Micael Vinicius Bragança": "fotos/micael_vinicius_braganca.jpeg",
+    "Iara Machado de Souza Azevedo": "fotos/iara_machado_de_souza_azevedo.jpeg",
+    "Pedro Cano Benetton": "fotos/pedro_benetton.JPG",
+    "Pedro Benetton": "fotos/pedro_benetton.JPG"
 };
 
 // Gera a URL da foto do consultor com base no seu nome completo
