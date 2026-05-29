@@ -625,10 +625,10 @@ def extrair_dados_google_sheets():
         # Remove espaços extras dos nomes dos consultores (e não encurta mais para o primeiro nome)
         df_externo['Consultor/Nível'] = df_externo['Consultor/Nível'].astype(str).str.strip()
         
-        print(f"✓ Dados do Time Mario carregados: {len(df_externo)} consultor(es).")
+        print(f"[OK] Dados do Time Mario carregados: {len(df_externo)} consultor(es).")
         return df_externo
     except Exception as e:
-        print(f"✗ Erro ao buscar dados da planilha externa: {e}")
+        print(f"[ERRO] Erro ao buscar dados da planilha externa: {e}")
         return None
 
 def executar_robo():
