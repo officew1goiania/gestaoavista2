@@ -308,6 +308,7 @@ def extrair_ranking_muapd(page):
                 # #=0, Consultor=1, Cargo=2, Escritório=3, AA=4
                 if len(cols) >= 5:
                     nome = cols[1].get_text(strip=True)
+                    cargo = cols[2].get_text(strip=True)
                     escritorio = cols[3].get_text(strip=True)
                     aa_texto = cols[4].get_text(strip=True)
                     
@@ -315,7 +316,11 @@ def extrair_ranking_muapd(page):
                     if "Goiânia" in escritorio and nome != "-" and nome != "Total":
                         try:
                             aa_val = int(aa_texto)
-                            dados_ranking.append({'Consultor': nome, 'AA': aa_val})
+                            if cargo:
+                                nome_completo = f"{nome} ({cargo})"
+                            else:
+                                nome_completo = nome
+                            dados_ranking.append({'Consultor': nome_completo, 'AA': aa_val})
                         except:
                             continue
         
@@ -558,6 +563,7 @@ def extrair_ranking_ap(page):
             headers = [th.get_text(strip=True).lower() for th in thead.find_all('th')] if thead else []
             
             idx_consultor = 2
+            idx_cargo = None
             idx_valor = 5
             idx_qtd = 6
             
@@ -565,6 +571,8 @@ def extrair_ranking_ap(page):
                 for idx, h in enumerate(headers):
                     if h == 'consultor':
                         idx_consultor = idx
+                    elif 'cargo' in h:
+                        idx_cargo = idx
                     elif 'valor' in h and 'médio' not in h:
                         idx_valor = idx
                     elif 'quantidade' in h or 'qtd' in h:
@@ -575,16 +583,26 @@ def extrair_ranking_ap(page):
             
             for linha in linhas:
                 cols = linha.find_all('td')
-                if len(cols) > max(idx_consultor, idx_valor, idx_qtd):
+                maior_idx = max(idx_consultor, idx_valor, idx_qtd)
+                if idx_cargo is not None:
+                    maior_idx = max(maior_idx, idx_cargo)
+                    
+                if len(cols) > maior_idx:
                     nome = cols[idx_consultor].get_text(strip=True)
                     if nome == "-" or nome == "Total" or not nome:
                         continue
                     
+                    cargo = cols[idx_cargo].get_text(strip=True) if idx_cargo is not None else ""
                     valor = cols[idx_valor].get_text(strip=True)
                     qtd = cols[idx_qtd].get_text(strip=True)
                     
+                    if cargo:
+                        nome_completo = f"{nome} ({cargo})"
+                    else:
+                        nome_completo = nome
+                        
                     dados_ranking.append({
-                        'Consultor': nome,
+                        'Consultor': nome_completo,
                         'Valor': valor,
                         'Quantidade': qtd
                     })
