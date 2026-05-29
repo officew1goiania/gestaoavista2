@@ -602,6 +602,160 @@ def extrair_ranking_ap(page):
         page.screenshot(path="erro_ranking_ap.png")
         return None
 
+def extrair_ranking_pp(page):
+    print("Acessando Rankings para PP...")
+    url_ranking = "https://w1nner.w1consultoria.com.br/painel-consultor/indicadores/rankings"
+    
+    try:
+        page.goto(url_ranking)
+        page.wait_for_load_state("networkidle")
+        
+        # 1. Acessa a aba PPs
+        print("Selecionando a aba PPs...")
+        try:
+            page.get_by_role("link", name="PPs", exact=True).click()
+        except Exception:
+            page.get_by_text("PPs", exact=True).click()
+        page.wait_for_timeout(2000)
+
+        # 2. Seleciona "W1 Goiânia" no campo Escritório da produção e "Próprios" em Ranquear por
+        print("Selecionando o escritório W1 Goiânia e 'Próprios' no ranking PP...")
+        try:
+            page.evaluate("""() => {
+                const rankingBySelect = document.getElementById('indicators_pp_ranking_ranking_by');
+                if (rankingBySelect) {
+                    rankingBySelect.value = 'only_consultant';
+                    rankingBySelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    if (window.jQuery && window.jQuery(rankingBySelect).trigger) {
+                        window.jQuery(rankingBySelect).trigger('chosen:updated');
+                        window.jQuery(rankingBySelect).trigger('change');
+                    }
+                }
+                
+                const officeSelect = document.getElementById('indicators_pp_ranking_productions_offices');
+                if (officeSelect) {
+                    // Desmarca todas as opções para limpar escolhas anteriores
+                    Array.from(officeSelect.options).forEach(opt => {
+                        opt.selected = false;
+                    });
+                    
+                    const optionToSelect = Array.from(officeSelect.options).find(opt => opt.text.includes('W1 Goiânia') || opt.value === '33');
+                    if (optionToSelect) {
+                        optionToSelect.selected = true;
+                        officeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        // Atualiza a UI do Chosen
+                        if (window.jQuery && window.jQuery(officeSelect).trigger) {
+                            window.jQuery(officeSelect).trigger('chosen:updated');
+                            window.jQuery(officeSelect).trigger('change');
+                        }
+                    }
+                }
+            }""")
+            page.wait_for_timeout(500)
+        except Exception as e:
+            print(f"Aviso ao selecionar via JS para PP: {e}")
+
+        # Como garantia, se for um Chosen Multi-Select que necessita de clique na interface:
+        try:
+            chosen_container = page.locator("#indicators_pp_ranking_productions_offices_chosen")
+            if chosen_container.count() > 0:
+                print("Interagindo diretamente com a interface do Chosen para PP Escritório...")
+                search_input = chosen_container.locator("input.chosen-search-input")
+                if search_input.count() > 0:
+                    search_input.first.click()
+                    page.wait_for_timeout(500)
+                    search_input.first.fill("W1 Goiânia")
+                    page.wait_for_timeout(500)
+                    page.keyboard.press("Enter")
+                    print("Digitado e selecionado W1 Goiânia via interface Chosen PP.")
+        except Exception as e:
+            print(f"Aviso ao tentar interface física do Chosen PP: {e}")
+            
+        page.wait_for_timeout(1000)
+
+        # 3. Filtra usando o botão dentro de #tab-pp ou #new_indicators_pp_ranking
+        print("Clicando no botão Filtrar (PP)...")
+        try:
+            page.evaluate("""() => {
+                const btn = document.querySelector('#tab-pp .js-btn-filter') || document.querySelector('#new_indicators_pp_ranking .js-btn-filter') || document.querySelector('.js-btn-filter');
+                if (btn) {
+                    btn.click();
+                } else {
+                    const fallback = document.querySelector('button[type="submit"]') || document.querySelector('.btn-positive');
+                    if (fallback) fallback.click();
+                }
+            }""")
+        except Exception as e:
+            print(f"Aviso no clique de filtro PP: {e}")
+            page.keyboard.press("Enter")
+
+        print("Aguardando ranking de PP (15s)...")
+        page.wait_for_timeout(15000)
+
+        # 4. Extração dos dados
+        html = page.content()
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        # Encontra a tabela js-ranking
+        tabela = soup.find('table', class_='js-ranking')
+        if not tabela:
+            tabela = soup.find('table')
+            
+        dados_ranking = []
+        if tabela:
+            thead = tabela.find('thead')
+            headers = [th.get_text(strip=True).lower() for th in thead.find_all('th')] if thead else []
+            
+            idx_consultor = 2
+            idx_cargo = 4
+            idx_pp_totais = 7
+            
+            if headers:
+                for idx, h in enumerate(headers):
+                    if h == 'consultor':
+                        idx_consultor = idx
+                    elif 'cargo' in h:
+                        idx_cargo = idx
+                    elif 'totais' in h:
+                        idx_pp_totais = idx
+                        
+            tbody = tabela.find('tbody')
+            linhas = tbody.find_all('tr') if tbody else tabela.find_all('tr')[1:]
+            
+            for linha in linhas:
+                cols = linha.find_all('td')
+                if len(cols) > max(idx_consultor, idx_cargo, idx_pp_totais):
+                    nome = cols[idx_consultor].get_text(strip=True)
+                    if nome == "-" or nome == "Total" or not nome:
+                        continue
+                    
+                    cargo = cols[idx_cargo].get_text(strip=True) if idx_cargo < len(cols) else ""
+                    pp_str = cols[idx_pp_totais].get_text(strip=True)
+                    
+                    if cargo:
+                        nome_completo = f"{nome} ({cargo})"
+                    else:
+                        nome_completo = nome
+                        
+                    dados_ranking.append({
+                        'Consultor': nome_completo,
+                        'PP': pp_str
+                    })
+                    
+        df = pd.DataFrame(dados_ranking, columns=['Consultor', 'PP'])
+        if not df.empty:
+            print(f"Sucesso: {len(df)} consultores no ranking PP extraídos.")
+        else:
+            print("Aviso: Nenhum dado de ranking PP extraído da tabela.")
+            
+        return df
+
+    except Exception as e:
+        print(f"Erro no Ranking PP: {e}")
+        page.screenshot(path="erro_ranking_pp.png")
+        return None
+
 def extrair_dados_google_sheets():
     """Busca dados da equipe externa na planilha do Google Sheets"""
     print("\n[GOOGLE SHEETS] Buscando dados do Time Mario...")
@@ -644,7 +798,7 @@ def executar_robo():
     print("Iniciando o robô...")
     
     # Cria os arquivos vazios logo de cara para evitar erro no Git Add
-    for arq in ["dados_extraidos.csv", "ranking_muapd.csv", "ranking_ap.csv"]:
+    for arq in ["dados_extraidos.csv", "ranking_muapd.csv", "ranking_ap.csv", "ranking_pp.csv"]:
         if not os.path.exists(arq):
             with open(arq, "w", encoding="utf-8") as f:
                 f.write("") 
@@ -654,6 +808,7 @@ def executar_robo():
     rankings_acumulados = []
     rankings_ap_acumulados = []
     rankings_rec_acumulados = []
+    rankings_pp_acumulados = []
     
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -685,6 +840,11 @@ def executar_robo():
                 df_ranking_rec = extrair_ranking_rec(page)
                 if df_ranking_rec is not None:
                     rankings_rec_acumulados.append(df_ranking_rec)
+
+                # 4.5. Extração de Ranking PP (Já logado na conta)
+                df_ranking_pp = extrair_ranking_pp(page)
+                if df_ranking_pp is not None:
+                    rankings_pp_acumulados.append(df_ranking_pp)
 
                 # 5. Extração de Produção Semanal (Já logado na conta)
                 df_semana = extrair_dados_semana_conta(page, conta["email"])
@@ -721,6 +881,13 @@ def executar_robo():
         if 'Recs' in df_externo.columns:
             df_rec_ext = df_externo[['Consultor/Nível', 'Recs']].rename(columns={'Consultor/Nível': 'Consultor'})
             rankings_rec_acumulados.append(df_rec_ext)
+            
+        if 'Total' in df_externo.columns:
+            df_pp_ext = df_externo[['Consultor/Nível', 'Total']].rename(columns={
+                'Consultor/Nível': 'Consultor',
+                'Total': 'PP'
+            })
+            rankings_pp_acumulados.append(df_pp_ext)
         
     # Salva Produção
     if todos_os_dados:
@@ -775,6 +942,24 @@ def executar_robo():
         df_ranking_rec_final = df_ranking_rec_final.head(10)
         df_ranking_rec_final.to_csv("ranking_rec.csv", index=False)
         print("Ranking REC consolidado e salvo.")
+
+    # Salva Ranking PP
+    if rankings_pp_acumulados:
+        df_ranking_pp_final = pd.concat(rankings_pp_acumulados, ignore_index=True)
+        # Limpeza e Ordenação por valor numérico
+        def parse_pp_ranking(val_str):
+            try:
+                return float(str(val_str).replace('.', '').replace(',', '.').strip())
+            except:
+                return 0.0
+        
+        df_ranking_pp_final['PP_Num'] = df_ranking_pp_final['PP'].apply(parse_pp_ranking)
+        df_ranking_pp_final = df_ranking_pp_final[df_ranking_pp_final['PP_Num'] > 0]
+        df_ranking_pp_final = df_ranking_pp_final.sort_values(by='PP_Num', ascending=False).drop_duplicates(subset=['Consultor'])
+        df_ranking_pp_final = df_ranking_pp_final.drop(columns=['PP_Num'])
+        df_ranking_pp_final = df_ranking_pp_final.head(10)
+        df_ranking_pp_final.to_csv("ranking_pp.csv", index=False)
+        print("Ranking PP consolidado e salvo.")
 
 
 

@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarRankingCSV();
     carregarRankingAPCSV();
     carregarRankingRECCSV();
+    carregarRankingPPCSV();
     carregarDadosSemanaCSV();
     iniciarCicloExibicao();
 });
@@ -180,6 +181,16 @@ function carregarDadosCSV() {
         skipEmptyLines: true,
         complete: function (results) {
             renderizarTabela(results.data);
+        }
+    });
+}
+
+function carregarRankingPPCSV() {
+    Papa.parse('ranking_pp.csv?t=' + new Date().getTime(), {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
             renderizarRankingPP(results.data);
         }
     });
@@ -629,52 +640,14 @@ function renderizarRankingPP(data) {
 
     grid.innerHTML = '';
 
-    // Filtra e limpa os dados
-    const dados = [];
-    (data || []).forEach(row => {
-        const nomeCompleto = (row['Consultor/Nível'] || '').trim();
-        if (!nomeCompleto) return;
-        const nomeLower = nomeCompleto.toLowerCase();
-
-        // Pula linhas de eficiências, TOTAL, etc.
-        if (
-            nomeLower.includes('eficiência') ||
-            nomeLower.includes('eficiencias') ||
-            nomeLower === 'total' ||
-            nomeLower.includes('consultor')
-        ) return;
-
-        // Remove prefixos como ◦ e •
-        const nomeLimpo = nomeCompleto.replace('◦', '').replace('•', '').trim();
-        const pp = parseNumero(row['Total']);
-
-        if (pp > 0) {
-            dados.push({
-                nomeCompleto: nomeLimpo,
-                pp: pp
-            });
-        }
-    });
-
-    // Ordena decrescente por PP e remove duplicados
-    dados.sort((a, b) => b.pp - a.pp);
-    
-    const dadosFiltrados = [];
-    const nomesVistos = new Set();
-    dados.forEach(d => {
-        const nomeBase = obterNomeExibicao(d.nomeCompleto);
-        if (!nomesVistos.has(nomeBase)) {
-            nomesVistos.add(nomeBase);
-            dadosFiltrados.push(d);
-        }
-    });
+    const dadosFiltrados = (data || []).filter(row => parseNumero(row['PP']) > 0);
 
     if (dadosFiltrados.length === 0) {
         grid.innerHTML = '<div class="loading-text">-</div>';
         return;
     }
 
-    // Pega os 10 primeiros
+    // Pega os 10 primeiros (já ordenados e limpos no Python)
     const top10 = dadosFiltrados.slice(0, 10);
 
     // Dividir os dados em 2 colunas
@@ -686,7 +659,7 @@ function renderizarRankingPP(data) {
         const listContainer = document.createElement('div');
         listContainer.className = 'leaderboard-list';
 
-        items.forEach((item, index) => {
+        items.forEach((row, index) => {
             const actualIndex = index + startOffset;
             const card = document.createElement('div');
             
@@ -705,7 +678,7 @@ function renderizarRankingPP(data) {
 
             card.className = `leaderboard-card ${rankClass}`;
             
-            const nomeCompleto = item.nomeCompleto;
+            const nomeCompleto = row['Consultor'] || '';
             const nomeExibicao = obterNomeExibicao(nomeCompleto);
             const iniciais = obterIniciais(nomeCompleto);
             
@@ -715,7 +688,7 @@ function renderizarRankingPP(data) {
                 sublabel = matchCargo[1];
             }
 
-            const valorFormato = formatarNumero(item.pp);
+            const valorFormato = formatarNumero(parseNumero(row['PP']));
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
@@ -749,5 +722,6 @@ setInterval(() => {
     carregarRankingCSV();
     carregarRankingAPCSV();
     carregarRankingRECCSV();
+    carregarRankingPPCSV();
     carregarDadosSemanaCSV();
 }, 10 * 60 * 1000);
