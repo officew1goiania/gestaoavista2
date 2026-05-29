@@ -6,7 +6,13 @@
 const CONFIG_FOTOS = {
     "Jallyson Henrique Alves Sobrinho": "fotos/jallyson_henrique_alves_sobrinho.png",
     "Marconiedson Rocha Paraguassú": "fotos/marconiedson_rocha_paraguassu.png",
-    "Victor Hugo Rocha Martins": "fotos/victor_hugo_rocha_martins.jpeg"
+    "Victor Hugo Rocha Martins": "fotos/victor_hugo_rocha_martins.jpeg",
+    "Durval Bernardes de Sousa Neto": "fotos/durval_bernardes_de_sousa_neto.jpeg",
+    "Eduarda Cabral": "fotos/eduarda_cabral.jpeg",
+    "Eduardo Verano Chaves Soares": "fotos/eduardo_verano_chaves_soares.jpeg",
+    "Felipe Henrique Nunes Ungarelli": "fotos/felipe_henrique_nunes_ungarelli.png",
+    "Gustavo Gomes de Alencar Cruz": "fotos/gustavo_cruz.png",
+    "Micael Vinicius Bragança": "fotos/micael_vinicius_braganca.jpeg"
 };
 
 // Gera a URL da foto do consultor com base no seu nome completo
