@@ -700,11 +700,7 @@ def executar_robo():
     if df_externo is not None:
         todos_os_dados.append(df_externo)
         
-        # Adiciona nos rankings acumulados
-        if 'AA' in df_externo.columns:
-            df_muapd_ext = df_externo[['Consultor/Nível', 'AA']].rename(columns={'Consultor/Nível': 'Consultor'})
-            rankings_acumulados.append(df_muapd_ext)
-            
+        # Adiciona nos rankings acumulados (exceto MUAPD/AA por solicitação do usuário)
         if 'AP [R$]' in df_externo.columns and 'AP' in df_externo.columns:
             df_ap_ext = df_externo[['Consultor/Nível', 'AP [R$]', 'AP']].rename(columns={
                 'Consultor/Nível': 'Consultor',
