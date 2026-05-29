@@ -105,6 +105,25 @@ html, body {
     color: var(--w1-white);
 }
 
+.header-badges {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+    margin-left: auto;
+    margin-right: 2vw;
+}
+
+.header-badge {
+    height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.header-badge:hover {
+    transform: scale(1.1);
+}
+
 .status-dot {
     width: 12px;
     height: 12px;
