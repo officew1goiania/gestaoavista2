@@ -603,7 +603,6 @@ def extrair_ranking_ap(page):
         return None
 
 def extrair_dados_google_sheets():
-
     """Busca dados da equipe externa na planilha do Google Sheets"""
     print("\n[GOOGLE SHEETS] Buscando dados do Time Mario...")
     url_planilha = "https://docs.google.com/spreadsheets/d/1MmoY1eIDApfLynUS3cKKc7OrEekEPEGSZjqz9ViOPW0/export?format=csv&gid=0"
@@ -611,19 +610,22 @@ def extrair_dados_google_sheets():
     try:
         df_externo = pd.read_csv(url_planilha)
         # Mapear colunas para o padrão do nosso CSV
-        # Planilha: Equipe, AA, AF, AP, AP [R$], REC, PP
+        # Planilha: Consultor, AA, AF, AP, AP [R$], REC, PP, C/S
         # Nosso CSV: Consultor/Nível, AA, AF, AP, AP [R$], Recs, Total
         
-        df_externo = df_externo.rename(columns={
+        # Suporta tanto 'Consultor' quanto o cabeçalho antigo 'Equipe'
+        renames = {
+            'Consultor': 'Consultor/Nível',
             'Equipe': 'Consultor/Nível',
             'REC': 'Recs',
             'PP': 'Total'
-        })
+        }
+        df_externo = df_externo.rename(columns=renames)
         
-        # Garante que o nome da equipe seja curto para o dashboard
-        df_externo['Consultor/Nível'] = df_externo['Consultor/Nível'].apply(lambda x: str(x).split(' ')[0])
+        # Remove espaços extras dos nomes dos consultores (e não encurta mais para o primeiro nome)
+        df_externo['Consultor/Nível'] = df_externo['Consultor/Nível'].astype(str).str.strip()
         
-        print(f"✓ Dados do Time Mario carregados: {len(df_externo)} equipe(s).")
+        print(f"✓ Dados do Time Mario carregados: {len(df_externo)} consultor(es).")
         return df_externo
     except Exception as e:
         print(f"✗ Erro ao buscar dados da planilha externa: {e}")
@@ -697,6 +699,23 @@ def executar_robo():
     df_externo = extrair_dados_google_sheets()
     if df_externo is not None:
         todos_os_dados.append(df_externo)
+        
+        # Adiciona nos rankings acumulados
+        if 'AA' in df_externo.columns:
+            df_muapd_ext = df_externo[['Consultor/Nível', 'AA']].rename(columns={'Consultor/Nível': 'Consultor'})
+            rankings_acumulados.append(df_muapd_ext)
+            
+        if 'AP [R$]' in df_externo.columns and 'AP' in df_externo.columns:
+            df_ap_ext = df_externo[['Consultor/Nível', 'AP [R$]', 'AP']].rename(columns={
+                'Consultor/Nível': 'Consultor',
+                'AP [R$]': 'Valor',
+                'AP': 'Quantidade'
+            })
+            rankings_ap_acumulados.append(df_ap_ext)
+            
+        if 'Recs' in df_externo.columns:
+            df_rec_ext = df_externo[['Consultor/Nível', 'Recs']].rename(columns={'Consultor/Nível': 'Consultor'})
+            rankings_rec_acumulados.append(df_rec_ext)
         
     # Salva Produção
     if todos_os_dados:
