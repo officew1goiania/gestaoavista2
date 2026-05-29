@@ -80,12 +80,13 @@ function iniciarCicloExibicao() {
     const viewRanking = document.getElementById('view-ranking');
     const viewRankingAP = document.getElementById('view-ranking-ap');
     const viewRankingREC = document.getElementById('view-ranking-rec');
+    const viewRankingPP = document.getElementById('view-ranking-pp');
 
     setInterval(() => {
         timeLeft -= 0.1;
         if (timeLeft <= 0) {
             timeLeft = SWITCH_TIME;
-            alternarVisualizacao(viewResults, viewRanking, viewRankingAP, viewRankingREC);
+            alternarVisualizacao(viewResults, viewRanking, viewRankingAP, viewRankingREC, viewRankingPP);
         }
 
         // Atualiza a barra de progresso
@@ -94,11 +95,12 @@ function iniciarCicloExibicao() {
     }, 100);
 }
 
-function alternarVisualizacao(results, ranking, rankingAP, rankingREC) {
+function alternarVisualizacao(results, ranking, rankingAP, rankingREC, rankingPP) {
     results.classList.remove('active');
     ranking.classList.remove('active');
     rankingAP.classList.remove('active');
     if (rankingREC) rankingREC.classList.remove('active');
+    if (rankingPP) rankingPP.classList.remove('active');
 
     if (currentView === 'results') {
         ranking.classList.add('active');
@@ -109,6 +111,9 @@ function alternarVisualizacao(results, ranking, rankingAP, rankingREC) {
     } else if (currentView === 'ranking-ap') {
         if (rankingREC) rankingREC.classList.add('active');
         currentView = 'ranking-rec';
+    } else if (currentView === 'ranking-rec') {
+        if (rankingPP) rankingPP.classList.add('active');
+        currentView = 'ranking-pp';
     } else {
         results.classList.add('active');
         currentView = 'results';
@@ -175,6 +180,7 @@ function carregarDadosCSV() {
         skipEmptyLines: true,
         complete: function (results) {
             renderizarTabela(results.data);
+            renderizarRankingPP(results.data);
         }
     });
 }
@@ -614,6 +620,125 @@ function renderizarRankingREC(data) {
     grid.appendChild(criarListaLeaderboardREC(col1Data, 0));
     if (col2Data.length > 0) {
         grid.appendChild(criarListaLeaderboardREC(col2Data, meio));
+    }
+}
+
+function renderizarRankingPP(data) {
+    const grid = document.getElementById('ranking-pp-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    // Filtra e limpa os dados
+    const dados = [];
+    (data || []).forEach(row => {
+        const nomeCompleto = (row['Consultor/Nível'] || '').trim();
+        if (!nomeCompleto) return;
+        const nomeLower = nomeCompleto.toLowerCase();
+
+        // Pula linhas de eficiências, TOTAL, etc.
+        if (
+            nomeLower.includes('eficiência') ||
+            nomeLower.includes('eficiencias') ||
+            nomeLower === 'total' ||
+            nomeLower.includes('consultor')
+        ) return;
+
+        // Remove prefixos como ◦ e •
+        const nomeLimpo = nomeCompleto.replace('◦', '').replace('•', '').trim();
+        const pp = parseNumero(row['Total']);
+
+        if (pp > 0) {
+            dados.push({
+                nomeCompleto: nomeLimpo,
+                pp: pp
+            });
+        }
+    });
+
+    // Ordena decrescente por PP e remove duplicados
+    dados.sort((a, b) => b.pp - a.pp);
+    
+    const dadosFiltrados = [];
+    const nomesVistos = new Set();
+    dados.forEach(d => {
+        const nomeBase = obterNomeExibicao(d.nomeCompleto);
+        if (!nomesVistos.has(nomeBase)) {
+            nomesVistos.add(nomeBase);
+            dadosFiltrados.push(d);
+        }
+    });
+
+    if (dadosFiltrados.length === 0) {
+        grid.innerHTML = '<div class="loading-text">-</div>';
+        return;
+    }
+
+    // Pega os 10 primeiros
+    const top10 = dadosFiltrados.slice(0, 10);
+
+    // Dividir os dados em 2 colunas
+    const meio = Math.ceil(top10.length / 2);
+    const col1Data = top10.slice(0, meio);
+    const col2Data = top10.slice(meio);
+
+    function criarListaLeaderboardPP(items, startOffset) {
+        const listContainer = document.createElement('div');
+        listContainer.className = 'leaderboard-list';
+
+        items.forEach((item, index) => {
+            const actualIndex = index + startOffset;
+            const card = document.createElement('div');
+            
+            let rankClass = 'rank-other';
+            let medal = actualIndex + 1;
+            if (actualIndex === 0) {
+                rankClass = 'rank-1';
+                medal = '🥇';
+            } else if (actualIndex === 1) {
+                rankClass = 'rank-2';
+                medal = '🥈';
+            } else if (actualIndex === 2) {
+                rankClass = 'rank-3';
+                medal = '🥉';
+            }
+
+            card.className = `leaderboard-card ${rankClass}`;
+            
+            const nomeCompleto = item.nomeCompleto;
+            const nomeExibicao = obterNomeExibicao(nomeCompleto);
+            const iniciais = obterIniciais(nomeCompleto);
+            
+            let sublabel = 'Consultor';
+            const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
+            if (matchCargo) {
+                sublabel = matchCargo[1];
+            }
+
+            const valorFormato = formatarNumero(item.pp);
+
+            card.innerHTML = `
+                <div class="leaderboard-rank">${medal}</div>
+                <div class="leaderboard-avatar-container">
+                    <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
+                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                </div>
+                <div class="leaderboard-details">
+                    <span class="leaderboard-name">${nomeExibicao}</span>
+                    <span class="leaderboard-subdetails">${sublabel}</span>
+                </div>
+                <div class="leaderboard-score-container">
+                    <div class="leaderboard-score">${valorFormato} PPs</div>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        });
+        return listContainer;
+    }
+
+    grid.appendChild(criarListaLeaderboardPP(col1Data, 0));
+    if (col2Data.length > 0) {
+        grid.appendChild(criarListaLeaderboardPP(col2Data, meio));
     }
 }
 
