@@ -625,6 +625,15 @@ def extrair_dados_google_sheets():
         # Remove espaços extras dos nomes dos consultores (e não encurta mais para o primeiro nome)
         df_externo['Consultor/Nível'] = df_externo['Consultor/Nível'].astype(str).str.strip()
         
+        # Se a coluna Cargo existir, junta ao nome no formato "Nome (Cargo)" para alinhar com o padrão do CRM
+        if 'Cargo' in df_externo.columns:
+            df_externo['Consultor/Nível'] = df_externo.apply(
+                lambda row: f"{str(row['Consultor/Nível'])} ({str(row['Cargo']).strip()})"
+                if pd.notna(row['Cargo']) and str(row['Cargo']).strip() != ''
+                else str(row['Consultor/Nível']),
+                axis=1
+            )
+        
         print(f"[OK] Dados do Time Mario carregados: {len(df_externo)} consultor(es).")
         return df_externo
     except Exception as e:
