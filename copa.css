@@ -1,0 +1,280 @@
+/* ==========================================
+   TEMA COPA DO MUNDO - GESTÃO À VISTA W1
+   ========================================== */
+
+:root {
+    --copa-green-dark: #072211;
+    --copa-green-medium: #0d4021;
+    --copa-green-light: #166534;
+    --copa-green-neon: #00ff66;
+    --copa-yellow: #facc15;
+    --copa-gold: #eab308;
+    --copa-blue: #1d4ed8;
+    --copa-blue-light: #3b82f6;
+    --copa-white: #ffffff;
+}
+
+/* Fundo Estádio: Listras de gramado alternadas */
+body.copa-do-mundo {
+    background: repeating-linear-gradient(
+        90deg,
+        var(--copa-green-dark),
+        var(--copa-green-dark) 80px,
+        var(--copa-green-medium) 80px,
+        var(--copa-green-medium) 160px
+    ) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Marcações do campo de futebol e holofotes */
+body.copa-do-mundo::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        /* Círculo central */
+        radial-gradient(circle at center, transparent 120px, rgba(255, 255, 255, 0.03) 120px, rgba(255, 255, 255, 0.03) 122px, transparent 122px),
+        /* Linha do meio campo */
+        linear-gradient(to right, transparent calc(50% - 1px), rgba(255, 255, 255, 0.03) calc(50% - 1px), rgba(255, 255, 255, 0.03) calc(50% + 1px), transparent calc(50% + 1px)),
+        /* Iluminação dos holofotes */
+        radial-gradient(circle at top left, rgba(250, 204, 21, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at top right, rgba(0, 255, 102, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Garante que o dashboard fique por cima das marcações */
+body.copa-do-mundo .tv-dashboard {
+    position: relative;
+    z-index: 1;
+}
+
+/* Barra de progresso no topo com bola correndo e girando */
+body.copa-do-mundo .progress-container {
+    background: rgba(255, 255, 255, 0.1);
+    height: 8px;
+}
+
+body.copa-do-mundo .progress-bar {
+    background: linear-gradient(90deg, var(--copa-green-neon), var(--copa-yellow)) !important;
+    box-shadow: 0 0 12px var(--copa-green-neon);
+    position: relative;
+}
+
+body.copa-do-mundo .progress-bar::after {
+    content: '⚽';
+    position: absolute;
+    right: -10px;
+    top: -6px;
+    font-size: 16px;
+    animation: spin-ball 1.2s linear infinite;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+@keyframes spin-ball {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Header estilizado Copa */
+body.copa-do-mundo .dashboard-header {
+    background: rgba(7, 34, 17, 0.6) !important;
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(0, 255, 102, 0.25) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(0, 255, 102, 0.05) !important;
+}
+
+body.copa-do-mundo .logo-wrapper {
+    background: linear-gradient(135deg, var(--copa-yellow) 0%, var(--copa-green-neon) 100%) !important;
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+}
+
+body.copa-do-mundo .title-group h1 {
+    color: var(--copa-white) !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+body.copa-do-mundo .subtitle {
+    color: var(--copa-yellow) !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+body.copa-do-mundo .update-status {
+    background: rgba(22, 101, 52, 0.6) !important;
+    border: 1.5px solid rgba(250, 204, 21, 0.4) !important;
+}
+
+body.copa-do-mundo .status-dot {
+    background-color: var(--copa-yellow) !important;
+    box-shadow: 0 0 12px var(--copa-yellow) !important;
+}
+
+/* Grid de Metas no Topo */
+body.copa-do-mundo .goal-box {
+    background: rgba(7, 34, 17, 0.7) !important;
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.3s ease;
+}
+
+body.copa-do-mundo .goal-box:hover {
+    transform: translateY(-2px);
+}
+
+body.copa-do-mundo .goal-box.ap-semana { color: var(--copa-green-neon) !important; border-color: var(--copa-green-neon) !important; }
+body.copa-do-mundo .goal-box.pp-semana { color: var(--copa-blue-light) !important; border-color: var(--copa-blue-light) !important; }
+body.copa-do-mundo .goal-box.ap-mes { color: var(--copa-yellow) !important; border-color: var(--copa-yellow) !important; }
+body.copa-do-mundo .goal-box.pp-mes { color: #f472b6 !important; border-color: #f472b6 !important; }
+
+/* Título das Seções */
+body.copa-do-mundo .section-title,
+body.copa-do-mundo .ranking-header {
+    border-left-color: var(--copa-yellow) !important;
+}
+
+/* Cards de Resultados do Mês (Vista 1) */
+body.copa-do-mundo .result-card {
+    background: rgba(7, 34, 17, 0.5) !important;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+body.copa-do-mundo .result-card:hover {
+    transform: scale(1.03) translateY(-2px);
+    border-color: var(--copa-yellow) !important;
+}
+
+/* Textos e Cores das Métricas */
+body.copa-do-mundo .result-aa      { border-color: rgba(0, 255, 102, 0.4) !important; color: var(--copa-green-neon) !important; }
+body.copa-do-mundo .result-af      { border-color: rgba(96, 165, 250, 0.4) !important; color: var(--copa-blue-light) !important; }
+body.copa-do-mundo .result-ap      { border-color: rgba(244, 114, 182, 0.4) !important; color: #f472b6 !important; }
+body.copa-do-mundo .result-apvalor { border-color: rgba(250, 204, 21, 0.4) !important; color: var(--copa-yellow) !important; }
+body.copa-do-mundo .result-rec     { border-color: rgba(167, 139, 250, 0.4) !important; color: #c084fc; }
+body.copa-do-mundo .result-pp      { border-color: rgba(251, 146, 60, 0.4) !important; color: #fb923c; }
+body.copa-do-mundo .result-apvalor-semana { border-color: rgba(250, 204, 21, 0.4) !important; color: var(--copa-yellow) !important; }
+body.copa-do-mundo .result-pp-semana      { border-color: rgba(251, 146, 60, 0.4) !important; color: #fb923c; }
+
+body.copa-do-mundo .result-value {
+    color: var(--copa-white) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Barras de progresso internas dos cards */
+body.copa-do-mundo .card-progress-bg {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.copa-do-mundo .card-progress-fill {
+    background: linear-gradient(90deg, var(--copa-green-neon), var(--copa-yellow)) !important;
+}
+
+/* Leaderboards */
+body.copa-do-mundo .leaderboard-card {
+    background: rgba(7, 34, 17, 0.5) !important;
+    backdrop-filter: blur(5px);
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+}
+
+/* Medalhas e Podium Estilizados da Copa */
+body.copa-do-mundo .leaderboard-card.rank-1 {
+    border: 2px solid var(--copa-yellow) !important;
+    background: linear-gradient(90deg, rgba(250, 204, 21, 0.03) 0%, rgba(250, 204, 21, 0.15) 100%) !important;
+    box-shadow: 0 6px 20px rgba(250, 204, 21, 0.25) !important;
+}
+body.copa-do-mundo .leaderboard-card.rank-1 .leaderboard-rank {
+    background: linear-gradient(135deg, var(--copa-yellow) 0%, var(--copa-gold) 100%) !important;
+    color: var(--copa-green-dark) !important;
+    font-size: 1.8rem !important;
+    box-shadow: 0 0 10px var(--copa-yellow);
+}
+
+body.copa-do-mundo .leaderboard-card.rank-2 {
+    border: 2px solid #e2e8f0 !important;
+    background: linear-gradient(90deg, rgba(226, 232, 240, 0.02) 0%, rgba(226, 232, 240, 0.1) 100%) !important;
+}
+body.copa-do-mundo .leaderboard-card.rank-2 .leaderboard-rank {
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%) !important;
+    color: var(--copa-green-dark) !important;
+}
+
+body.copa-do-mundo .leaderboard-card.rank-3 {
+    border: 2px solid #ea580c !important;
+    background: linear-gradient(90deg, rgba(234, 88, 12, 0.02) 0%, rgba(234, 88, 12, 0.1) 100%) !important;
+}
+body.copa-do-mundo .leaderboard-card.rank-3 .leaderboard-rank {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    color: var(--copa-white) !important;
+}
+
+/* Placar individual e badge de pontos */
+body.copa-do-mundo .leaderboard-score {
+    background: rgba(13, 64, 33, 0.8) !important;
+    border: 1.5px solid rgba(0, 255, 102, 0.35) !important;
+    color: var(--copa-white) !important;
+}
+
+body.copa-do-mundo .leaderboard-secondary-score {
+    background: rgba(22, 101, 52, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Cores específicas de ranking nos placares */
+body.copa-do-mundo .view-section[id="view-ranking"] .leaderboard-score {
+    color: var(--copa-green-neon) !important;
+    border-color: rgba(0, 255, 102, 0.5) !important;
+}
+body.copa-do-mundo .view-section[id="view-ranking-ap"] .leaderboard-score {
+    color: #f472b6 !important;
+    border-color: rgba(244, 114, 182, 0.5) !important;
+}
+body.copa-do-mundo .view-section[id="view-ranking-rec"] .leaderboard-score {
+    color: #c084fc !important;
+    border-color: rgba(167, 139, 250, 0.5) !important;
+}
+body.copa-do-mundo .view-section[id="view-ranking-pp"] .leaderboard-score {
+    color: #fb923c !important;
+    border-color: rgba(251, 146, 60, 0.5) !important;
+}
+
+/* Rodapé */
+body.copa-do-mundo .dashboard-footer {
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Alerta de cartão amarelo/vermelho do juiz (quando ninguém fez MUAPD) */
+body.copa-do-mundo .alert-empty-ranking {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+    border: 3px dashed #ef4444 !important;
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2) !important;
+    color: #7f1d1d !important;
+}
+
+body.copa-do-mundo .alert-empty-icon-wrapper {
+    background: #ef4444 !important;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4) !important;
+}
+
+body.copa-do-mundo .alert-empty-icon {
+    color: var(--copa-white) !important;
+}
+
+body.copa-do-mundo .alert-empty-pulse {
+    border-color: #ef4444 !important;
+}
+
+body.copa-do-mundo .alert-empty-title {
+    color: #7f1d1d !important;
+}
+
+body.copa-do-mundo .alert-empty-desc {
+    color: #991b1b !important;
+}
