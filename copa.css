@@ -272,3 +272,22 @@ body.copa-do-mundo .alert-empty-title {
 body.copa-do-mundo .alert-empty-desc {
     color: #991b1b !important;
 }
+
+/* Bandeira do Brasil discreta - Renderiza via SVG inline no CSS */
+.flag-br {
+    display: none;
+}
+
+body.copa-do-mundo .flag-br {
+    display: inline-block;
+    width: 24px;
+    height: 17px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 504"><rect width="720" height="504" fill="%23009c3b"/><polygon points="360,43 658,252 360,460 61,252" fill="%23ffdf00"/><circle cx="360" cy="252" r="100" fill="%23002776"/><path d="M260,265 C300,240 340,240 380,255 C370,257 350,258 330,258 C290,258 270,262 260,265 Z" fill="%23ffffff"/></svg>');
+    background-size: cover;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+    border-radius: 3px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    margin-left: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+}
