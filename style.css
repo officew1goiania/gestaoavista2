@@ -790,4 +790,239 @@ h1 { font-size: 2.2rem !important; }
     margin: 0;
 }
 
+/* ====================================================
+   MOBILE RESPONSIVENESS (SMARTPHONES)
+   ==================================================== */
+@media (max-width: 768px) {
+    /* Permitir rolagem vertical nativa */
+    html, body {
+        overflow-y: auto !important;
+        height: auto !important;
+        width: 100vw;
+    }
+
+    .tv-dashboard {
+        height: auto !important;
+        min-height: 100vh;
+        padding: 15px 10px 30px 10px !important;
+    }
+
+    /* Ocultar barra de progresso do timer */
+    .progress-container {
+        display: none !important;
+    }
+
+    /* Exibir todas as seções (views) empilhadas verticalmente */
+    .view-section {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        display: block !important;
+        margin-bottom: 40px;
+    }
+
+    /* Ajustar Header */
+    .dashboard-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center;
+        padding: 15px !important;
+        gap: 15px;
+        margin-bottom: 20px !important;
+    }
+
+    .header-content {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .logo-wrapper {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .title-group h1 {
+        font-size: 1.6rem !important;
+    }
+
+    .subtitle {
+        font-size: 0.9rem !important;
+    }
+
+    .header-badges {
+        margin: 5px 0 !important;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .header-badge {
+        height: 40px;
+    }
+
+    .update-status {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 15px !important;
+    }
+
+    /* Ajustar Grid de Metas (2 colunas) */
+    .goals-grid-header {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .goal-box {
+        padding: 10px !important;
+    }
+
+    .goal-label {
+        font-size: 0.7rem !important;
+    }
+
+    .goal-value {
+        font-size: 1.1rem !important;
+    }
+
+    /* Ajustar Título de Seções */
+    .section-title,
+    .ranking-header {
+        font-size: 1.3rem !important;
+        margin-bottom: 10px !important;
+        border-left-width: 4px !important;
+    }
+
+    .ranking-header h2 {
+        font-size: 1.3rem !important;
+    }
+
+    /* Ajustar Cards de Resultados (2 colunas) */
+    .results-cards-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: auto !important;
+        gap: 10px !important;
+    }
+
+    .result-card {
+        padding: 15px 10px !important;
+        min-height: 120px;
+    }
+
+    .result-label {
+        font-size: 0.8rem !important;
+        letter-spacing: 1px !important;
+    }
+
+    .result-value {
+        font-size: 1.8rem !important;
+    }
+
+    .result-sublabel {
+        font-size: 0.75rem !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .card-progress-wrapper {
+        margin-top: 10px !important;
+    }
+
+    .card-progress-bg {
+        height: 6px !important;
+    }
+
+    .card-progress-text {
+        font-size: 0.75rem !important;
+    }
+
+    /* Ajustar Rankings (1 coluna em vez de 2) */
+    .ranking-two-columns {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+
+    /* Leaderboard Cards */
+    .leaderboard-card {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .leaderboard-rank {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 1rem !important;
+        margin-right: 10px !important;
+    }
+
+    .leaderboard-card.rank-1 .leaderboard-rank,
+    .leaderboard-card.rank-2 .leaderboard-rank,
+    .leaderboard-card.rank-3 .leaderboard-rank {
+        font-size: 1.2rem !important;
+    }
+
+    .leaderboard-avatar-container {
+        width: 36px !important;
+        height: 36px !important;
+        margin-right: 10px !important;
+    }
+
+    .leaderboard-avatar-fallback {
+        font-size: 0.9rem !important;
+    }
+
+    .leaderboard-name {
+        font-size: 1.1rem !important;
+    }
+
+    .leaderboard-subdetails {
+        font-size: 0.8rem !important;
+    }
+
+    .leaderboard-score {
+        padding: 5px 10px !important;
+        font-size: 1.1rem !important;
+        border-radius: 8px !important;
+    }
+
+    .leaderboard-secondary-score {
+        padding: 4px 8px !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Ajustar alerta de ranking vazio */
+    .alert-empty-ranking {
+        padding: 30px 15px !important;
+        border-radius: 16px !important;
+        gap: 15px !important;
+        margin: 20px auto !important;
+    }
+
+    .alert-empty-icon-wrapper {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .alert-empty-icon {
+        font-size: 2rem !important;
+    }
+
+    .alert-empty-title {
+        font-size: 1.4rem !important;
+    }
+
+    .alert-empty-desc {
+        font-size: 1rem !important;
+    }
+
+    .dashboard-footer {
+        margin-top: 20px !important;
+    }
+}
+
 
