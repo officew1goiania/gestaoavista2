@@ -21,7 +21,8 @@ const CONFIG_FOTOS = {
     "Saymon Santos": "fotos/saymon_de_gouveia_pereira_dos_santos.jpg",
     "Saymon Gouveia": "fotos/saymon_de_gouveia_pereira_dos_santos.jpg",
     "Eduardo Soares": "fotos/eduardo_verano_chaves_soares.jpeg",
-    "Eduardo Verano": "fotos/eduardo_verano_chaves_soares.jpeg"
+    "Eduardo Verano": "fotos/eduardo_verano_chaves_soares.jpeg",
+    "João Pedro Rosin Cardoso": "fotos/joao_pedro_rosin_cardoso.jpg"
 };
 
 // Função para normalizar e renomear nomes de consultores solicitados pelo usuário
