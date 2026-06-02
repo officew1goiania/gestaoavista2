@@ -15,11 +15,30 @@ const CONFIG_FOTOS = {
     "Micael Vinicius Bragança": "fotos/micael_vinicius_braganca.jpeg",
     "Iara Machado de Souza Azevedo": "fotos/iara_machado_de_souza_azevedo.jpeg",
     "Pedro Cano Benetton": "fotos/pedro_benetton.JPG",
-    "Pedro Benetton": "fotos/pedro_benetton.JPG"
+    "Pedro Benetton": "fotos/pedro_benetton.JPG",
+    "Daniela Calanca": "fotos/daniela_calanca.jpg",
+    "Daniela Calanca da Silva": "fotos/daniela_calanca.jpg",
+    "Saymon Santos": "fotos/saymon_de_gouveia_pereira_dos_santos.jpg",
+    "Saymon Gouveia": "fotos/saymon_de_gouveia_pereira_dos_santos.jpg",
+    "Eduardo Soares": "fotos/eduardo_verano_chaves_soares.jpeg",
+    "Eduardo Verano": "fotos/eduardo_verano_chaves_soares.jpeg"
 };
+
+// Função para normalizar e renomear nomes de consultores solicitados pelo usuário
+function normalizarNome(nome) {
+    if (!nome) return '';
+    return nome
+        .replace(/Daniela Calanca da Silva/g, "Daniela Calanca")
+        .replace(/Daniela Silva/g, "Daniela Calanca")
+        .replace(/Saymon de Gouveia Pereira dos Santos/g, "Saymon Gouveia")
+        .replace(/Saymon Santos/g, "Saymon Gouveia")
+        .replace(/Eduardo Verano Chaves Soares/g, "Eduardo Verano")
+        .replace(/Eduardo Soares/g, "Eduardo Verano");
+}
 
 // Gera a URL da foto do consultor com base no seu nome completo
 function obterFotoUrl(nomeCompleto) {
+    nomeCompleto = normalizarNome(nomeCompleto);
     if (!nomeCompleto) return '';
     
     // Remove parênteses como "(FA I)", "(FA II)"
@@ -44,6 +63,7 @@ function obterFotoUrl(nomeCompleto) {
 
 // Gera um gradiente dinâmico com base no nome do consultor para o avatar de fallback
 function obterCorGradiente(nome) {
+    nome = normalizarNome(nome);
     if (!nome) return 'linear-gradient(135deg, var(--w1-teal) 0%, var(--w1-dark) 100%)';
     const cores = [
         ['#00D2C8', '#05171E'], // Teal -> Dark
@@ -144,6 +164,7 @@ function formatarNumero(num, ehMoeda = false) {
 }
 
 function obterIniciais(nome) {
+    nome = normalizarNome(nome);
     if (!nome) return 'W1';
     // Remove parênteses como "(FA I)", "(FA II)"
     const nomeLimpo = nome.replace(/\s*\(.*\)\s*/g, '').trim();
@@ -156,6 +177,7 @@ function obterIniciais(nome) {
 }
 
 function obterNomeExibicao(nome) {
+    nome = normalizarNome(nome);
     if (!nome) return '';
     // Remove parênteses como "(FA I)", "(FA II)"
     const nomeLimpo = nome.replace(/\s*\(.*\)\s*/g, '').trim();

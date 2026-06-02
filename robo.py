@@ -812,6 +812,17 @@ def extrair_dados_google_sheets():
         print(f"[ERRO] Erro ao buscar dados da planilha externa: {e}")
         return None
 
+def substituir_nomes(df, coluna):
+    if df is not None and coluna in df.columns:
+        df[coluna] = df[coluna].astype(str)
+        df[coluna] = df[coluna].str.replace("Daniela Calanca da Silva", "Daniela Calanca", regex=False)
+        df[coluna] = df[coluna].str.replace("Daniela Silva", "Daniela Calanca", regex=False)
+        df[coluna] = df[coluna].str.replace("Saymon de Gouveia Pereira dos Santos", "Saymon Gouveia", regex=False)
+        df[coluna] = df[coluna].str.replace("Saymon Santos", "Saymon Gouveia", regex=False)
+        df[coluna] = df[coluna].str.replace("Eduardo Verano Chaves Soares", "Eduardo Verano", regex=False)
+        df[coluna] = df[coluna].str.replace("Eduardo Soares", "Eduardo Verano", regex=False)
+    return df
+
 def executar_robo():
     print("Iniciando o robô...")
     
@@ -910,6 +921,7 @@ def executar_robo():
     # Salva Produção
     if todos_os_dados:
         df_final = pd.concat(todos_os_dados, ignore_index=True)
+        df_final = substituir_nomes(df_final, "Consultor/Nível")
         df_final.to_csv("dados_extraidos.csv", index=False)
         from datetime import datetime
         with open("last_update.txt", "w", encoding="utf-8") as f:
@@ -919,12 +931,14 @@ def executar_robo():
     # Salva Produção Semanal
     if todos_os_dados_semana:
         df_semana_final = pd.concat(todos_os_dados_semana, ignore_index=True)
+        df_semana_final = substituir_nomes(df_semana_final, "Consultor/Nível")
         df_semana_final.to_csv("dados_semana.csv", index=False)
         print("Dados semanais consolidados e salvos.")
 
     # Salva Ranking MUAPD
     if rankings_acumulados:
         df_ranking_final = pd.concat(rankings_acumulados, ignore_index=True)
+        df_ranking_final = substituir_nomes(df_ranking_final, "Consultor")
         # Limpeza e Ordenação
         df_ranking_final['AA'] = pd.to_numeric(df_ranking_final['AA'], errors='coerce').fillna(0)
         df_ranking_final = df_ranking_final[df_ranking_final['AA'] > 0]
@@ -935,6 +949,7 @@ def executar_robo():
     # Salva Ranking AP
     if rankings_ap_acumulados:
         df_ranking_ap_final = pd.concat(rankings_ap_acumulados, ignore_index=True)
+        df_ranking_ap_final = substituir_nomes(df_ranking_ap_final, "Consultor")
         # Limpeza e Ordenação por Valor Numérico
         def parse_valor_ranking(val_str):
             try:
@@ -953,6 +968,7 @@ def executar_robo():
     # Salva Ranking REC
     if rankings_rec_acumulados:
         df_ranking_rec_final = pd.concat(rankings_rec_acumulados, ignore_index=True)
+        df_ranking_rec_final = substituir_nomes(df_ranking_rec_final, "Consultor")
         # Limpeza e Ordenação
         df_ranking_rec_final['Recs'] = pd.to_numeric(df_ranking_rec_final['Recs'], errors='coerce').fillna(0).astype(int)
         df_ranking_rec_final = df_ranking_rec_final[df_ranking_rec_final['Recs'] > 0]
@@ -964,6 +980,7 @@ def executar_robo():
     # Salva Ranking PP
     if rankings_pp_acumulados:
         df_ranking_pp_final = pd.concat(rankings_pp_acumulados, ignore_index=True)
+        df_ranking_pp_final = substituir_nomes(df_ranking_pp_final, "Consultor")
         # Limpeza e Ordenação por valor numérico
         def parse_pp_ranking(val_str):
             try:
