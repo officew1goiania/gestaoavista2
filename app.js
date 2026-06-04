@@ -89,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarDadosCSV();
     carregarRankingCSV();
     carregarRankingAPCSV();
-    carregarRankingRECCSV();
     carregarRankingPPCSV();
     carregarDadosSemanaCSV();
     iniciarCicloExibicao();
@@ -104,14 +103,13 @@ function iniciarCicloExibicao() {
     const viewResults = document.getElementById('view-results');
     const viewRanking = document.getElementById('view-ranking');
     const viewRankingAP = document.getElementById('view-ranking-ap');
-    const viewRankingREC = document.getElementById('view-ranking-rec');
     const viewRankingPP = document.getElementById('view-ranking-pp');
 
     setInterval(() => {
         timeLeft -= 0.1;
         if (timeLeft <= 0) {
             timeLeft = SWITCH_TIME;
-            alternarVisualizacao(viewResults, viewRanking, viewRankingAP, viewRankingREC, viewRankingPP);
+            alternarVisualizacao(viewResults, viewRanking, viewRankingAP, viewRankingPP);
         }
 
         // Atualiza a barra de progresso
@@ -120,11 +118,10 @@ function iniciarCicloExibicao() {
     }, 100);
 }
 
-function alternarVisualizacao(results, ranking, rankingAP, rankingREC, rankingPP) {
+function alternarVisualizacao(results, ranking, rankingAP, rankingPP) {
     results.classList.remove('active');
     ranking.classList.remove('active');
     rankingAP.classList.remove('active');
-    if (rankingREC) rankingREC.classList.remove('active');
     if (rankingPP) rankingPP.classList.remove('active');
 
     if (currentView === 'results') {
@@ -134,9 +131,6 @@ function alternarVisualizacao(results, ranking, rankingAP, rankingREC, rankingPP
         rankingAP.classList.add('active');
         currentView = 'ranking-ap';
     } else if (currentView === 'ranking-ap') {
-        if (rankingREC) rankingREC.classList.add('active');
-        currentView = 'ranking-rec';
-    } else if (currentView === 'ranking-rec') {
         if (rankingPP) rankingPP.classList.add('active');
         currentView = 'ranking-pp';
     } else {
@@ -485,16 +479,7 @@ function carregarRankingAPCSV() {
     });
 }
 
-function carregarRankingRECCSV() {
-    Papa.parse('ranking_rec.csv?t=' + new Date().getTime(), {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function (results) {
-            renderizarRankingREC(results.data);
-        }
-    });
-}
+// carregarRankingRECCSV removido
 
 function renderizarRankingAP(data) {
     const grid = document.getElementById('ranking-ap-grid');
@@ -579,86 +564,7 @@ function renderizarRankingAP(data) {
     }
 }
 
-function renderizarRankingREC(data) {
-    const grid = document.getElementById('ranking-rec-grid');
-    if (!grid) return;
-
-    grid.innerHTML = '';
-
-    const dadosFiltrados = (data || []).filter(row => parseNumero(row['Recs']) > 0);
-
-    if (dadosFiltrados.length === 0) {
-        grid.innerHTML = '<div class="loading-text">-</div>';
-        return;
-    }
-
-    // Pega os 10 primeiros
-    const top10 = dadosFiltrados.slice(0, 10);
-
-    // Dividir os dados em 2 colunas
-    const meio = Math.ceil(top10.length / 2);
-    const col1Data = top10.slice(0, meio);
-    const col2Data = top10.slice(meio);
-
-    function criarListaLeaderboardREC(items, startOffset) {
-        const listContainer = document.createElement('div');
-        listContainer.className = 'leaderboard-list';
-
-        items.forEach((row, index) => {
-            const actualIndex = index + startOffset;
-            const card = document.createElement('div');
-            
-            let rankClass = 'rank-other';
-            let medal = actualIndex + 1;
-            if (actualIndex === 0) {
-                rankClass = 'rank-1';
-                medal = '🥇';
-            } else if (actualIndex === 1) {
-                rankClass = 'rank-2';
-                medal = '🥈';
-            } else if (actualIndex === 2) {
-                rankClass = 'rank-3';
-                medal = '🥉';
-            }
-
-            card.className = `leaderboard-card ${rankClass}`;
-            
-            const nomeCompleto = row['Consultor'] || '';
-            const nomeExibicao = obterNomeExibicao(nomeCompleto);
-            const iniciais = obterIniciais(nomeCompleto);
-            
-            let sublabel = 'Consultor';
-            const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
-            if (matchCargo) {
-                sublabel = matchCargo[1];
-            }
-
-            const recs = row['Recs'] || '0';
-
-            card.innerHTML = `
-                <div class="leaderboard-rank">${medal}</div>
-                <div class="leaderboard-avatar-container">
-                    <div class="leaderboard-avatar-fallback" style="background: ${obterCorGradiente(nomeCompleto)}">${iniciais}</div>
-                    <img src="${obterFotoUrl(nomeCompleto)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
-                </div>
-                <div class="leaderboard-details">
-                    <span class="leaderboard-name">${nomeExibicao}</span>
-                    <span class="leaderboard-subdetails">${sublabel}</span>
-                </div>
-                <div class="leaderboard-score-container">
-                    <div class="leaderboard-score">${recs} RECs</div>
-                </div>
-            `;
-            listContainer.appendChild(card);
-        });
-        return listContainer;
-    }
-
-    grid.appendChild(criarListaLeaderboardREC(col1Data, 0));
-    if (col2Data.length > 0) {
-        grid.appendChild(criarListaLeaderboardREC(col2Data, meio));
-    }
-}
+// renderizarRankingREC removido
 
 function renderizarRankingPP(data) {
     const grid = document.getElementById('ranking-pp-grid');
@@ -747,7 +653,6 @@ setInterval(() => {
     carregarDadosCSV();
     carregarRankingCSV();
     carregarRankingAPCSV();
-    carregarRankingRECCSV();
     carregarRankingPPCSV();
     carregarDadosSemanaCSV();
 }, 10 * 60 * 1000);
