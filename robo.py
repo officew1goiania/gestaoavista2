@@ -722,6 +722,65 @@ def substituir_nomes(df, coluna):
         df[coluna] = df[coluna].str.replace("Eduardo Soares", "Eduardo Verano", regex=False)
     return df
 
+def processar_conta(conta):
+    email = conta["email"]
+    senha = conta["senha"]
+    if not email or not senha:
+        return None
+        
+    resultado = {
+        "df_conta": None,
+        "df_ranking": None,
+        "df_ranking_ap": None,
+        "df_ranking_pp": None,
+        "df_semana": None
+    }
+    
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(viewport={'width': 1280, 'height': 1600})
+        page = context.new_page()
+        
+        try:
+            # 1. Extração de Produção
+            df_conta = extrair_dados_da_conta(page, email, senha)
+            if df_conta is not None:
+                resultado["df_conta"] = df_conta
+            
+            # 2. Extração de Ranking MUAPD (Já logado na conta)
+            df_ranking = extrair_ranking_muapd(page)
+            if df_ranking is not None:
+                resultado["df_ranking"] = df_ranking
+
+            # 3. Extração de Ranking AP (Já logado na conta)
+            df_ranking_ap = extrair_ranking_ap(page)
+            if df_ranking_ap is not None:
+                resultado["df_ranking_ap"] = df_ranking_ap
+
+            # 4.5. Extração de Ranking PP (Já logado na conta)
+            df_ranking_pp = extrair_ranking_pp(page)
+            if df_ranking_pp is not None:
+                resultado["df_ranking_pp"] = df_ranking_pp
+
+            # 5. Extração de Produção Semanal (Já logado na conta)
+            df_semana = extrair_dados_semana_conta(page, email)
+            if df_semana is not None:
+                resultado["df_semana"] = df_semana
+
+        except Exception as e:
+            import traceback
+            erro_detalhado = traceback.format_exc()
+            print(f"ERRO na conta {email}: {e}")
+            with open(f"log_erro_{email.split('@')[0]}.txt", "w") as f:
+                f.write(erro_detalhado)
+            page.screenshot(path=f"debug_erro_{email.split('@')[0]}.png")
+        finally:
+            page.close()
+            context.close()
+            browser.close()
+            
+    return resultado
+
 def executar_robo():
     print("Iniciando o robô...")
     
@@ -737,57 +796,42 @@ def executar_robo():
     rankings_ap_acumulados = []
     rankings_pp_acumulados = []
     
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-
-        for conta in CONTAS:
-            if not conta["email"] or not conta["senha"]:
-                continue
-                
-            context = browser.new_context(viewport={'width': 1280, 'height': 1600})
-            page = context.new_page()
-            
-            try:
-                # 1. Extração de Produção
-                df_conta = extrair_dados_da_conta(page, conta["email"], conta["senha"])
-                if df_conta is not None:
-                    todos_os_dados.append(df_conta)
-                
-                # 2. Extração de Ranking MUAPD (Já logado na conta)
-                df_ranking = extrair_ranking_muapd(page)
-                if df_ranking is not None:
-                    rankings_acumulados.append(df_ranking)
-
-                # 3. Extração de Ranking AP (Já logado na conta)
-                df_ranking_ap = extrair_ranking_ap(page)
-                if df_ranking_ap is not None:
-                    rankings_ap_acumulados.append(df_ranking_ap)
-
-                # 4.5. Extração de Ranking PP (Já logado na conta)
-                df_ranking_pp = extrair_ranking_pp(page)
-                if df_ranking_pp is not None:
-                    rankings_pp_acumulados.append(df_ranking_pp)
-
-                # 5. Extração de Produção Semanal (Já logado na conta)
-                df_semana = extrair_dados_semana_conta(page, conta["email"])
-                if df_semana is not None:
-                    todos_os_dados_semana.append(df_semana)
-
-            except Exception as e:
-                import traceback
-                erro_detalhado = traceback.format_exc()
-                print(f"ERRO na conta {conta['email']}: {e}")
-                with open(f"log_erro_{conta['email'].split('@')[0]}.txt", "w") as f:
-                    f.write(erro_detalhado)
-                page.screenshot(path=f"debug_erro_{conta['email'].split('@')[0]}.png")
-            finally:
-                page.close()
-                context.close()
-
-        browser.close()
-        
-    # 4. Busca dados externos (Time Mario)
+    # 1. Executa a busca no Google Sheets (Planilha do Mario)
+    # Como o Sheets é por requisição simples, é instantâneo e roda em paralelo/início
     df_externo = extrair_dados_google_sheets()
+    
+    # 2. Executa as contas do CRM em paralelo
+    import concurrent.futures
+    contas_validas = [c for c in CONTAS if c["email"] and c["senha"]]
+    resultados = []
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(contas_validas)) as executor:
+        futuros = {executor.submit(processar_conta, conta): conta["email"] for conta in contas_validas}
+        
+        for futuro in concurrent.futures.as_completed(futuros):
+            email = futuros[futuro]
+            try:
+                res = futuro.result()
+                if res:
+                    resultados.append(res)
+                    print(f"Extração concluída com sucesso para a conta: {email}")
+            except Exception as exc:
+                print(f"Erro ao processar a conta {email}: {exc}")
+                
+    # 3. Consolida os resultados paralelos
+    for res in resultados:
+        if res["df_conta"] is not None:
+            todos_os_dados.append(res["df_conta"])
+        if res["df_ranking"] is not None:
+            rankings_acumulados.append(res["df_ranking"])
+        if res["df_ranking_ap"] is not None:
+            rankings_ap_acumulados.append(res["df_ranking_ap"])
+        if res["df_ranking_pp"] is not None:
+            rankings_pp_acumulados.append(res["df_ranking_pp"])
+        if res["df_semana"] is not None:
+            todos_os_dados_semana.append(res["df_semana"])
+
+    # 4. Adiciona dados externos do Google Sheets (Time Mario)
     if df_externo is not None:
         todos_os_dados.append(df_externo)
         
