@@ -5,7 +5,6 @@
 // Valor: Caminho relativo do arquivo de imagem (ex: 'fotos/joao.jpg')
 const CONFIG_FOTOS = {
     "Jallyson Henrique Alves Sobrinho": "fotos/jallyson_henrique_alves_sobrinho.png",
-    "Marconiedson Rocha Paraguassú": "fotos/marconiedson_rocha_paraguassu.png",
     "Victor Hugo Rocha Martins": "fotos/victor_hugo_rocha_martins.jpeg",
     "Durval Bernardes de Sousa Neto": "fotos/durval_bernardes_de_sousa_neto.jpeg",
     "Eduarda Cabral": "fotos/eduarda_cabral.jpeg",
@@ -22,7 +21,13 @@ const CONFIG_FOTOS = {
     "Saymon Gouveia": "fotos/saymon_de_gouveia_pereira_dos_santos.jpg",
     "Eduardo Soares": "fotos/eduardo_verano_chaves_soares.jpeg",
     "Eduardo Verano": "fotos/eduardo_verano_chaves_soares.jpeg",
-    "João Pedro Rosin Cardoso": "fotos/joao_pedro_rosin_cardoso.jpg"
+    "João Pedro Rosin Cardoso": "fotos/joao_pedro_rosin_cardoso.jpg",
+    "André Giometti Rapcham": "fotos/andre_giometti_rapcham.jpg",
+    "Felipe Costa Miguel": "fotos/felipe_costa_miguel.jpg",
+    "Samuel Enrique Ivanaskas Duarte": "fotos/samuel_enrique_ivanaskas_duarte.jpeg",
+    "Tarek Shamseddine Jarrah Mourad": "fotos/tarek_mourad.jpeg",
+    "Tarek Mourad": "fotos/tarek_mourad.jpeg",
+    "Victor Santos": "fotos/victor_santos.jpeg"
 };
 
 // Função para normalizar e renomear nomes de consultores solicitados pelo usuário
