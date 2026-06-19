@@ -27,7 +27,7 @@ const CONFIG_FOTOS = {
     "Samuel Enrique Ivanaskas Duarte": "fotos/samuel_enrique_ivanaskas_duarte.jpeg",
     "Tarek Shamseddine Jarrah Mourad": "fotos/tarek_mourad.jpeg",
     "Tarek Mourad": "fotos/tarek_mourad.jpeg",
-    "Victor Santos": "fotos/victor_santos.jpeg"
+    "Victor Guilherme de Sousa Santos": "fotos/victor_guilherme_de_sousa_santos.jpeg"
 };
 
 // Função para normalizar e renomear nomes de consultores solicitados pelo usuário
@@ -46,15 +46,15 @@ function normalizarNome(nome) {
 function obterFotoUrl(nomeCompleto) {
     nomeCompleto = normalizarNome(nomeCompleto);
     if (!nomeCompleto) return '';
-    
+
     // Remove parênteses como "(FA I)", "(FA II)"
     const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
-    
+
     // Se existir mapeamento explícito na configuração, usa-o
     if (CONFIG_FOTOS[nomeLimpo]) {
         return CONFIG_FOTOS[nomeLimpo];
     }
-    
+
     // Fallback: normaliza o nome para gerar o padrão "fotos/nome_sobrenome.jpg"
     const nomeNormalizado = nomeLimpo
         .toLowerCase()
@@ -63,7 +63,7 @@ function obterFotoUrl(nomeCompleto) {
         .replace(/[^a-z0-9\s]/g, '')     // remove caracteres especiais
         .trim()
         .replace(/\s+/g, '_');          // substitui espaços por _
-        
+
     return `fotos/${nomeNormalizado}.jpg`;
 }
 
@@ -257,14 +257,14 @@ function renderizarTabela(data) {
             nomeLower.includes('consultor')
         ) return;
 
-        totais.aa     += parseNumero(row['AA']);
-        totais.af     += parseNumero(row['AF']);
-        totais.ap     += parseNumero(row['AP']);
-        totais.apValor+= parseNumero(row['AP [R$]']);
-        totais.rec    += parseNumero(row['Recs']);
-        totais.pp     += parseNumero(row['Total']);
-        totais.c      += parseNumero(row['C']);
-        totais.sf     += parseNumero(row['SF']);
+        totais.aa += parseNumero(row['AA']);
+        totais.af += parseNumero(row['AF']);
+        totais.ap += parseNumero(row['AP']);
+        totais.apValor += parseNumero(row['AP [R$]']);
+        totais.rec += parseNumero(row['Recs']);
+        totais.pp += parseNumero(row['Total']);
+        totais.c += parseNumero(row['C']);
+        totais.sf += parseNumero(row['SF']);
     });
 
     const set = (id, val) => {
@@ -272,26 +272,26 @@ function renderizarTabela(data) {
         if (el) el.textContent = val;
     };
 
-    set('total-aa',      totais.aa);
-    set('total-af',      totais.af);
-    set('total-ap',      totais.ap);
+    set('total-aa', totais.aa);
+    set('total-af', totais.af);
+    set('total-ap', totais.ap);
     set('total-apvalor', formatarNumero(totais.apValor, true));
-    set('total-rec',     totais.rec);
-    set('total-pp',      formatarNumero(totais.pp));
+    set('total-rec', totais.rec);
+    set('total-pp', formatarNumero(totais.pp));
 
     // Atualiza barras de progresso
     const updateProgress = (metric, atual, meta) => {
         const bgEl = document.getElementById(`bar-${metric}`);
         const textEl = document.getElementById(`text-${metric}`);
         if (!bgEl || !textEl) return;
-        
+
         const percent = meta > 0 ? (atual / meta) * 100 : 0;
         bgEl.style.width = `${Math.min(percent, 100)}%`;
-        
+
         // Formata a meta para exibição
         const metaFormatada = metric === 'apvalor' ? formatarNumero(meta, true) : formatarNumero(meta);
         textEl.innerHTML = `<strong>${percent.toFixed(1)}%</strong> da meta (${metaFormatada})`;
-        
+
         // Muda cor caso atinja a meta
         if (percent >= 100) {
             bgEl.style.backgroundColor = '#10b981'; // Verde sucesso
@@ -356,13 +356,13 @@ function renderizarTabelaSemana(data) {
         const bgEl = document.getElementById(`bar-${metric}-semana`);
         const textEl = document.getElementById(`text-${metric}-semana`);
         if (!bgEl || !textEl) return;
-        
+
         const percent = meta > 0 ? (atual / meta) * 100 : 0;
         bgEl.style.width = `${Math.min(percent, 100)}%`;
-        
+
         const metaFormatada = metric === 'apvalor' ? formatarNumero(meta, true) : formatarNumero(meta);
         textEl.innerHTML = `<strong>${percent.toFixed(1)}%</strong> da meta (${metaFormatada})`;
-        
+
         if (percent >= 100) {
             bgEl.style.backgroundColor = '#10b981'; // Verde sucesso
         }
@@ -420,7 +420,7 @@ function renderizarRanking(data) {
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
             const card = document.createElement('div');
-            
+
             let rankClass = 'rank-other';
             let medal = actualIndex + 1;
             if (actualIndex === 0) {
@@ -435,11 +435,11 @@ function renderizarRanking(data) {
             }
 
             card.className = `leaderboard-card ${rankClass}`;
-            
+
             const nomeCompleto = row['Consultor'] || '';
             const nomeExibicao = obterNomeExibicao(nomeCompleto);
             const iniciais = obterIniciais(nomeCompleto);
-            
+
             let sublabel = 'Consultor';
             const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
             if (matchCargo) {
@@ -514,7 +514,7 @@ function renderizarRankingAP(data) {
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
             const card = document.createElement('div');
-            
+
             let rankClass = 'rank-other';
             let medal = actualIndex + 1;
             if (actualIndex === 0) {
@@ -529,11 +529,11 @@ function renderizarRankingAP(data) {
             }
 
             card.className = `leaderboard-card ${rankClass}`;
-            
+
             const nomeCompleto = row['Consultor'] || '';
             const nomeExibicao = obterNomeExibicao(nomeCompleto);
             const iniciais = obterIniciais(nomeCompleto);
-            
+
             let sublabel = 'Consultor';
             const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
             if (matchCargo) {
@@ -599,7 +599,7 @@ function renderizarRankingPP(data) {
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
             const card = document.createElement('div');
-            
+
             let rankClass = 'rank-other';
             let medal = actualIndex + 1;
             if (actualIndex === 0) {
@@ -614,11 +614,11 @@ function renderizarRankingPP(data) {
             }
 
             card.className = `leaderboard-card ${rankClass}`;
-            
+
             const nomeCompleto = row['Consultor'] || '';
             const nomeExibicao = obterNomeExibicao(nomeCompleto);
             const iniciais = obterIniciais(nomeCompleto);
-            
+
             let sublabel = 'Consultor';
             const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
             if (matchCargo) {
