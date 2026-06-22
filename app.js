@@ -30,6 +30,71 @@ const CONFIG_FOTOS = {
     "Victor Guilherme de Sousa Santos": "fotos/victor_guilherme_de_sousa_santos.jpeg"
 };
 
+// Lista Mestre com todos os 27 consultores do Office Goiânia
+const TODOS_CONSULTORES = [
+    "André Giometti Rapcham",
+    "André Vinícius Santos e Silva",
+    "Daniela Calanca",
+    "Durval Bernardes de Sousa Neto",
+    "Eduarda Cabral",
+    "Eduardo Verano",
+    "Felipe Costa Miguel",
+    "Felipe Henrique Nunes Ungarelli",
+    "Gianlucca Venturi",
+    "Gihad Nasih El Azanki",
+    "Gustavo Gomes de Alencar Cruz",
+    "Iara Machado de Souza Azevedo",
+    "Jallyson Henrique Alves Sobrinho",
+    "Jason Guilhardi Rosa e Silva",
+    "João Pedro Rosin Cardoso",
+    "João Victor Lima de Sousa",
+    "Matheus Garcia de Brito Itagiba",
+    "Micael Vinicius Bragança",
+    "Murillo Caixeta",
+    "Paulo Henrique Graciano",
+    "Pedro Benetton",
+    "Rafael Cabral Albernaz Rocha",
+    "Samuel Enrique Ivanaskas Duarte",
+    "Saymon Gouveia",
+    "Tarek Mourad",
+    "Victor Guilherme de Sousa Santos",
+    "Victor Hugo Rocha Martins"
+];
+
+// Dicionário global para mapear nomes limpos aos seus cargos (ex: "FA I", "FA II")
+const CARGOS_MAPEADOS = {
+    "Daniela Calanca": "P",
+    "Tarek Mourad": "P",
+    "Gianlucca Venturi": "P",
+    "Felipe Henrique Nunes Ungarelli": "FA III",
+    "João Victor Lima de Sousa": "FA IV",
+    "Matheus Garcia de Brito Itagiba": "FA III",
+    "Victor Hugo Rocha Martins": "FA I",
+    "Micael Vinicius Bragança": "FA II",
+    "Paulo Henrique Graciano": "FA IV",
+    "Murillo Caixeta": "FA III",
+    "Eduarda Cabral": "FA III",
+    "Jason Guilhardi Rosa e Silva": "FA II",
+    "André Vinícius Santos e Silva": "FA II",
+    "Samuel Enrique Ivanaskas Duarte": "FA I",
+    "Gustavo Gomes de Alencar Cruz": "FA I"
+};
+
+// Função para registrar dinamicamente cargos a partir dos dados dos CSVs
+function registrarCargos(data, campoNome) {
+    if (!data) return;
+    data.forEach(row => {
+        const nomeCompleto = row[campoNome] || '';
+        if (!nomeCompleto) return;
+        const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
+        if (matchCargo) {
+            const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
+            const nomeNorm = normalizarNome(nomeLimpo);
+            CARGOS_MAPEADOS[nomeNorm] = matchCargo[1];
+        }
+    });
+}
+
 // Função para normalizar e renomear nomes de consultores solicitados pelo usuário
 function normalizarNome(nome) {
     if (!nome) return '';
@@ -205,6 +270,7 @@ function carregarDadosCSV() {
         header: true,
         skipEmptyLines: true,
         complete: function (results) {
+            registrarCargos(results.data, 'Consultor/Nível');
             renderizarTabela(results.data);
         }
     });
@@ -216,6 +282,7 @@ function carregarRankingPPCSV() {
         header: true,
         skipEmptyLines: true,
         complete: function (results) {
+            registrarCargos(results.data, 'Consultor');
             renderizarRankingPP(results.data);
         }
     });
@@ -227,6 +294,7 @@ function carregarRankingCSV() {
         header: true,
         skipEmptyLines: true,
         complete: function (results) {
+            registrarCargos(results.data, 'Consultor');
             renderizarRanking(results.data);
         }
     });
@@ -311,6 +379,7 @@ function carregarDadosSemanaCSV() {
         header: true,
         skipEmptyLines: true,
         complete: function (results) {
+            registrarCargos(results.data, 'Consultor/Nível');
             renderizarTabelaSemana(results.data);
         }
     });
@@ -378,40 +447,56 @@ function renderizarRanking(data) {
 
     grid.innerHTML = '';
 
-    // Filtrar para remover quem está com 0 ou menos agendamentos (AA)
-    const dadosFiltrados = (data || []).filter(row => parseNumero(row['AA']) > 0);
+    // Mapeia os dados do CSV para acesso rápido (nome normalizado -> valor AA)
+    const mapAA = {};
+    (data || []).forEach(row => {
+        const nomeCompleto = row['Consultor'] || '';
+        const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
+        const nomeNorm = normalizarNome(nomeLimpo);
+        mapAA[nomeNorm] = parseNumero(row['AA']);
+    });
 
-    if (dadosFiltrados.length === 0) {
-        const totalEl = document.getElementById('ranking-total-aa');
-        if (totalEl) totalEl.textContent = 0;
-
-        grid.innerHTML = `
-            <div class="alert-empty-ranking">
-                <div class="alert-empty-icon-wrapper">
-                    <div class="alert-empty-pulse"></div>
-                    <div class="alert-empty-icon">⚠️</div>
-                </div>
-                <div>
-                    <h3 class="alert-empty-title">Atenção!</h3>
-                    <p class="alert-empty-desc">Ninguém fez MUAPD hoje!</p>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
-    // Calcular o Total de AA
+    // Calcula o Total de AA geral
     let totalAA = 0;
-    dadosFiltrados.forEach(row => {
-        totalAA += parseNumero(row['AA']);
+    Object.values(mapAA).forEach(val => {
+        totalAA += val;
     });
     const totalEl = document.getElementById('ranking-total-aa');
     if (totalEl) totalEl.textContent = totalAA;
 
-    // Dividir os dados em 2 colunas
-    const meio = Math.ceil(dadosFiltrados.length / 2);
-    const col1Data = dadosFiltrados.slice(0, meio);
-    const col2Data = dadosFiltrados.slice(meio);
+    // Constrói a lista com todos os 27 consultores
+    const listaCompleta = TODOS_CONSULTORES.map(nomeConsultor => {
+        const nomeNorm = normalizarNome(nomeConsultor);
+        const aaVal = mapAA[nomeNorm] || 0;
+        return {
+            nomeCompleto: nomeConsultor,
+            aa: aaVal
+        };
+    });
+
+    // Ordenação: primeiro quem tem AA > 0 (decrescente por AA), depois quem tem AA == 0 (alfabético por nome de exibição)
+    listaCompleta.sort((a, b) => {
+        if (a.aa > 0 && b.aa > 0) {
+            return b.aa - a.aa;
+        }
+        if (a.aa > 0 && b.aa === 0) {
+            return -1;
+        }
+        if (a.aa === 0 && b.aa > 0) {
+            return 1;
+        }
+        // Ambos zerados: ordem alfabética do nome de exibição
+        const nomeA = obterNomeExibicao(a.nomeCompleto).toLowerCase();
+        const nomeB = obterNomeExibicao(b.nomeCompleto).toLowerCase();
+        return nomeA.localeCompare(nomeB, 'pt-BR');
+    });
+
+    // Divide em 3 colunas (9 consultores por coluna para os 27 no total)
+    const totalItens = listaCompleta.length;
+    const colunaTamanho = Math.ceil(totalItens / 3);
+    const col1Data = listaCompleta.slice(0, colunaTamanho);
+    const col2Data = listaCompleta.slice(colunaTamanho, colunaTamanho * 2);
+    const col3Data = listaCompleta.slice(colunaTamanho * 2);
 
     function criarListaLeaderboard(items, startOffset) {
         const listContainer = document.createElement('div');
@@ -420,33 +505,71 @@ function renderizarRanking(data) {
         items.forEach((row, index) => {
             const actualIndex = index + startOffset;
             const card = document.createElement('div');
+            const aaVal = row.aa;
 
             let rankClass = 'rank-other';
-            let medal = actualIndex + 1;
-            if (actualIndex === 0) {
-                rankClass = 'rank-1';
-                medal = '🥇';
-            } else if (actualIndex === 1) {
-                rankClass = 'rank-2';
-                medal = '🥈';
-            } else if (actualIndex === 2) {
-                rankClass = 'rank-3';
-                medal = '🥉';
+            let medal = '';
+
+            if (aaVal > 0) {
+                // Quem já fez ganha rank e medalha
+                const rankPos = actualIndex + 1; // Posição no ranking ordenado
+                medal = rankPos;
+                if (actualIndex === 0) {
+                    rankClass = 'rank-1';
+                    medal = '🥇';
+                } else if (actualIndex === 1) {
+                    rankClass = 'rank-2';
+                    medal = '🥈';
+                } else if (actualIndex === 2) {
+                    rankClass = 'rank-3';
+                    medal = '🥉';
+                }
+            } else {
+                // Zerados: X vermelho e classe rank-other
+                rankClass = 'rank-other';
+                medal = '<span class="zero-x-rank">❌</span>';
             }
 
             card.className = `leaderboard-card ${rankClass}`;
 
-            const nomeCompleto = row['Consultor'] || '';
+            const nomeCompleto = row.nomeCompleto;
             const nomeExibicao = obterNomeExibicao(nomeCompleto);
             const iniciais = obterIniciais(nomeCompleto);
 
-            let sublabel = 'Consultor';
-            const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
-            if (matchCargo) {
-                sublabel = matchCargo[1];
-            }
+            // Tenta pegar o cargo dinamicamente, senão usa do mapping, senão padrão
+            const nomeNorm = normalizarNome(nomeCompleto);
+            const cargoMapeado = CARGOS_MAPEADOS[nomeNorm];
+            const sublabel = cargoMapeado || 'Consultor';
 
-            const valor = row['AA'] || '0';
+            let detailsHtml = '';
+            let scoreHtml = '';
+
+            if (aaVal > 0) {
+                // Convocado com medalha e quantidade
+                detailsHtml = `
+                    <span class="leaderboard-name">${nomeExibicao}</span>
+                    <span class="leaderboard-subdetails">
+                        ${sublabel}
+                        <span class="convocado-badge">convocado!</span>
+                    </span>
+                `;
+                scoreHtml = `
+                    <div class="leaderboard-score-container">
+                        <div class="leaderboard-score">${aaVal}</div>
+                    </div>
+                `;
+            } else {
+                // Zerado com X vermelho do lado do nome e cartão vermelho
+                detailsHtml = `
+                    <span class="leaderboard-name">${nomeExibicao}<span class="zero-x-name">❌</span></span>
+                    <span class="leaderboard-subdetails">${sublabel}</span>
+                `;
+                scoreHtml = `
+                    <div class="leaderboard-score-container">
+                        <div class="red-card-score">0</div>
+                    </div>
+                `;
+            }
 
             card.innerHTML = `
                 <div class="leaderboard-rank">${medal}</div>
@@ -455,12 +578,9 @@ function renderizarRanking(data) {
                     <img src="${obterFotoUrl(nomeCompleto)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="leaderboard-avatar-img" style="display: none;" alt="${nomeExibicao}">
                 </div>
                 <div class="leaderboard-details">
-                    <span class="leaderboard-name">${nomeExibicao}</span>
-                    <span class="leaderboard-subdetails">${sublabel}</span>
+                    ${detailsHtml}
                 </div>
-                <div class="leaderboard-score-container">
-                    <div class="leaderboard-score">${valor}</div>
-                </div>
+                ${scoreHtml}
             `;
             listContainer.appendChild(card);
         });
@@ -469,7 +589,10 @@ function renderizarRanking(data) {
 
     grid.appendChild(criarListaLeaderboard(col1Data, 0));
     if (col2Data.length > 0) {
-        grid.appendChild(criarListaLeaderboard(col2Data, meio));
+        grid.appendChild(criarListaLeaderboard(col2Data, colunaTamanho));
+    }
+    if (col3Data.length > 0) {
+        grid.appendChild(criarListaLeaderboard(col3Data, colunaTamanho * 2));
     }
 }
 
@@ -479,6 +602,7 @@ function carregarRankingAPCSV() {
         header: true,
         skipEmptyLines: true,
         complete: function (results) {
+            registrarCargos(results.data, 'Consultor');
             renderizarRankingAP(results.data);
         }
     });
