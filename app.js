@@ -30,7 +30,7 @@ const CONFIG_FOTOS = {
     "Victor Guilherme de Sousa Santos": "fotos/victor_guilherme_de_sousa_santos.jpeg"
 };
 
-// Lista Mestre com todos os 27 consultores do Office Goiânia
+// Lista Mestre com todos os 26 consultores do Office Goiânia (ativos, correspondentes às fotos)
 const TODOS_CONSULTORES = [
     "André Giometti Rapcham",
     "André Vinícius Santos e Silva",
@@ -40,7 +40,6 @@ const TODOS_CONSULTORES = [
     "Eduardo Verano",
     "Felipe Costa Miguel",
     "Felipe Henrique Nunes Ungarelli",
-    "Gianlucca Venturi",
     "Gihad Nasih El Azanki",
     "Gustavo Gomes de Alencar Cruz",
     "Iara Machado de Souza Azevedo",
