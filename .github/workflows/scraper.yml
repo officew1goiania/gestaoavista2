@@ -1,6 +1,9 @@
 name: Atualizar Dashboard W1 a cada 20 min
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: '5,25,45 * * * *' # Executa nos minutos 5, 25 e 45 de cada hora
   workflow_dispatch: # Permite rodar manualmente clicando em um botão no GitHub
