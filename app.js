@@ -167,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentView = 'results';
 const SWITCH_TIME = 10; // segundos
 let timeLeft = SWITCH_TIME;
+let checkStatusInterval = null;
+let isWorkflowRunning = false;
 
 function iniciarCicloExibicao() {
     const progressBar = document.getElementById('progress-bar');
@@ -918,10 +920,134 @@ function inicializarSyncManual() {
             localStorage.setItem('github_pat_token', token);
             modalOverlay.classList.remove('active');
             acionarRobotWorkflow(token);
+            setTimeout(() => {
+                iniciarMonitoramentoWorkflow();
+            }, 1000);
         } else {
             alert('Por favor, insira um token válido.');
         }
     });
+
+    // Inicia monitoramento caso já tenha o token salvo
+    const savedToken = localStorage.getItem('github_pat_token');
+    if (savedToken) {
+        iniciarMonitoramentoWorkflow();
+    }
+}
+
+function iniciarMonitoramentoWorkflow() {
+    const token = localStorage.getItem('github_pat_token');
+    if (!token) return;
+
+    if (checkStatusInterval) clearInterval(checkStatusInterval);
+
+    // Faz a primeira checagem imediata
+    consultarStatusGitHub(token);
+
+    // Checagem padrão a cada 15 segundos
+    checkStatusInterval = setInterval(() => {
+        consultarStatusGitHub(token);
+    }, 15000);
+}
+
+function consultarStatusGitHub(token) {
+    const btnSync = document.getElementById('btn-sync');
+    if (!btnSync) return;
+
+    const syncText = btnSync.querySelector('.sync-text');
+    const syncIcon = btnSync.querySelector('.sync-icon');
+
+    fetch('https://api.github.com/repos/officew1goiania/gestaoavista2/actions/workflows/scraper.yml/runs?per_page=1', {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        }
+    })
+    .then(response => {
+        if (response.status === 401) {
+            localStorage.removeItem('github_pat_token');
+            if (checkStatusInterval) {
+                clearInterval(checkStatusInterval);
+                checkStatusInterval = null;
+            }
+            resetarBotaoSync();
+            return;
+        }
+        if (!response.ok) throw new Error("Erro na requisição");
+        return response.json();
+    })
+    .then(data => {
+        if (!data || !data.workflow_runs || data.workflow_runs.length === 0) return;
+
+        const latestRun = data.workflow_runs[0];
+        const status = latestRun.status;
+        const runningStatuses = ['queued', 'in_progress', 'waiting', 'requested', 'pending'];
+
+        if (runningStatuses.includes(status)) {
+            // A Action está rodando
+            if (!isWorkflowRunning) {
+                isWorkflowRunning = true;
+                // Aumenta a frequência de monitoramento para cada 8 segundos
+                clearInterval(checkStatusInterval);
+                checkStatusInterval = setInterval(() => {
+                    consultarStatusGitHub(token);
+                }, 8000);
+            }
+            
+            btnSync.disabled = true;
+            btnSync.classList.add('loading');
+            syncIcon.textContent = '🔄';
+            syncText.textContent = 'Rodando...';
+            btnSync.style.borderColor = 'rgba(250, 204, 21, 0.4)';
+            btnSync.style.color = '#facc15';
+            btnSync.style.background = 'rgba(250, 204, 21, 0.08)';
+        } else {
+            // Finalizada / Ociosa
+            if (isWorkflowRunning) {
+                // Acabou de finalizar!
+                isWorkflowRunning = false;
+                
+                // Recarrega todos os dados
+                carregarUltimaAtualizacao();
+                carregarDadosCSV();
+                carregarRankingCSV();
+                carregarRankingAPCSV();
+                carregarRankingPPCSV();
+                carregarDadosSemanaCSV();
+
+                // Mostra feedback de conclusão
+                syncIcon.textContent = '✅';
+                syncText.textContent = 'Atualizado!';
+                btnSync.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                btnSync.style.color = '#10b981';
+                btnSync.style.background = 'rgba(16, 185, 129, 0.08)';
+
+                setTimeout(() => {
+                    resetarBotaoSync();
+                    iniciarMonitoramentoWorkflow(); // Volta para a checagem normal
+                }, 5000);
+            } else {
+                resetarBotaoSync();
+            }
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao verificar status do workflow:", err);
+    });
+}
+
+function resetarBotaoSync() {
+    const btnSync = document.getElementById('btn-sync');
+    if (!btnSync || isWorkflowRunning) return;
+
+    btnSync.disabled = false;
+    btnSync.classList.remove('loading');
+    btnSync.querySelector('.sync-icon').textContent = '🔄';
+    btnSync.querySelector('.sync-text').textContent = 'Atualizar Agora';
+    btnSync.style.borderColor = '';
+    btnSync.style.color = '';
+    btnSync.style.background = '';
 }
 
 function acionarRobotWorkflow(token) {
@@ -950,13 +1076,12 @@ function acionarRobotWorkflow(token) {
         if (response.status === 204) {
             btnSync.querySelector('.sync-icon').textContent = '✅';
             syncText.textContent = 'Acionado!';
-            alert('Robô acionado com sucesso! O painel será atualizado automaticamente em cerca de 2 minutos.');
             
+            // Aguarda 4 segundos e então força o estado ativo e o monitoramento imediato
             setTimeout(() => {
-                btnSync.querySelector('.sync-icon').textContent = '🔄';
-                syncText.textContent = originalText;
-                btnSync.disabled = false;
-            }, 5000);
+                isWorkflowRunning = true;
+                iniciarMonitoramentoWorkflow();
+            }, 4000);
         } else if (response.status === 401) {
             localStorage.removeItem('github_pat_token');
             btnSync.disabled = false;
