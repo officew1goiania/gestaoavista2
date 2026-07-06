@@ -161,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarRankingPPCSV();
     carregarDadosSemanaCSV();
     iniciarCicloExibicao();
+    inicializarSyncManual();
 });
 
 let currentView = 'results';
@@ -856,3 +857,122 @@ setInterval(() => {
     carregarRankingPPCSV();
     carregarDadosSemanaCSV();
 }, 10 * 60 * 1000);
+
+// Função para configurar e gerenciar a sincronização manual
+function inicializarSyncManual() {
+    const btnSync = document.getElementById('btn-sync');
+    if (!btnSync) return;
+
+    // Cria o Modal de Autenticação se não existir
+    if (!document.getElementById('auth-modal-overlay')) {
+        const modalHtml = `
+            <div id="auth-modal-overlay" class="auth-modal-overlay">
+                <div class="auth-modal">
+                    <h3>Autenticação Requerida</h3>
+                    <p>Para acionar o robô de atualização diretamente pelo painel, você precisa de um <strong>Personal Access Token (PAT)</strong> do GitHub com permissão de escrita em Actions:</p>
+                    <ol>
+                        <li>Acesse o GitHub -> Developer settings -> Personal access tokens -> Tokens (classic).</li>
+                        <li>Gere um novo token clássico e marque a caixinha <strong>workflow</strong>.</li>
+                        <li>Cole o token abaixo (ele ficará salvo de forma privada apenas na TV/computador atual).</li>
+                    </ol>
+                    <div class="auth-input-group">
+                        <label for="github-pat-input">Token do GitHub (PAT)</label>
+                        <input type="password" id="github-pat-input" class="auth-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    </div>
+                    <div class="auth-actions">
+                        <button id="btn-auth-cancel" class="btn-cancel">Cancelar</button>
+                        <button id="btn-auth-save" class="btn-save">Salvar e Acionar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    const modalOverlay = document.getElementById('auth-modal-overlay');
+    const patInput = document.getElementById('github-pat-input');
+    const btnCancel = document.getElementById('btn-auth-cancel');
+    const btnSave = document.getElementById('btn-auth-save');
+
+    btnSync.addEventListener('click', (e) => {
+        e.preventDefault();
+        const savedToken = localStorage.getItem('github_pat_token');
+        if (!savedToken) {
+            modalOverlay.classList.add('active');
+            patInput.focus();
+        } else {
+            acionarRobotWorkflow(savedToken);
+        }
+    });
+
+    btnCancel.addEventListener('click', (e) => {
+        e.preventDefault();
+        modalOverlay.classList.remove('active');
+        patInput.value = '';
+    });
+
+    btnSave.addEventListener('click', (e) => {
+        e.preventDefault();
+        const token = patInput.value.trim();
+        if (token) {
+            localStorage.setItem('github_pat_token', token);
+            modalOverlay.classList.remove('active');
+            acionarRobotWorkflow(token);
+        } else {
+            alert('Por favor, insira um token válido.');
+        }
+    });
+}
+
+function acionarRobotWorkflow(token) {
+    const btnSync = document.getElementById('btn-sync');
+    if (!btnSync) return;
+
+    const syncText = btnSync.querySelector('.sync-text');
+    const originalText = syncText.textContent;
+
+    btnSync.disabled = true;
+    btnSync.classList.add('loading');
+    syncText.textContent = 'Enviando...';
+
+    // Dispara a API do GitHub Actions (workflow_dispatch)
+    fetch('https://api.github.com/repos/officew1goiania/gestaoavista2/actions/workflows/scraper.yml/dispatches', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify({ ref: 'main' })
+    })
+    .then(response => {
+        btnSync.classList.remove('loading');
+        if (response.status === 204) {
+            btnSync.querySelector('.sync-icon').textContent = '✅';
+            syncText.textContent = 'Acionado!';
+            alert('Robô acionado com sucesso! O painel será atualizado automaticamente em cerca de 2 minutos.');
+            
+            setTimeout(() => {
+                btnSync.querySelector('.sync-icon').textContent = '🔄';
+                syncText.textContent = originalText;
+                btnSync.disabled = false;
+            }, 5000);
+        } else if (response.status === 401) {
+            localStorage.removeItem('github_pat_token');
+            btnSync.disabled = false;
+            syncText.textContent = originalText;
+            alert('Token do GitHub expirado ou inválido. Por favor, insira um novo token.');
+            document.getElementById('auth-modal-overlay').classList.add('active');
+            document.getElementById('github-pat-input').focus();
+        } else {
+            throw new Error('Falha no acionamento (Status: ' + response.status + ')');
+        }
+    })
+    .catch(error => {
+        btnSync.classList.remove('loading');
+        btnSync.disabled = false;
+        syncText.textContent = originalText;
+        console.error(error);
+        alert('Erro ao acionar o robô: ' + (error.message || 'Verifique sua conexão ou permissões do token.'));
+    });
+}

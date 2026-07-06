@@ -32,11 +32,17 @@
                 <img src="selos/s1.png" alt="Selo S1" class="header-badge">
                 <img src="selos/revelacao.png" alt="Selo Revelação" class="header-badge">
             </div>
-            <div class="update-status">
-                <div class="status-dot"></div>
-                <div class="update-text">
-                    <span>Sincronizado:</span>
-                    <strong id="update-time">Carregando...</strong>
+            <div class="header-right-group" style="display: flex; align-items: center; gap: 1vw;">
+                <button id="btn-sync" class="sync-button" title="Forçar Atualização do Robô">
+                    <span class="sync-icon">🔄</span>
+                    <span class="sync-text">Atualizar Agora</span>
+                </button>
+                <div class="update-status">
+                    <div class="status-dot"></div>
+                    <div class="update-text">
+                        <span>Sincronizado:</span>
+                        <strong id="update-time">Carregando...</strong>
+                    </div>
                 </div>
             </div>
         </header>
