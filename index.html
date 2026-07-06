@@ -148,16 +148,35 @@
 
             <!-- VISTA 2: RANKING MUAPD -->
             <div id="view-ranking" class="view-section">
-                <div class="ranking-full-container">
-                    <div class="ranking-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <h2>Ranking Análises Agendadas no dia (MUAPD)</h2>
-                        <div style="background-color: var(--w1-teal); color: var(--w1-white); padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 1.2rem;">
-                            TOTAL AA: <span id="ranking-total-aa">-</span>
+                <div class="muapd-layout-split">
+                    <!-- Esquerda: Ranking diário (2 colunas) -->
+                    <div class="ranking-full-container daily-muapd-container">
+                        <div class="ranking-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>Ranking Análises Agendadas no dia (MUAPD)</h2>
+                            <div style="background-color: var(--w1-teal); color: var(--w1-white); padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 1.2rem;">
+                                TOTAL AA: <span id="ranking-total-aa">-</span>
+                            </div>
+                        </div>
+                        <div id="ranking-grid" class="ranking-two-columns ranking-muapd-compact">
+                            <!-- O conteúdo do ranking será inserido aqui em 2 colunas -->
+                            <div class="loading-text">Carregando Ranking...</div>
                         </div>
                     </div>
-                    <div id="ranking-grid" class="ranking-three-columns ranking-muapd-compact">
-                        <!-- O conteúdo do ranking será inserido aqui em 3 colunas -->
-                        <div class="loading-text">Carregando Ranking...</div>
+
+                    <!-- Direita: Maratona MUAPD -->
+                    <div class="maratona-container">
+                        <div class="maratona-header">
+                            <div class="maratona-prize-wrapper">
+                                <img src="fone.jpg" alt="Prêmio Maratona" class="maratona-prize-img">
+                                <div class="maratona-prize-badge">Prêmio Consistência</div>
+                            </div>
+                            <h3>Maratona MUAPD</h3>
+                            <p class="maratona-subtitle">Meta diária (Seg a Sex)</p>
+                        </div>
+                        <div id="maratona-list" class="maratona-list">
+                            <!-- Os participantes da maratona serão inseridos aqui -->
+                            <div class="loading-text">Carregando Maratona...</div>
+                        </div>
                     </div>
                 </div>
             </div>

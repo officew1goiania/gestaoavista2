@@ -878,6 +878,42 @@ def executar_robo():
         df_ranking_final.to_csv("ranking_muapd.csv", index=False)
         print("Ranking MUAPD salvo com sucesso.")
 
+        # Salva histórico de MUAPD (Maratona)
+        try:
+            import json
+            import os
+            from datetime import datetime, timezone, timedelta
+            
+            # Fuso horário de Brasília (UTC-3)
+            fuso_br = timezone(timedelta(hours=-3))
+            data_local = datetime.now(fuso_br)
+            data_str = data_local.strftime("%Y-%m-%d")
+            
+            # Só atualiza em dias úteis (segunda=0 a sexta=4)
+            if data_local.weekday() < 5:
+                nome_arq_hist = "historico_muapd.json"
+                historico = {}
+                if os.path.exists(nome_arq_hist):
+                    try:
+                        with open(nome_arq_hist, "r", encoding="utf-8") as f:
+                            historico = json.load(f)
+                    except Exception as e:
+                        print(f"Erro ao ler historico_muapd.json: {e}")
+                
+                # Lista de consultores com MUAPD > 0 hoje
+                consultores_ativos = df_ranking_final[df_ranking_final['AA'] > 0]['Consultor'].tolist()
+                
+                # Registra/atualiza o dia de hoje
+                historico[data_str] = consultores_ativos
+                
+                with open(nome_arq_hist, "w", encoding="utf-8") as f:
+                    json.dump(historico, f, indent=4, ensure_ascii=False)
+                print(f"Histórico de MUAPD atualizado para {data_str}: {len(consultores_ativos)} consultores ativos.")
+            else:
+                print("Final de semana. Histórico de MUAPD não atualizado.")
+        except Exception as e:
+            print(f"Erro ao salvar histórico de MUAPD: {e}")
+
     # Salva Ranking AP
     if rankings_ap_acumulados:
         df_ranking_ap_final = pd.concat(rankings_ap_acumulados, ignore_index=True)

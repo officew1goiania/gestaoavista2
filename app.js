@@ -294,7 +294,20 @@ function carregarRankingCSV() {
         skipEmptyLines: true,
         complete: function (results) {
             registrarCargos(results.data, 'Consultor');
-            renderizarRanking(results.data);
+            
+            // Carrega o histórico JSON
+            fetch('historico_muapd.json?t=' + new Date().getTime())
+                .then(response => {
+                    if (!response.ok) throw new Error("Sem histórico");
+                    return response.json();
+                })
+                .then(historico => {
+                    renderizarRankingEMaratona(results.data, historico);
+                })
+                .catch(() => {
+                    // Fallback se falhar
+                    renderizarRankingEMaratona(results.data, {});
+                });
         }
     });
 }
@@ -440,7 +453,7 @@ function renderizarTabelaSemana(data) {
     updateProgressSemana('pp', totaisSemana.pp, metasSemana.pp);
 }
 
-function renderizarRanking(data) {
+function renderizarRankingEMaratona(data, historico) {
     const grid = document.getElementById('ranking-grid');
     if (!grid) return;
 
@@ -463,7 +476,7 @@ function renderizarRanking(data) {
     const totalEl = document.getElementById('ranking-total-aa');
     if (totalEl) totalEl.textContent = totalAA;
 
-    // Constrói a lista com todos os 27 consultores
+    // Constrói a lista com todos os 26 consultores
     const listaCompleta = TODOS_CONSULTORES.map(nomeConsultor => {
         const nomeNorm = normalizarNome(nomeConsultor);
         const aaVal = mapAA[nomeNorm] || 0;
@@ -490,12 +503,11 @@ function renderizarRanking(data) {
         return nomeA.localeCompare(nomeB, 'pt-BR');
     });
 
-    // Divide em 3 colunas (9 consultores por coluna para os 27 no total)
+    // Divide em 2 colunas para caber a maratona à direita
     const totalItens = listaCompleta.length;
-    const colunaTamanho = Math.ceil(totalItens / 3);
+    const colunaTamanho = Math.ceil(totalItens / 2);
     const col1Data = listaCompleta.slice(0, colunaTamanho);
-    const col2Data = listaCompleta.slice(colunaTamanho, colunaTamanho * 2);
-    const col3Data = listaCompleta.slice(colunaTamanho * 2);
+    const col2Data = listaCompleta.slice(colunaTamanho);
 
     function criarListaLeaderboard(items, startOffset) {
         const listContainer = document.createElement('div');
@@ -524,9 +536,9 @@ function renderizarRanking(data) {
                     medal = '🥉';
                 }
             } else {
-                // Zerados: classe rank-other e o próprio número da posição
+                // Zerados: classe rank-other e '❌' no lugar da posição
                 rankClass = 'rank-other';
-                medal = actualIndex + 1;
+                medal = '❌';
             }
 
             card.className = `leaderboard-card ${rankClass}`;
@@ -590,8 +602,85 @@ function renderizarRanking(data) {
     if (col2Data.length > 0) {
         grid.appendChild(criarListaLeaderboard(col2Data, colunaTamanho));
     }
-    if (col3Data.length > 0) {
-        grid.appendChild(criarListaLeaderboard(col3Data, colunaTamanho * 2));
+
+    // ==========================================
+    // RENDERIZAÇÃO DA MARATONA MUAPD (DIREITA)
+    // ==========================================
+    const chavesOrdenadas = Object.keys(historico || {})
+        .filter(k => k >= "2026-07-06")
+        .sort();
+
+    let diasPassados = [];
+    let diaAtual = null;
+
+    if (chavesOrdenadas.length > 0) {
+        // O último dia no histórico é o dia atual (hoje)
+        diaAtual = chavesOrdenadas[chavesOrdenadas.length - 1];
+        diasPassados = chavesOrdenadas.slice(0, chavesOrdenadas.length - 1);
+    }
+
+    // Calcula os participantes da maratona (devem ter MUAPD > 0 em todos os dias úteis passados)
+    const participantesMaratona = TODOS_CONSULTORES.filter(nomeConsultor => {
+        const nomeNorm = normalizarNome(nomeConsultor);
+        
+        // Verifica se esteve ativo em todos os dias passados
+        for (const dia of diasPassados) {
+            const ativosNoDia = (historico[dia] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
+            if (!ativosNoDia.includes(nomeNorm)) {
+                return false; // Falhou em algum dia
+            }
+        }
+        return true;
+    });
+
+    // Função para verificar se concluiu hoje
+    const concluiuHoje = (nomeConsultor) => {
+        if (!diaAtual) return false;
+        const nomeNorm = normalizarNome(nomeConsultor);
+        const ativosHoje = (historico[diaAtual] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
+        return ativosHoje.includes(nomeNorm);
+    };
+
+    // Ordenação da Maratona: quem já fez hoje fica no topo, depois os pendentes. Dentro de cada grupo, ordem alfabética.
+    participantesMaratona.sort((a, b) => {
+        const aConcluido = concluiuHoje(a);
+        const bConcluido = concluiuHoje(b);
+        if (aConcluido && !bConcluido) return -1;
+        if (!aConcluido && bConcluido) return 1;
+        return obterNomeExibicao(a).localeCompare(obterNomeExibicao(b), 'pt-BR');
+    });
+
+    const maratonaListContainer = document.getElementById('maratona-list');
+    if (maratonaListContainer) {
+        maratonaListContainer.innerHTML = '';
+        if (participantesMaratona.length === 0) {
+            maratonaListContainer.innerHTML = '<div class="loading-text" style="color: rgba(255,255,255,0.3); padding-top: 5vh;">Ninguém na maratona</div>';
+        } else {
+            participantesMaratona.forEach(nomeConsultor => {
+                const card = document.createElement('div');
+                const isCompletedToday = concluiuHoje(nomeConsultor);
+                const nomeExibicao = obterNomeExibicao(nomeConsultor);
+                const iniciais = obterIniciais(nomeConsultor);
+                
+                card.className = `maratona-card ${isCompletedToday ? 'completed' : ''}`;
+                
+                const statusHtml = isCompletedToday 
+                    ? '<span class="maratona-status-icon done" title="Concluído hoje!">🔥</span>' 
+                    : '<span class="maratona-status-icon pending" title="Pendente hoje" style="opacity: 0.15;">🔥</span>';
+                
+                card.innerHTML = `
+                    <div class="maratona-avatar-container">
+                        <div class="maratona-avatar-fallback" style="background: ${obterCorGradiente(nomeConsultor)}">${iniciais}</div>
+                        <img src="${obterFotoUrl(nomeConsultor)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="maratona-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                    </div>
+                    <div class="maratona-details">
+                        <span class="maratona-name">${nomeExibicao}</span>
+                    </div>
+                    ${statusHtml}
+                `;
+                maratonaListContainer.appendChild(card);
+            });
+        }
     }
 }
 

@@ -1105,4 +1105,202 @@ h1 { font-size: 2.2rem !important; }
     box-shadow: none !important;
 }
 
+/* Layout Split para MUAPD + Maratona */
+.muapd-layout-split {
+    display: grid;
+    grid-template-columns: 2.8fr 1fr;
+    gap: 1.5vw;
+    height: 82vh;
+}
+
+.daily-muapd-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.maratona-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1.5px solid rgba(0, 210, 200, 0.15);
+    border-radius: 16px;
+    padding: 1.5vh 1vw;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(0, 210, 200, 0.02);
+}
+
+.maratona-header {
+    text-align: center;
+    margin-bottom: 1.5vh;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 1.5vh;
+    flex-shrink: 0;
+}
+
+.maratona-prize-wrapper {
+    position: relative;
+    width: 100%;
+    height: 14vh;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    margin-bottom: 1vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.maratona-prize-img {
+    max-height: 90%;
+    max-width: 90%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 210, 200, 0.3));
+    animation: prize-pulse 3s infinite ease-in-out;
+}
+
+@keyframes prize-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 4px 10px rgba(0, 210, 200, 0.2)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 6px 15px rgba(0, 210, 200, 0.4)); }
+}
+
+.maratona-prize-badge {
+    position: absolute;
+    bottom: 6px;
+    background: rgba(0, 210, 200, 0.9);
+    color: #05171E;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.maratona-container h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--w1-white);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.maratona-subtitle {
+    font-size: 0.75rem;
+    color: var(--w1-teal);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.maratona-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+    padding-right: 4px;
+}
+
+.maratona-list::-webkit-scrollbar {
+    width: 4px;
+}
+.maratona-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+.maratona-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 210, 200, 0.2);
+    border-radius: 10px;
+}
+
+.maratona-card {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 0.6vh 0.8vw;
+    transition: transform 0.2s ease;
+}
+
+.maratona-card:hover {
+    transform: translateX(2px);
+    border-color: rgba(0, 210, 200, 0.2);
+}
+
+.maratona-card.completed {
+    background: rgba(0, 210, 200, 0.03);
+    border-color: rgba(0, 210, 200, 0.15);
+}
+
+.maratona-avatar-container {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-right: 0.6vw;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    background: #E5E7EB;
+}
+
+.maratona-avatar-fallback {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #FFFFFF;
+    font-size: 0.75rem;
+}
+
+.maratona-avatar-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.maratona-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.maratona-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--w1-white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.maratona-status-icon {
+    margin-left: auto;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.maratona-status-icon.done {
+    color: var(--w1-teal);
+    filter: drop-shadow(0 0 4px rgba(0, 210, 200, 0.5));
+    animation: flame-flicker 1.5s infinite alternate;
+}
+
+@keyframes flame-flicker {
+    0% { transform: scale(1) rotate(-2deg); }
+    100% { transform: scale(1.1) rotate(2deg); }
+}
+
+.maratona-status-icon.pending {
+    color: rgba(255, 255, 255, 0.2);
+}
+
 
