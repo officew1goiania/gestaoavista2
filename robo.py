@@ -881,7 +881,6 @@ def executar_robo():
         # Salva histórico de MUAPD (Maratona)
         try:
             import json
-            import os
             from datetime import datetime, timezone, timedelta
             
             # Fuso horário de Brasília (UTC-3)
