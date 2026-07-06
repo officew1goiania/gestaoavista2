@@ -862,6 +862,17 @@ setInterval(() => {
 
 // Função para configurar e gerenciar a sincronização manual
 function inicializarSyncManual() {
+    // Verifica se o token foi passado via parâmetro de URL (facilitando configuração na TV)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('pat') || urlParams.get('token');
+    if (urlToken && urlToken.trim().startsWith('ghp_')) {
+        localStorage.setItem('github_pat_token', urlToken.trim());
+        // Limpa o parâmetro da URL para segurança e estética
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+        alert('Token do GitHub configurado com sucesso neste dispositivo!');
+    }
+
     const btnSync = document.getElementById('btn-sync');
     if (!btnSync) return;
 
@@ -928,50 +939,49 @@ function inicializarSyncManual() {
         }
     });
 
-    // Inicia monitoramento caso já tenha o token salvo
-    const savedToken = localStorage.getItem('github_pat_token');
-    if (savedToken) {
-        iniciarMonitoramentoWorkflow();
-    }
+    // Inicia monitoramento caso já tenha o token salvo ou monitoramento anônimo
+    iniciarMonitoramentoWorkflow();
 }
 
 function iniciarMonitoramentoWorkflow() {
-    const token = localStorage.getItem('github_pat_token');
-    if (!token) return;
-
     if (checkStatusInterval) clearInterval(checkStatusInterval);
 
-    // Faz a primeira checagem imediata
-    consultarStatusGitHub(token);
+    // Se tiver token, checa a cada 15 segundos. Se não tiver, checa a cada 120 segundos (anônimo) para respeitar limite
+    const token = localStorage.getItem('github_pat_token');
+    const intervalTime = token ? 15000 : 120000;
 
-    // Checagem padrão a cada 15 segundos
+    // Faz a primeira checagem imediata
+    consultarStatusGitHub();
+
     checkStatusInterval = setInterval(() => {
-        consultarStatusGitHub(token);
-    }, 15000);
+        consultarStatusGitHub();
+    }, intervalTime);
 }
 
-function consultarStatusGitHub(token) {
+function consultarStatusGitHub() {
     const btnSync = document.getElementById('btn-sync');
     if (!btnSync) return;
 
     const syncText = btnSync.querySelector('.sync-text');
     const syncIcon = btnSync.querySelector('.sync-icon');
 
+    const token = localStorage.getItem('github_pat_token');
+    const headers = {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     fetch('https://api.github.com/repos/officew1goiania/gestaoavista2/actions/workflows/scraper.yml/runs?per_page=1', {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28'
-        }
+        headers: headers
     })
     .then(response => {
         if (response.status === 401) {
             localStorage.removeItem('github_pat_token');
-            if (checkStatusInterval) {
-                clearInterval(checkStatusInterval);
-                checkStatusInterval = null;
-            }
             resetarBotaoSync();
+            iniciarMonitoramentoWorkflow(); // Reinicia como anônimo
             return;
         }
         if (!response.ok) throw new Error("Erro na requisição");
@@ -983,16 +993,18 @@ function consultarStatusGitHub(token) {
         const latestRun = data.workflow_runs[0];
         const status = latestRun.status;
         const runningStatuses = ['queued', 'in_progress', 'waiting', 'requested', 'pending'];
+        const token = localStorage.getItem('github_pat_token');
 
         if (runningStatuses.includes(status)) {
             // A Action está rodando
             if (!isWorkflowRunning) {
                 isWorkflowRunning = true;
-                // Aumenta a frequência de monitoramento para cada 8 segundos
+                // Aumenta a frequência de monitoramento (15 segundos para anônimo, 8 para com token)
                 clearInterval(checkStatusInterval);
+                const fastInterval = token ? 8000 : 15000;
                 checkStatusInterval = setInterval(() => {
-                    consultarStatusGitHub(token);
-                }, 8000);
+                    consultarStatusGitHub();
+                }, fastInterval);
             }
             
             btnSync.disabled = true;
