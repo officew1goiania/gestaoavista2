@@ -524,9 +524,9 @@ function renderizarRanking(data) {
                     medal = '🥉';
                 }
             } else {
-                // Zerados: X vermelho e classe rank-other
+                // Zerados: classe rank-other e o próprio número da posição
                 rankClass = 'rank-other';
-                medal = '<span class="zero-x-rank">❌</span>';
+                medal = actualIndex + 1;
             }
 
             card.className = `leaderboard-card ${rankClass}`;
@@ -544,12 +544,12 @@ function renderizarRanking(data) {
             let scoreHtml = '';
 
             if (aaVal > 0) {
-                // Convocado com medalha e quantidade
+                // Feito com badge e quantidade
                 detailsHtml = `
                     <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">
                         ${sublabel}
-                        <span class="convocado-badge">convocado!</span>
+                        <span class="feito-badge">feito!</span>
                     </span>
                 `;
                 scoreHtml = `
@@ -558,14 +558,14 @@ function renderizarRanking(data) {
                     </div>
                 `;
             } else {
-                // Zerado com X vermelho do lado do nome e cartão vermelho
+                // Zerado sem badge especial e com pontuação zero opaca
                 detailsHtml = `
-                    <span class="leaderboard-name">${nomeExibicao}<span class="zero-x-name">❌</span></span>
+                    <span class="leaderboard-name">${nomeExibicao}</span>
                     <span class="leaderboard-subdetails">${sublabel}</span>
                 `;
                 scoreHtml = `
                     <div class="leaderboard-score-container">
-                        <div class="red-card-score">0</div>
+                        <div class="leaderboard-score zero-score">0</div>
                     </div>
                 `;
             }

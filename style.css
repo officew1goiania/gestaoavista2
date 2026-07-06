@@ -1025,4 +1025,84 @@ h1 { font-size: 2.2rem !important; }
     }
 }
 
+/* Layout de 3 colunas para o Ranking */
+.ranking-three-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.2vw;
+    height: 100%;
+}
+
+/* Estilos compactos para caber todos os consultores na tela de MUAPD */
+.ranking-muapd-compact .leaderboard-list {
+    gap: 0.6vh !important;
+}
+
+.ranking-muapd-compact .leaderboard-card {
+    padding: 0.6vh 0.8vw !important;
+    border-radius: 12px !important;
+}
+
+.ranking-muapd-compact .leaderboard-rank {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 1.1rem !important;
+    margin-right: 0.8vw !important;
+}
+
+.ranking-muapd-compact .leaderboard-avatar-container {
+    width: 36px !important;
+    height: 36px !important;
+    margin-right: 0.8vw !important;
+}
+
+.ranking-muapd-compact .leaderboard-avatar-fallback {
+    font-size: 0.85rem !important;
+}
+
+.ranking-muapd-compact .leaderboard-name {
+    font-size: 1.15rem !important;
+}
+
+.ranking-muapd-compact .leaderboard-subdetails {
+    font-size: 0.85rem !important;
+    margin-top: 1px !important;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.ranking-muapd-compact .leaderboard-score {
+    padding: 4px 10px !important;
+    font-size: 1.2rem !important;
+    border-radius: 8px !important;
+}
+
+/* Badge de Feito! */
+.feito-badge {
+    background: rgba(0, 210, 200, 0.15) !important;
+    color: var(--w1-teal) !important;
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border: 1px solid rgba(0, 210, 200, 0.3) !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+    margin-left: 8px !important;
+    vertical-align: middle !important;
+    text-shadow: none !important;
+}
+
+/* Score para consultores zerados */
+.leaderboard-score.zero-score {
+    background: rgba(255, 255, 255, 0.02) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+}
+
 
