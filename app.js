@@ -27,13 +27,16 @@ const CONFIG_FOTOS = {
     "Samuel Enrique Ivanaskas Duarte": "fotos/samuel_enrique_ivanaskas_duarte.jpeg",
     "Tarek Shamseddine Jarrah Mourad": "fotos/tarek_mourad.jpeg",
     "Tarek Mourad": "fotos/tarek_mourad.jpeg",
-    "Victor Guilherme de Sousa Santos": "fotos/victor_guilherme_de_sousa_santos.jpeg"
+    "Victor Guilherme de Sousa Santos": "fotos/victor_guilherme_de_sousa_santos.jpeg",
+    "Bryan Martins": "fotos/bryan_santos.jpg",
+    "Bryan Martins dos Santos": "fotos/bryan_santos.jpg"
 };
 
-// Lista Mestre com todos os 26 consultores do Office Goiânia (ativos, correspondentes às fotos)
+// Lista Mestre com todos os 27 consultores do Office Goiânia (ativos, correspondentes às fotos)
 const TODOS_CONSULTORES = [
     "André Giometti Rapcham",
     "André Vinícius Santos e Silva",
+    "Bryan Martins",
     "Daniela Calanca",
     "Durval Bernardes de Sousa Neto",
     "Eduarda Cabral",
@@ -76,7 +79,8 @@ const CARGOS_MAPEADOS = {
     "Jason Guilhardi Rosa e Silva": "FA II",
     "André Vinícius Santos e Silva": "FA II",
     "Samuel Enrique Ivanaskas Duarte": "FA I",
-    "Gustavo Gomes de Alencar Cruz": "FA I"
+    "Gustavo Gomes de Alencar Cruz": "FA I",
+    "Bryan Martins": "FA III"
 };
 
 // Função para registrar dinamicamente cargos a partir dos dados dos CSVs
@@ -103,7 +107,8 @@ function normalizarNome(nome) {
         .replace(/Saymon de Gouveia Pereira dos Santos/g, "Saymon Gouveia")
         .replace(/Saymon Santos/g, "Saymon Gouveia")
         .replace(/Eduardo Verano Chaves Soares/g, "Eduardo Verano")
-        .replace(/Eduardo Soares/g, "Eduardo Verano");
+        .replace(/Eduardo Soares/g, "Eduardo Verano")
+        .replace(/Bryan Martins dos Santos/g, "Bryan Martins");
 }
 
 // Gera a URL da foto do consultor com base no seu nome completo
@@ -479,7 +484,7 @@ function renderizarRankingEMaratona(data, historico) {
     const totalEl = document.getElementById('ranking-total-aa');
     if (totalEl) totalEl.textContent = totalAA;
 
-    // Constrói a lista com todos os 26 consultores
+    // Constrói a lista com todos os 27 consultores
     const listaCompleta = TODOS_CONSULTORES.map(nomeConsultor => {
         const nomeNorm = normalizarNome(nomeConsultor);
         const aaVal = mapAA[nomeNorm] || 0;
