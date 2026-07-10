@@ -28,6 +28,45 @@ html, body {
     flex-direction: column;
     padding: 1vw 2vw 2vw 2vw; /* Reduzido padding superior para a barra */
     position: relative;
+    overflow: hidden;
+}
+
+/* Efeito de Luzes Ambientais de Fundo */
+.ambient-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.16;
+}
+
+.glow-1 {
+    width: 45vw;
+    height: 45vw;
+    background: radial-gradient(circle, var(--w1-teal) 0%, transparent 70%);
+    top: -15vw;
+    left: -15vw;
+    animation: floatGlow1 25s infinite alternate ease-in-out;
+}
+
+.glow-2 {
+    width: 35vw;
+    height: 35vw;
+    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+    bottom: -10vw;
+    right: -10vw;
+    animation: floatGlow2 20s infinite alternate ease-in-out;
+}
+
+@keyframes floatGlow1 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(6vw, 4vw) scale(1.1); }
+}
+
+@keyframes floatGlow2 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-4vw, -3vw) scale(1.05); }
 }
 
 /* Barra de Progresso Superior (Opcional/Oculta) */
@@ -104,6 +143,8 @@ html, body {
 }
 
 .dashboard-header {
+    position: relative;
+    z-index: 1;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -236,6 +277,7 @@ h1 { font-size: 2.2rem !important; }
 /* Layout de Colunas e Alternância */
 .dashboard-layout {
     position: relative;
+    z-index: 1;
     flex: 1;
     width: 100%;
     margin-top: 1vh;
@@ -600,38 +642,41 @@ h1 { font-size: 2.2rem !important; }
     flex-shrink: 0;
 }
 
-/* Podium Rank Styling */
+/* Podium Rank Styling - Neon & Glow */
 .leaderboard-card.rank-1 {
-    border: 2px solid #FFD700;
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.02) 0%, rgba(255, 215, 0, 0.08) 100%);
-    box-shadow: 0 6px 16px rgba(255, 215, 0, 0.15);
+    border: 1.5px solid rgba(255, 215, 0, 0.35);
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.03) 0%, rgba(255, 215, 0, 0.08) 100%);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.12), inset 0 0 10px rgba(255, 215, 0, 0.03);
 }
 .leaderboard-card.rank-1 .leaderboard-rank {
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
     color: #FFFFFF;
     font-size: 1.7rem;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
 }
 
 .leaderboard-card.rank-2 {
-    border: 2px solid #C0C0C0;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.06) 100%);
-    box-shadow: 0 6px 16px rgba(192, 192, 192, 0.12);
+    border: 1.5px solid rgba(192, 192, 192, 0.35);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.06) 100%);
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.02);
 }
 .leaderboard-card.rank-2 .leaderboard-rank {
     background: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%);
     color: #FFFFFF;
     font-size: 1.7rem;
+    box-shadow: 0 0 8px rgba(192, 192, 192, 0.3);
 }
 
 .leaderboard-card.rank-3 {
-    border: 2px solid #CD7F32;
-    background: linear-gradient(90deg, rgba(205, 127, 50, 0.01) 0%, rgba(205, 127, 50, 0.06) 100%);
-    box-shadow: 0 6px 16px rgba(205, 127, 50, 0.1);
+    border: 1.5px solid rgba(251, 146, 60, 0.35);
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.02) 0%, rgba(205, 127, 50, 0.06) 100%);
+    box-shadow: 0 0 15px rgba(205, 127, 50, 0.08), inset 0 0 10px rgba(205, 127, 50, 0.02);
 }
 .leaderboard-card.rank-3 .leaderboard-rank {
     background: linear-gradient(135deg, #FDBA74 0%, #C2410C 100%);
     color: #FFFFFF;
     font-size: 1.7rem;
+    box-shadow: 0 0 8px rgba(205, 127, 50, 0.3);
 }
 
 .leaderboard-card.rank-other .leaderboard-rank {
@@ -1305,6 +1350,7 @@ h1 { font-size: 2.2rem !important; }
     display: flex;
     flex-direction: column;
     min-width: 0;
+    flex-grow: 1;
 }
 
 .maratona-name {
@@ -1314,19 +1360,14 @@ h1 { font-size: 2.2rem !important; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.maratona-status-icon {
-    margin-left: auto;
-    font-size: 1.1rem;
     display: flex;
     align-items: center;
-    justify-content: center;
 }
 
-.maratona-status-icon.done {
-    color: var(--w1-teal);
-    filter: drop-shadow(0 0 4px rgba(0, 210, 200, 0.5));
+.maratona-fire-badge {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 0.95rem;
     animation: flame-flicker 1.5s infinite alternate;
 }
 
@@ -1335,8 +1376,34 @@ h1 { font-size: 2.2rem !important; }
     100% { transform: scale(1.1) rotate(2deg); }
 }
 
-.maratona-status-icon.pending {
-    color: rgba(255, 255, 255, 0.2);
+.maratona-grid {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    align-items: center;
+}
+
+.maratona-day {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.maratona-day.done {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #10b981;
+    text-shadow: 0 0 3px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.15);
 }
 
 /* Botão de Sincronização Manual */

@@ -175,6 +175,72 @@ let timeLeft = SWITCH_TIME;
 let checkStatusInterval = null;
 let isWorkflowRunning = false;
 
+// Estado global para controlar as celebrações das metas (evitar loops de confete)
+const CELEBRACOES_REALIZADAS = {
+    apvalor: false,
+    pp: false,
+    rec: false,
+    'apvalor-semana': false,
+    'pp-semana': false
+};
+
+// Retorna a data YYYY-MM-DD da segunda-feira da semana corrente
+function obterSegundaFeiraDestaSemana() {
+    const hoje = new Date();
+    const diaSemana = hoje.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+    const diff = hoje.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+    const segunda = new Date(hoje.setDate(diff));
+    
+    const ano = segunda.getFullYear();
+    const mes = String(segunda.getMonth() + 1).padStart(2, '0');
+    const dia = String(segunda.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+}
+
+// Dispara efeito visual de confetes virtuais
+function dispararConfetesCelebracao(metaNome) {
+    if (typeof confetti === 'undefined') {
+        console.warn('Canvas Confetti não está carregado.');
+        return;
+    }
+
+    const nomesMetas = {
+        apvalor: 'Meta AP do Mês',
+        pp: 'Meta PP do Mês',
+        rec: 'Meta de Recomendações',
+        'apvalor-semana': 'Meta AP da Semana',
+        'pp-semana': 'Meta PP da Semana'
+    };
+    const metaAmigavel = nomesMetas[metaNome] || 'Meta Batida';
+    console.log(`[CONQUISTA] Celebrando meta batida: ${metaAmigavel}!`);
+
+    // Explosão central
+    confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.65 }
+    });
+
+    // Explosões laterais em cascata
+    setTimeout(() => {
+        confetti({
+            particleCount: 80,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.75 }
+        });
+    }, 250);
+
+    setTimeout(() => {
+        confetti({
+            particleCount: 80,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.75 }
+        });
+    }, 450);
+}
+
 function iniciarCicloExibicao() {
     const progressBar = document.getElementById('progress-bar');
     const bgTimerBar = document.getElementById('bg-timer-bar');
@@ -387,9 +453,13 @@ function renderizarTabela(data) {
         const metaFormatada = metric === 'apvalor' ? formatarNumero(meta, true) : formatarNumero(meta);
         textEl.innerHTML = `<strong>${percent.toFixed(1)}%</strong> da meta (${metaFormatada})`;
 
-        // Muda cor caso atinja a meta
+        // Muda cor caso atinja a meta e dispara confetes
         if (percent >= 100) {
             bgEl.style.backgroundColor = '#10b981'; // Verde sucesso
+            if (!CELEBRACOES_REALIZADAS[metric]) {
+                CELEBRACOES_REALIZADAS[metric] = true;
+                dispararConfetesCelebracao(metric);
+            }
         }
     };
 
@@ -461,6 +531,11 @@ function renderizarTabelaSemana(data) {
 
         if (percent >= 100) {
             bgEl.style.backgroundColor = '#10b981'; // Verde sucesso
+            const celebracaoId = `${metric}-semana`;
+            if (!CELEBRACOES_REALIZADAS[celebracaoId]) {
+                CELEBRACOES_REALIZADAS[celebracaoId] = true;
+                dispararConfetesCelebracao(celebracaoId);
+            }
         }
     };
 
@@ -621,36 +696,57 @@ function renderizarRankingEMaratona(data, historico) {
     // ==========================================
     // RENDERIZAÇÃO DA MARATONA MUAPD (DIREITA)
     // ==========================================
-    const chavesOrdenadas = Object.keys(historico || {})
-        .filter(k => k >= "2026-07-06")
-        .sort();
-
-    let diasPassados = [];
-    let diaAtual = null;
-
-    if (chavesOrdenadas.length > 0) {
-        // O último dia no histórico é o dia atual (hoje)
-        diaAtual = chavesOrdenadas[chavesOrdenadas.length - 1];
-        diasPassados = chavesOrdenadas.slice(0, chavesOrdenadas.length - 1);
+    const segundaStr = obterSegundaFeiraDestaSemana();
+    
+    // Obtém datas da semana de segunda a sexta
+    const datasSemana = [];
+    for (let i = 0; i < 5; i++) {
+        const d = new Date(segundaStr + 'T00:00:00');
+        d.setDate(d.getDate() + i);
+        const ano = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        const dia = String(d.getDate()).padStart(2, '0');
+        datasSemana.push(`${ano}-${mes}-${dia}`);
     }
 
-    // Calcula os participantes da maratona (devem ter MUAPD > 0 em todos os dias úteis registrados no histórico, inclusive hoje)
-    const participantesMaratona = TODOS_CONSULTORES.filter(nomeConsultor => {
+    // Filtra as chaves de histórico que pertencem à semana corrente
+    const chavesOrdenadas = Object.keys(historico || {})
+        .filter(k => k >= segundaStr && k <= datasSemana[4])
+        .sort();
+
+    // Calcula os participantes da maratona e sua consistência detalhada
+    const participantesMaratona = [];
+    
+    TODOS_CONSULTORES.forEach(nomeConsultor => {
         const nomeNorm = normalizarNome(nomeConsultor);
-        
-        // Verifica se esteve ativo em todos os dias (incluindo o dia atual)
-        for (const dia of chavesOrdenadas) {
+        const diasConcluidos = [];
+        let totalConcluido = 0;
+
+        datasSemana.forEach(dia => {
             const ativosNoDia = (historico[dia] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
-            if (!ativosNoDia.includes(nomeNorm)) {
-                return false; // Falhou em algum dia ou ainda não marcou hoje
+            const fezNoDia = ativosNoDia.includes(nomeNorm);
+            diasConcluidos.push(fezNoDia);
+            if (fezNoDia) {
+                totalConcluido++;
             }
+        });
+
+        // Só exibe quem marcou pelo menos 1 dia nesta semana
+        if (totalConcluido > 0) {
+            participantesMaratona.push({
+                nomeCompleto: nomeConsultor,
+                diasConcluidos: diasConcluidos,
+                totalConcluido: totalConcluido
+            });
         }
-        return true;
     });
 
-    // Ordenação da Maratona: ordem alfabética do nome de exibição
+    // Ordenação da Maratona: decrescente por totalConcluido, e depois ordem alfabética do nome de exibição
     participantesMaratona.sort((a, b) => {
-        return obterNomeExibicao(a).localeCompare(obterNomeExibicao(b), 'pt-BR');
+        if (b.totalConcluido !== a.totalConcluido) {
+            return b.totalConcluido - a.totalConcluido;
+        }
+        return obterNomeExibicao(a.nomeCompleto).localeCompare(obterNomeExibicao(b.nomeCompleto), 'pt-BR');
     });
 
     const maratonaListContainer = document.getElementById('maratona-list');
@@ -659,22 +755,35 @@ function renderizarRankingEMaratona(data, historico) {
         if (participantesMaratona.length === 0) {
             maratonaListContainer.innerHTML = '<div class="loading-text" style="color: rgba(255,255,255,0.3); padding-top: 5vh; font-size: 1rem; text-align: center;">Ninguém com consistência hoje</div>';
         } else {
-            participantesMaratona.forEach(nomeConsultor => {
+            participantesMaratona.forEach(part => {
                 const card = document.createElement('div');
-                const nomeExibicao = obterNomeExibicao(nomeConsultor);
-                const iniciais = obterIniciais(nomeConsultor);
+                const nomeExibicao = obterNomeExibicao(part.nomeCompleto);
+                const iniciais = obterIniciais(part.nomeCompleto);
                 
-                card.className = 'maratona-card completed';
+                // Determina se o consultor completou TODOS os dias registrados até o momento na semana
+                const eConsistenteTotal = chavesOrdenadas.length > 0 && part.totalConcluido === chavesOrdenadas.length;
+                const fireBadge = eConsistenteTotal ? '<span class="maratona-fire-badge" title="Consistência total esta semana!">🔥</span>' : '';
+                
+                const diasLabels = ['S', 'T', 'Q', 'Q', 'S'];
+                let diasHtml = '';
+                part.diasConcluidos.forEach((concluido, i) => {
+                    const statusClass = concluido ? 'done' : '';
+                    diasHtml += `<div class="maratona-day ${statusClass}" title="${diasLabels[i]}">${diasLabels[i]}</div>`;
+                });
+
+                card.className = `maratona-card ${eConsistenteTotal ? 'completed' : ''}`;
                 
                 card.innerHTML = `
                     <div class="maratona-avatar-container">
-                        <div class="maratona-avatar-fallback" style="background: ${obterCorGradiente(nomeConsultor)}">${iniciais}</div>
-                        <img src="${obterFotoUrl(nomeConsultor)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="maratona-avatar-img" style="display: none;" alt="${nomeExibicao}">
+                        <div class="maratona-avatar-fallback" style="background: ${obterCorGradiente(part.nomeCompleto)}">${iniciais}</div>
+                        <img src="${obterFotoUrl(part.nomeCompleto)}" onload="this.style.display='block';" onerror="this.style.display='none';" class="maratona-avatar-img" style="display: none;" alt="${nomeExibicao}">
                     </div>
                     <div class="maratona-details">
-                        <span class="maratona-name">${nomeExibicao}</span>
+                        <span class="maratona-name">${nomeExibicao} ${fireBadge}</span>
+                        <div class="maratona-grid">
+                            ${diasHtml}
+                        </div>
                     </div>
-                    <span class="maratona-status-icon done" title="Consistente!">🔥</span>
                 `;
                 maratonaListContainer.appendChild(card);
             });
