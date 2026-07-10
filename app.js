@@ -194,7 +194,7 @@ function iniciarCicloExibicao() {
         const percent = ((SWITCH_TIME - timeLeft) / SWITCH_TIME) * 100;
         if (progressBar) progressBar.style.width = `${percent}%`;
 
-        // Atualiza o contorno do timer no fundo (circular)
+        // Atualiza o contorno do timer no cabeçalho (circular)
         if (bgTimerBar) {
             const offset = 289 - (percent / 100) * 289;
             bgTimerBar.style.strokeDashoffset = offset;
