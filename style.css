@@ -315,11 +315,25 @@ h1 { font-size: 2.2rem !important; }
     }
 }
 
+@keyframes fadeInUpCard3D {
+    from {
+        opacity: 0;
+        transform: translateY(15px) perspective(800px) rotateX(12deg) rotateY(-12deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) perspective(800px) rotateX(12deg) rotateY(-12deg);
+    }
+}
+
 .view-section.active .leaderboard-card,
 .view-section.active .maratona-card,
-.view-section.active .result-card,
 .view-section.active .goal-box {
     animation: fadeInUpCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.view-section.active .result-card {
+    animation: fadeInUpCard3D 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Atrasos em cascata para os quadros de metas do topo */
@@ -587,9 +601,45 @@ h1 { font-size: 2.2rem !important; }
     align-items: center;
     justify-content: center;
     gap: 0.5vh;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-    border: 1.5px solid rgba(255, 255, 255, 0.08);
-    transition: transform 0.2s ease;
+    color: var(--card-color);
+    
+    /* Moldura com luz superior/esquerda (efeito de relevo) */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.18);
+    
+    /* Transformações 3D e Extrusão lateral/inferior */
+    transform-style: preserve-3d;
+    transform: perspective(800px) rotateX(12deg) rotateY(-12deg);
+    
+    box-shadow: 
+        1px 1px 0 var(--card-color-dark),
+        2px 2px 0 var(--card-color-dark),
+        3px 3px 0 var(--card-color-dark),
+        4px 4px 0 var(--card-color-dark),
+        5px 5px 0 var(--card-color-dark),
+        6px 6px 0 var(--card-color-dark),
+        10px 10px 20px rgba(0, 0, 0, 0.6);
+        
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
+}
+
+/* Hover: Efeito de elevação da caixa */
+.result-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: perspective(800px) rotateX(12deg) rotateY(-12deg) translate3d(-3px, -3px, 15px);
+    box-shadow: 
+        1px 1px 0 var(--card-color-dark),
+        2px 2px 0 var(--card-color-dark),
+        3px 3px 0 var(--card-color-dark),
+        4px 4px 0 var(--card-color-dark),
+        5px 5px 0 var(--card-color-dark),
+        6px 6px 0 var(--card-color-dark),
+        7px 7px 0 var(--card-color-dark),
+        8px 8px 0 var(--card-color-dark),
+        9px 9px 0 var(--card-color-dark),
+        10px 10px 0 var(--card-color-dark),
+        15px 15px 25px rgba(0, 0, 0, 0.5);
 }
 
 .result-label {
@@ -606,6 +656,7 @@ h1 { font-size: 2.2rem !important; }
     line-height: 1;
     letter-spacing: -1px;
     color: #FFFFFF;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 .result-sublabel {
@@ -618,17 +669,17 @@ h1 { font-size: 2.2rem !important; }
     text-align: center;
 }
 
-/* Cores individuais por métrica (Modo Escuro Translúcido com Neon Borders) */
-.result-aa     { background: rgba(0, 210, 200, 0.05); color: #00D2C8; border-color: rgba(0, 210, 200, 0.3); }
-.result-af     { background: rgba(59, 130, 246, 0.05); color: #3B82F6; border-color: rgba(59, 130, 246, 0.3); }
-.result-ap     { background: rgba(139, 92, 246, 0.05); color: #8B5CF6; border-color: rgba(139, 92, 246, 0.3); }
-.result-apvalor{ background: rgba(245, 158, 11, 0.05); color: #F59E0B; border-color: rgba(245, 158, 11, 0.3); }
-.result-rec    { background: rgba(236, 72, 153, 0.05); color: #EC4899; border-color: rgba(236, 72, 153, 0.3); }
-.result-pp     { background: rgba(168, 85, 247, 0.05); color: #A855F7; border-color: rgba(168, 85, 247, 0.3); }
+/* Cores individuais por métrica (Modo Escuro Translúcido com Neon Borders e Fundos Correspondentes) */
+.result-aa     { --card-color: #00D2C8; --card-color-dark: #007c76; background: linear-gradient(135deg, rgba(8, 38, 48, 0.95) 0%, rgba(4, 20, 26, 0.95) 100%); border-color: rgba(0, 210, 200, 0.25); }
+.result-af     { --card-color: #3B82F6; --card-color-dark: #1e40af; background: linear-gradient(135deg, rgba(10, 25, 48, 0.95) 0%, rgba(5, 12, 26, 0.95) 100%); border-color: rgba(59, 130, 246, 0.25); }
+.result-ap     { --card-color: #8B5CF6; --card-color-dark: #5b21b6; background: linear-gradient(135deg, rgba(20, 15, 48, 0.95) 0%, rgba(10, 7, 26, 0.95) 100%); border-color: rgba(139, 92, 246, 0.25); }
+.result-apvalor{ --card-color: #F59E0B; --card-color-dark: #92400e; background: linear-gradient(135deg, rgba(30, 22, 10, 0.95) 0%, rgba(15, 11, 5, 0.95) 100%); border-color: rgba(245, 158, 11, 0.25); }
+.result-rec    { --card-color: #EC4899; --card-color-dark: #9d174d; background: linear-gradient(135deg, rgba(30, 15, 35, 0.95) 0%, rgba(15, 7, 18, 0.95) 100%); border-color: rgba(236, 72, 153, 0.25); }
+.result-pp     { --card-color: #A855F7; --card-color-dark: #6b21a8; background: linear-gradient(135deg, rgba(22, 15, 40, 0.95) 0%, rgba(11, 7, 20, 0.95) 100%); border-color: rgba(168, 85, 247, 0.25); }
 
 /* Cores semanais (tons um pouco mais marcantes ou similares) */
-.result-apvalor-semana { background: rgba(234, 179, 8, 0.05); color: #EAB308; border-color: rgba(234, 179, 8, 0.3); }
-.result-pp-semana      { background: rgba(147, 51, 234, 0.05); color: #9333EA; border-color: rgba(147, 51, 234, 0.3); }
+.result-apvalor-semana { --card-color: #EAB308; --card-color-dark: #854d0e; background: linear-gradient(135deg, rgba(28, 24, 8, 0.95) 0%, rgba(14, 12, 4, 0.95) 100%); border-color: rgba(234, 179, 8, 0.25); }
+.result-pp-semana      { --card-color: #9333EA; --card-color-dark: #581c87; background: linear-gradient(135deg, rgba(18, 12, 35, 0.95) 0%, rgba(9, 6, 18, 0.95) 100%); border-color: rgba(147, 51, 234, 0.25); }
 
 /* Barras de Progresso nos Quadros de AP e PP */
 .card-progress-wrapper {
@@ -1056,6 +1107,8 @@ h1 { font-size: 2.2rem !important; }
     .result-card {
         padding: 15px 10px !important;
         min-height: 120px;
+        transform: none !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
     }
 
     .result-label {
