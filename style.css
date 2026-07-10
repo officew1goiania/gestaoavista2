@@ -30,7 +30,7 @@ html, body {
     position: relative;
 }
 
-/* Barra de Progresso Superior */
+/* Barra de Progresso Superior (Opcional/Oculta) */
 .progress-container {
     position: absolute;
     top: 0;
@@ -39,6 +39,7 @@ html, body {
     height: 6px;
     background: rgba(255, 255, 255, 0.05);
     z-index: 100;
+    display: none; /* Oculta a barra superior para dar lugar ao temporizador circular */
 }
 
 .progress-bar {
@@ -46,6 +47,56 @@ html, body {
     width: 0%;
     background: var(--w1-teal);
     transition: width 0.1s linear;
+}
+
+/* Logo e Temporizador Circular ao Fundo */
+.bg-timer-container {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32vw;
+    height: 32vw;
+    max-width: 400px;
+    max-height: 400px;
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bg-timer-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); /* Inicia o contorno no topo (12 horas) */
+}
+
+.bg-timer-track {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.015);
+    stroke-width: 1;
+}
+
+.bg-timer-bar {
+    fill: none;
+    stroke: var(--w1-teal);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-dasharray: 289; /* 2 * PI * 46 (raio) */
+    stroke-dashoffset: 289;
+    opacity: 0.12; /* Faint outline so it's not distracting */
+    transition: stroke-dashoffset 0.1s linear;
+}
+
+.bg-timer-logo {
+    width: 50%;
+    height: 50%;
+    object-fit: contain;
+    opacity: 0.035; /* Faint watermark logo */
 }
 
 .dashboard-header {
@@ -807,8 +858,9 @@ h1 { font-size: 2.2rem !important; }
         padding: 15px 10px 30px 10px !important;
     }
 
-    /* Ocultar barra de progresso do timer */
-    .progress-container {
+    /* Ocultar barra de progresso e temporizador de fundo */
+    .progress-container,
+    .bg-timer-container {
         display: none !important;
     }
 

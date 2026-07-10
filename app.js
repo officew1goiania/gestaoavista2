@@ -177,6 +177,7 @@ let isWorkflowRunning = false;
 
 function iniciarCicloExibicao() {
     const progressBar = document.getElementById('progress-bar');
+    const bgTimerBar = document.getElementById('bg-timer-bar');
     const viewResults = document.getElementById('view-results');
     const viewRanking = document.getElementById('view-ranking');
     const viewRankingAP = document.getElementById('view-ranking-ap');
@@ -192,6 +193,12 @@ function iniciarCicloExibicao() {
         // Atualiza a barra de progresso
         const percent = ((SWITCH_TIME - timeLeft) / SWITCH_TIME) * 100;
         if (progressBar) progressBar.style.width = `${percent}%`;
+
+        // Atualiza o contorno do timer no fundo (circular)
+        if (bgTimerBar) {
+            const offset = 289 - (percent / 100) * 289;
+            bgTimerBar.style.strokeDashoffset = offset;
+        }
     }, 100);
 }
 

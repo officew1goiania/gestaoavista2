@@ -15,9 +15,13 @@
 </head>
 <body class="dark-theme">
     <div class="tv-dashboard">
-        <!-- Barra de Progresso Fina -->
-        <div class="progress-container">
-            <div id="progress-bar" class="progress-bar"></div>
+        <!-- Logo e Contorno Temporizador ao Fundo -->
+        <div class="bg-timer-container">
+            <svg class="bg-timer-svg" viewBox="0 0 100 100">
+                <circle class="bg-timer-track" cx="50" cy="50" r="46" />
+                <circle id="bg-timer-bar" class="bg-timer-bar" cx="50" cy="50" r="46" />
+            </svg>
+            <img src="logo.svg" alt="Logo W1" class="bg-timer-logo">
         </div>
 
         <header class="dashboard-header">
