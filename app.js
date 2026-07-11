@@ -29,7 +29,24 @@ const CONFIG_FOTOS = {
     "Tarek Mourad": "fotos/tarek_mourad.jpeg",
     "Victor Guilherme de Sousa Santos": "fotos/victor_guilherme_de_sousa_santos.jpeg",
     "Bryan Martins": "fotos/bryan_santos.jpg",
-    "Bryan Martins dos Santos": "fotos/bryan_santos.jpg"
+    "Bryan Martins dos Santos": "fotos/bryan_santos.jpg",
+    "André Vinícius Santos e Silva": "fotos/andre_vinicius_santos_e_silva.jpg",
+    "André Vinícius": "fotos/andre_vinicius_santos_e_silva.jpg",
+    "Gihad Nasih El Azanki": "fotos/gihad_nasih_el_azanki.jpg",
+    "Gihad Nasih": "fotos/gihad_nasih_el_azanki.jpg",
+    "Jason Guilhardi Rosa e Silva": "fotos/jason_guilhardi_rosa_e_silva.jpg",
+    "Jason Guilhardi": "fotos/jason_guilhardi_rosa_e_silva.jpg",
+    "João Victor Lima de Sousa": "fotos/joao_victor_lima_de_sousa.jpg",
+    "João Victor": "fotos/joao_victor_lima_de_sousa.jpg",
+    "Matheus Garcia de Brito Itagiba": "fotos/matheus_garcia_de_brito_itagiba.jpg",
+    "Matheus Garcia": "fotos/matheus_garcia_de_brito_itagiba.jpg",
+    "Matheus Itagiba": "fotos/matheus_garcia_de_brito_itagiba.jpg",
+    "Murillo Caixeta": "fotos/murillo_caixeta.jpg",
+    "Paulo Henrique Graciano": "fotos/paulo_henrique_graciano.jpg",
+    "Paulo Henrique": "fotos/paulo_henrique_graciano.jpg",
+    "Rafael Cabral Albernaz Rocha": "fotos/rafael_cabral_albernaz_rocha.jpg",
+    "Rafael Cabral": "fotos/rafael_cabral_albernaz_rocha.jpg",
+    "Walasson Sousa": "fotos/walasson_sousa.jpg"
 };
 
 // Lista Mestre com todos os 27 consultores do Office Goiânia (ativos, correspondentes às fotos)
@@ -593,11 +610,13 @@ function renderizarRankingEMaratona(data, historico) {
         return nomeA.localeCompare(nomeB, 'pt-BR');
     });
 
-    // Divide em 2 colunas para caber a maratona à direita
+    // Divide em 3 colunas para caber a maratona à direita
     const totalItens = listaCompleta.length;
-    const colunaTamanho = Math.ceil(totalItens / 2);
+    const colunas = 3;
+    const colunaTamanho = Math.ceil(totalItens / colunas);
     const col1Data = listaCompleta.slice(0, colunaTamanho);
-    const col2Data = listaCompleta.slice(colunaTamanho);
+    const col2Data = listaCompleta.slice(colunaTamanho, colunaTamanho * 2);
+    const col3Data = listaCompleta.slice(colunaTamanho * 2);
 
     function criarListaLeaderboard(items, startOffset) {
         const listContainer = document.createElement('div');
@@ -691,6 +710,9 @@ function renderizarRankingEMaratona(data, historico) {
     grid.appendChild(criarListaLeaderboard(col1Data, 0));
     if (col2Data.length > 0) {
         grid.appendChild(criarListaLeaderboard(col2Data, colunaTamanho));
+    }
+    if (col3Data.length > 0) {
+        grid.appendChild(criarListaLeaderboard(col3Data, colunaTamanho * 2));
     }
 
     // ==========================================

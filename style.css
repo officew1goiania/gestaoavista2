@@ -315,25 +315,11 @@ h1 { font-size: 2.2rem !important; }
     }
 }
 
-@keyframes fadeInUpCard3D {
-    from {
-        opacity: 0;
-        transform: translateY(15px) perspective(800px) rotateX(12deg) rotateY(-12deg);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) perspective(800px) rotateX(12deg) rotateY(-12deg);
-    }
-}
-
 .view-section.active .leaderboard-card,
 .view-section.active .maratona-card,
+.view-section.active .result-card,
 .view-section.active .goal-box {
     animation: fadeInUpCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.view-section.active .result-card {
-    animation: fadeInUpCard3D 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Atrasos em cascata para os quadros de metas do topo */
@@ -608,10 +594,8 @@ h1 { font-size: 2.2rem !important; }
     border-top: 1.5px solid rgba(255, 255, 255, 0.18);
     border-left: 1.5px solid rgba(255, 255, 255, 0.18);
     
-    /* Transformações 3D e Extrusão lateral/inferior */
-    transform-style: preserve-3d;
-    transform: perspective(800px) rotateX(12deg) rotateY(-12deg);
-    
+    /* Caixa 3D (Extrusão lateral/inferior sem inclinação) */
+    transform: translate(0, 0);
     box-shadow: 
         1px 1px 0 var(--card-color-dark),
         2px 2px 0 var(--card-color-dark),
@@ -619,15 +603,15 @@ h1 { font-size: 2.2rem !important; }
         4px 4px 0 var(--card-color-dark),
         5px 5px 0 var(--card-color-dark),
         6px 6px 0 var(--card-color-dark),
-        10px 10px 20px rgba(0, 0, 0, 0.6);
+        0px 10px 20px rgba(0, 0, 0, 0.5);
         
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
 }
 
-/* Hover: Efeito de elevação da caixa */
+/* Hover: Efeito de elevação da caixa retilínea */
 .result-card:hover {
     border-color: rgba(255, 255, 255, 0.15);
-    transform: perspective(800px) rotateX(12deg) rotateY(-12deg) translate3d(-3px, -3px, 15px);
+    transform: translate(-4px, -4px);
     box-shadow: 
         1px 1px 0 var(--card-color-dark),
         2px 2px 0 var(--card-color-dark),
@@ -639,7 +623,7 @@ h1 { font-size: 2.2rem !important; }
         8px 8px 0 var(--card-color-dark),
         9px 9px 0 var(--card-color-dark),
         10px 10px 0 var(--card-color-dark),
-        15px 15px 25px rgba(0, 0, 0, 0.5);
+        4px 14px 24px rgba(0, 0, 0, 0.6);
 }
 
 .result-label {
@@ -1230,49 +1214,57 @@ h1 { font-size: 2.2rem !important; }
 }
 
 /* Estilos compactos para caber todos os consultores na tela de MUAPD */
+.ranking-muapd-compact {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.6vw !important;
+}
+
 .ranking-muapd-compact .leaderboard-list {
-    gap: 0.6vh !important;
+    gap: 0.5vh !important;
 }
 
 .ranking-muapd-compact .leaderboard-card {
-    padding: 0.6vh 0.8vw !important;
-    border-radius: 12px !important;
+    padding: 0.5vh 0.6vw !important;
+    border-radius: 10px !important;
 }
 
 .ranking-muapd-compact .leaderboard-rank {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 1.1rem !important;
-    margin-right: 0.8vw !important;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.95rem !important;
+    margin-right: 0.5vw !important;
 }
 
 .ranking-muapd-compact .leaderboard-avatar-container {
-    width: 36px !important;
-    height: 36px !important;
-    margin-right: 0.8vw !important;
+    width: 30px !important;
+    height: 30px !important;
+    margin-right: 0.5vw !important;
 }
 
 .ranking-muapd-compact .leaderboard-avatar-fallback {
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
 }
 
 .ranking-muapd-compact .leaderboard-name {
-    font-size: 1.15rem !important;
+    font-size: 1.05rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .ranking-muapd-compact .leaderboard-subdetails {
-    font-size: 0.85rem !important;
+    font-size: 0.75rem !important;
     margin-top: 1px !important;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 3px;
 }
 
 .ranking-muapd-compact .leaderboard-score {
-    padding: 4px 10px !important;
-    font-size: 1.2rem !important;
-    border-radius: 8px !important;
+    padding: 3px 6px !important;
+    font-size: 1.1rem !important;
+    border-radius: 6px !important;
 }
 
 /* Badge de Feito! */
