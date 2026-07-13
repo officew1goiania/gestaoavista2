@@ -1,4 +1,5 @@
 import os
+import base64
 from dotenv import load_dotenv
 # pyrefly: ignore [missing-import]
 from playwright.sync_api import sync_playwright
@@ -895,7 +896,16 @@ def executar_robo():
                 if os.path.exists(nome_arq_hist):
                     try:
                         with open(nome_arq_hist, "r", encoding="utf-8") as f:
-                            historico = json.load(f)
+                            conteudo = f.read().strip()
+                            if conteudo:
+                                try:
+                                    # Tenta decodificar de Base64
+                                    conteudo_decodificado = base64.b64decode(conteudo).decode('utf-8')
+                                    historico = json.loads(conteudo_decodificado)
+                                except Exception:
+                                    # Fallback se o arquivo ainda estiver em texto plano/JSON normal
+                                    f.seek(0)
+                                    historico = json.load(f)
                     except Exception as e:
                         print(f"Erro ao ler historico_muapd.json: {e}")
                 
@@ -906,7 +916,9 @@ def executar_robo():
                 historico[data_str] = consultores_ativos
                 
                 with open(nome_arq_hist, "w", encoding="utf-8") as f:
-                    json.dump(historico, f, indent=4, ensure_ascii=False)
+                    json_str = json.dumps(historico, indent=4, ensure_ascii=False)
+                    json_b64 = base64.b64encode(json_str.encode('utf-8')).decode('utf-8')
+                    f.write(json_b64)
                 print(f"Histórico de MUAPD atualizado para {data_str}: {len(consultores_ativos)} consultores ativos.")
             else:
                 print("Final de semana. Histórico de MUAPD não atualizado.")

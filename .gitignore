@@ -4,3 +4,9 @@ __pycache__
 .DS_Store
 debug.html
 playwright_context_*
+dados_extraidos.csv
+dados_semana.csv
+ranking_ap.csv
+ranking_pp.csv
+ranking_muapd.csv
+last_update.txt

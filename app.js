@@ -397,12 +397,15 @@ function carregarRankingCSV() {
             fetch('historico_muapd.json?t=' + new Date().getTime())
                 .then(response => {
                     if (!response.ok) throw new Error("Sem histórico");
-                    return response.json();
+                    return response.text();
                 })
-                .then(historico => {
+                .then(base64Text => {
+                    const decodedText = atob(base64Text.trim());
+                    const historico = JSON.parse(decodedText);
                     renderizarRankingEMaratona(results.data, historico);
                 })
-                .catch(() => {
+                .catch((err) => {
+                    console.warn("Aviso ao carregar histórico: pode estar vazio ou ainda sem formato Base64.", err);
                     // Fallback se falhar
                     renderizarRankingEMaratona(results.data, {});
                 });
