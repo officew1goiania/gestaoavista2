@@ -1690,4 +1690,55 @@ h1 { font-size: 2.2rem !important; }
     box-shadow: 0 4px 12px rgba(0, 210, 200, 0.25);
 }
 
+/* Estilos compactos para o Ranking de AP e PP (até 15 pessoas) */
+.ranking-ap-pp-compact {
+    gap: 0.6vw !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-list {
+    gap: 0.5vh !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-card {
+    padding: 0.6vh 0.8vw !important;
+    border-radius: 12px !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-rank {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 1.05rem !important;
+    margin-right: 0.8vw !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-avatar-container {
+    width: 34px !important;
+    height: 34px !important;
+    margin-right: 0.8vw !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-avatar-fallback {
+    font-size: 0.85rem !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-name {
+    font-size: 1.2rem !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-subdetails {
+    font-size: 0.85rem !important;
+    margin-top: 1px !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-score {
+    padding: 4px 10px !important;
+    font-size: 1.3rem !important;
+    border-radius: 8px !important;
+}
+
+.ranking-ap-pp-compact .leaderboard-score-subtext {
+    font-size: 0.8rem !important;
+}
+
+
 

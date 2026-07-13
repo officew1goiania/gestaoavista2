@@ -214,6 +214,89 @@ function obterSegundaFeiraDestaSemana() {
     return `${ano}-${mes}-${dia}`;
 }
 
+// Retorna a data YYYY-MM-DD no fuso de Brasília
+function obterDataBrasilia() {
+    const agora = new Date();
+    const formatter = new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+    return formatter.format(agora);
+}
+
+// Calcula a quantidade de dias úteis consecutivos marcados por um consultor (de trás para frente)
+function calcularStreakConsultor(nomeConsultor, historico, hojeStr) {
+    const nomeNorm = normalizarNome(nomeConsultor);
+    
+    // Filtra e ordena as chaves do histórico que são dias úteis (segunda a sexta)
+    const chavesOrdenadas = Object.keys(historico || {})
+        .filter(k => {
+            const d = new Date(k + 'T00:00:00');
+            const day = d.getDay();
+            return day >= 1 && day <= 5;
+        })
+        .sort();
+        
+    if (chavesOrdenadas.length === 0) {
+        return 0;
+    }
+    
+    const ultimoDiaHist = chavesOrdenadas[chavesOrdenadas.length - 1];
+    const hojeNoHist = chavesOrdenadas.includes(hojeStr);
+    
+    let startIndex = -1;
+    
+    if (hojeNoHist) {
+        // Se hoje está no histórico, verifica se o consultor marcou hoje
+        const ativosHoje = (historico[hojeStr] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
+        const marcouHoje = ativosHoje.includes(nomeNorm);
+        
+        if (marcouHoje) {
+            startIndex = chavesOrdenadas.indexOf(hojeStr);
+        } else {
+            // Se não marcou hoje, mas hoje é o dia atual, ele ainda pode marcar.
+            // Então verificamos se ele marcou no dia útil anterior registrado no histórico.
+            const idxHoje = chavesOrdenadas.indexOf(hojeStr);
+            if (idxHoje > 0) {
+                const diaAnterior = chavesOrdenadas[idxHoje - 1];
+                const ativosAnterior = (historico[diaAnterior] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
+                if (ativosAnterior.includes(nomeNorm)) {
+                    startIndex = idxHoje - 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        }
+    } else {
+        // Se hoje não está no histórico (ex: robô ainda não rodou hoje),
+        // começamos a contagem a partir do último dia registrado se ele marcou nesse dia.
+        const ativosUltimo = (historico[ultimoDiaHist] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
+        if (ativosUltimo.includes(nomeNorm)) {
+            startIndex = chavesOrdenadas.length - 1;
+        } else {
+            return 0;
+        }
+    }
+    
+    // Conta os dias consecutivos marcados a partir de startIndex para trás
+    let streak = 0;
+    for (let i = startIndex; i >= 0; i--) {
+        const dia = chavesOrdenadas[i];
+        const ativosNoDia = (historico[dia] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
+        if (ativosNoDia.includes(nomeNorm)) {
+            streak++;
+        } else {
+            break;
+        }
+    }
+    
+    return streak;
+}
+
 // Dispara efeito visual de confetes virtuais
 function dispararConfetesCelebracao(metaNome) {
     if (typeof confetti === 'undefined') {
@@ -719,9 +802,10 @@ function renderizarRankingEMaratona(data, historico) {
     }
 
     // ==========================================
-    // RENDERIZAÇÃO DA MARATONA MUAPD (DIREITA)
+    // RENDERIZAÇÃO DA CAMPANHA MUAPD CONSTÂNCIA (DIREITA)
     // ==========================================
     const segundaStr = obterSegundaFeiraDestaSemana();
+    const hojeStr = obterDataBrasilia();
     
     // Obtém datas da semana de segunda a sexta
     const datasSemana = [];
@@ -733,11 +817,6 @@ function renderizarRankingEMaratona(data, historico) {
         const dia = String(d.getDate()).padStart(2, '0');
         datasSemana.push(`${ano}-${mes}-${dia}`);
     }
-
-    // Filtra as chaves de histórico que pertencem à semana corrente
-    const chavesOrdenadas = Object.keys(historico || {})
-        .filter(k => k >= segundaStr && k <= datasSemana[4])
-        .sort();
 
     // Calcula os participantes da maratona e sua consistência detalhada
     const participantesMaratona = [];
@@ -756,20 +835,24 @@ function renderizarRankingEMaratona(data, historico) {
             }
         });
 
-        // Só exibe quem marcou pelo menos 1 dia nesta semana
-        if (totalConcluido > 0) {
+        // Calcula a constância (streak)
+        const streak = calcularStreakConsultor(nomeConsultor, historico, hojeStr);
+
+        // Só exibe quem está apto (streak > 0)
+        if (streak > 0) {
             participantesMaratona.push({
                 nomeCompleto: nomeConsultor,
                 diasConcluidos: diasConcluidos,
-                totalConcluido: totalConcluido
+                totalConcluido: totalConcluido,
+                streak: streak
             });
         }
     });
 
-    // Ordenação da Maratona: decrescente por totalConcluido, e depois ordem alfabética do nome de exibição
+    // Ordenação da Maratona: decrescente por streak (dias seguidos), e depois ordem alfabética do nome de exibição
     participantesMaratona.sort((a, b) => {
-        if (b.totalConcluido !== a.totalConcluido) {
-            return b.totalConcluido - a.totalConcluido;
+        if (b.streak !== a.streak) {
+            return b.streak - a.streak;
         }
         return obterNomeExibicao(a.nomeCompleto).localeCompare(obterNomeExibicao(b.nomeCompleto), 'pt-BR');
     });
@@ -778,16 +861,18 @@ function renderizarRankingEMaratona(data, historico) {
     if (maratonaListContainer) {
         maratonaListContainer.innerHTML = '';
         if (participantesMaratona.length === 0) {
-            maratonaListContainer.innerHTML = '<div class="loading-text" style="color: rgba(255,255,255,0.3); padding-top: 5vh; font-size: 1rem; text-align: center;">Ninguém com consistência hoje</div>';
+            maratonaListContainer.innerHTML = '<div class="loading-text" style="color: rgba(255,255,255,0.3); padding-top: 5vh; font-size: 1rem; text-align: center;">Ninguém com consistência ativa</div>';
         } else {
             participantesMaratona.forEach(part => {
                 const card = document.createElement('div');
-                const nomeExibicao = obterNomeExibicao(part.nomeCompleto);
+                const nomeExibicao = `(${part.streak}) ${obterNomeExibicao(part.nomeCompleto)}`;
                 const iniciais = obterIniciais(part.nomeCompleto);
                 
-                // Determina se o consultor completou TODOS os dias registrados até o momento na semana
-                const eConsistenteTotal = chavesOrdenadas.length > 0 && part.totalConcluido === chavesOrdenadas.length;
-                const fireBadge = eConsistenteTotal ? '<span class="maratona-fire-badge" title="Consistência total esta semana!">🔥</span>' : '';
+                // Determina se o consultor completou a meta de 30 dias
+                const eConsistenteTotal = part.streak >= 30;
+                const fireBadge = eConsistenteTotal 
+                    ? '<span class="maratona-fire-badge" style="animation: none;" title="Meta de 30 dias alcançada! 🎉">👑</span>' 
+                    : '<span class="maratona-fire-badge" title="Consistente!">🔥</span>';
                 
                 const diasLabels = ['S', 'T', 'Q', 'Q', 'S'];
                 let diasHtml = '';
@@ -843,13 +928,13 @@ function renderizarRankingAP(data) {
         return;
     }
 
-    // Pega apenas os 10 primeiros
-    const top10 = dadosFiltrados.slice(0, 10);
+    // Pega apenas os 15 primeiros
+    const top15 = dadosFiltrados.slice(0, 15);
 
     // Dividir os dados em 2 colunas
-    const meio = Math.ceil(top10.length / 2);
-    const col1Data = top10.slice(0, meio);
-    const col2Data = top10.slice(meio);
+    const meio = Math.ceil(top15.length / 2);
+    const col1Data = top15.slice(0, meio);
+    const col2Data = top15.slice(meio);
 
     function criarListaLeaderboardAP(items, startOffset) {
         const listContainer = document.createElement('div');
@@ -928,13 +1013,13 @@ function renderizarRankingPP(data) {
         return;
     }
 
-    // Pega os 10 primeiros (já ordenados e limpos no Python)
-    const top10 = dadosFiltrados.slice(0, 10);
+    // Pega os 15 primeiros (já ordenados e limpos no Python)
+    const top15 = dadosFiltrados.slice(0, 15);
 
     // Dividir os dados em 2 colunas
-    const meio = Math.ceil(top10.length / 2);
-    const col1Data = top10.slice(0, meio);
-    const col2Data = top10.slice(meio);
+    const meio = Math.ceil(top15.length / 2);
+    const col1Data = top15.slice(0, meio);
+    const col2Data = top15.slice(meio);
 
     function criarListaLeaderboardPP(items, startOffset) {
         const listContainer = document.createElement('div');

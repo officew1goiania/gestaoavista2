@@ -940,7 +940,7 @@ def executar_robo():
         df_ranking_ap_final = df_ranking_ap_final[df_ranking_ap_final['Valor_Num'] > 0]
         df_ranking_ap_final = df_ranking_ap_final.sort_values(by='Valor_Num', ascending=False).drop_duplicates(subset=['Consultor'])
         df_ranking_ap_final = df_ranking_ap_final.drop(columns=['Valor_Num'])
-        df_ranking_ap_final = df_ranking_ap_final.head(10)
+        df_ranking_ap_final = df_ranking_ap_final.head(15)
         df_ranking_ap_final.to_csv("ranking_ap.csv", index=False)
         print("Ranking AP consolidado e salvo.")
 
@@ -959,7 +959,7 @@ def executar_robo():
         df_ranking_pp_final = df_ranking_pp_final[df_ranking_pp_final['PP_Num'] > 0]
         df_ranking_pp_final = df_ranking_pp_final.sort_values(by='PP_Num', ascending=False).drop_duplicates(subset=['Consultor'])
         df_ranking_pp_final = df_ranking_pp_final.drop(columns=['PP_Num'])
-        df_ranking_pp_final = df_ranking_pp_final.head(10)
+        df_ranking_pp_final = df_ranking_pp_final.head(15)
         df_ranking_pp_final.to_csv("ranking_pp.csv", index=False)
         print("Ranking PP consolidado e salvo.")
 
