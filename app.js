@@ -46,7 +46,14 @@ const CONFIG_FOTOS = {
     "Paulo Henrique": "fotos/paulo_henrique_graciano.jpg",
     "Rafael Cabral Albernaz Rocha": "fotos/rafael_cabral_albernaz_rocha.jpg",
     "Rafael Cabral": "fotos/rafael_cabral_albernaz_rocha.jpg",
-    "Walasson Sousa": "fotos/walasson_sousa.jpg"
+    "Walasson Sousa": "fotos/walasson_sousa.jpg",
+    "Gabriel Póvoa Chaves Pinheiro": "fotos/gabriel_povoa_chaves_pinheiro.jpeg",
+    "Gabriel Póvoa": "fotos/gabriel_povoa_chaves_pinheiro.jpeg",
+    "Paulo Vitor de Castro Porto": "fotos/paulo_vitor_castro_porto.png",
+    "Paulo Vitor": "fotos/paulo_vitor_castro_porto.png",
+    "Paulo Vitor Porto": "fotos/paulo_vitor_castro_porto.png",
+    "Rilke de Souza Machado": "fotos/rilke_machado.jpeg",
+    "Rilke Machado": "fotos/rilke_machado.jpeg"
 };
 
 // Lista Mestre com todos os consultores do Office Goiânia (ativos)
@@ -54,31 +61,36 @@ const TODOS_CONSULTORES = [
     "André Giometti Rapcham",
     "André Vinícius Santos e Silva",
     "Bryan Martins",
+    "Claudio Malena Neto",
     "Daniela Calanca",
     "Durval Bernardes de Sousa Neto",
     "Eduarda Cabral",
     "Eduardo Verano",
     "Felipe Costa Miguel",
     "Felipe Henrique Nunes Ungarelli",
+    "Gabriel Póvoa Chaves Pinheiro",
     "Gianlucca Venturi",
     "Gihad Nasih El Azanki",
     "Gustavo Gomes de Alencar Cruz",
+    "Gustavo Mendes Ribeiro",
     "Iara Machado de Souza Azevedo",
     "Jallyson Henrique Alves Sobrinho",
     "Jason Guilhardi Rosa e Silva",
     "João Pedro Rosin Cardoso",
     "João Victor Lima de Sousa",
+    "Mateus Martins Araújo",
     "Matheus Garcia de Brito Itagiba",
     "Micael Vinicius Bragança",
     "Murillo Caixeta",
     "Nicolas Mello Costa",
     "Paulo Henrique Graciano",
+    "Paulo Vitor de Castro Porto",
     "Pedro Benetton",
     "Rafael Cabral Albernaz Rocha",
+    "Rilke de Souza Machado",
     "Samuel Enrique Ivanaskas Duarte",
     "Saymon Gouveia",
     "Tarek Mourad",
-    "Victor Guilherme de Sousa Santos",
     "Victor Hugo Rocha Martins",
     "Walasson Sousa"
 ];
@@ -101,8 +113,21 @@ const CARGOS_MAPEADOS = {
     "Samuel Enrique Ivanaskas Duarte": "FA I",
     "Gustavo Gomes de Alencar Cruz": "FA I",
     "Bryan Martins": "FA III",
-    "Nicolas Mello Costa": "FA I"
+    "Nicolas Mello Costa": "FA I",
+    "Claudio Malena Neto": "FA I",
+    "Gabriel Póvoa Chaves Pinheiro": "FA I",
+    "Gustavo Mendes Ribeiro": "FA I",
+    "João Pedro de Araújo Pitaluga Dagfal": "FA I",
+    "Mateus Martins Araújo": "FA I",
+    "Paulo Vitor de Castro Porto": "FA I",
+    "Rilke de Souza Machado": "FA I"
 };
+
+// Lista de consultores desligados/excluídos (para evitar que sejam reinseridos dinamicamente)
+const EXCLUIDOS = [
+    "Victor Guilherme de Sousa Santos",
+    "João Pedro de Araújo Pitaluga Dagfal"
+];
 
 // Função para registrar dinamicamente cargos a partir dos dados dos CSVs
 function registrarCargos(data, campoNome) {
@@ -140,6 +165,10 @@ function registrarConsultorDinamico(nomeCompleto) {
         nomeLower.includes('consultor') ||
         nomeLower === ''
     ) return;
+    
+    // Verifica se está na lista de excluídos
+    const eExcluido = EXCLUIDOS.some(c => normalizarNome(c) === nomeNorm);
+    if (eExcluido) return;
     
     // Verifica se já existe em TODOS_CONSULTORES
     const existe = TODOS_CONSULTORES.some(c => normalizarNome(c) === nomeNorm);
