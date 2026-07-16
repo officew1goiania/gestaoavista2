@@ -49,7 +49,7 @@ const CONFIG_FOTOS = {
     "Walasson Sousa": "fotos/walasson_sousa.jpg"
 };
 
-// Lista Mestre com todos os 27 consultores do Office Goiânia (ativos, correspondentes às fotos)
+// Lista Mestre com todos os consultores do Office Goiânia (ativos)
 const TODOS_CONSULTORES = [
     "André Giometti Rapcham",
     "André Vinícius Santos e Silva",
@@ -60,6 +60,7 @@ const TODOS_CONSULTORES = [
     "Eduardo Verano",
     "Felipe Costa Miguel",
     "Felipe Henrique Nunes Ungarelli",
+    "Gianlucca Venturi",
     "Gihad Nasih El Azanki",
     "Gustavo Gomes de Alencar Cruz",
     "Iara Machado de Souza Azevedo",
@@ -70,6 +71,7 @@ const TODOS_CONSULTORES = [
     "Matheus Garcia de Brito Itagiba",
     "Micael Vinicius Bragança",
     "Murillo Caixeta",
+    "Nicolas Mello Costa",
     "Paulo Henrique Graciano",
     "Pedro Benetton",
     "Rafael Cabral Albernaz Rocha",
@@ -77,7 +79,8 @@ const TODOS_CONSULTORES = [
     "Saymon Gouveia",
     "Tarek Mourad",
     "Victor Guilherme de Sousa Santos",
-    "Victor Hugo Rocha Martins"
+    "Victor Hugo Rocha Martins",
+    "Walasson Sousa"
 ];
 
 // Dicionário global para mapear nomes limpos aos seus cargos (ex: "FA I", "FA II")
@@ -97,7 +100,8 @@ const CARGOS_MAPEADOS = {
     "André Vinícius Santos e Silva": "FA II",
     "Samuel Enrique Ivanaskas Duarte": "FA I",
     "Gustavo Gomes de Alencar Cruz": "FA I",
-    "Bryan Martins": "FA III"
+    "Bryan Martins": "FA III",
+    "Nicolas Mello Costa": "FA I"
 };
 
 // Função para registrar dinamicamente cargos a partir dos dados dos CSVs
@@ -106,6 +110,10 @@ function registrarCargos(data, campoNome) {
     data.forEach(row => {
         const nomeCompleto = row[campoNome] || '';
         if (!nomeCompleto) return;
+        
+        // Registra dinamicamente o consultor na lista mestre se não estiver
+        registrarConsultorDinamico(nomeCompleto);
+        
         const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
         if (matchCargo) {
             const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
@@ -115,17 +123,45 @@ function registrarCargos(data, campoNome) {
     });
 }
 
+// Função para registrar dinamicamente novos consultores ativos dos CSVs
+function registrarConsultorDinamico(nomeCompleto) {
+    if (!nomeCompleto) return;
+    
+    // Remove parênteses como "(FA I)", "(FA II)"
+    const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
+    const nomeNorm = normalizarNome(nomeLimpo);
+    
+    // Ignora totalizadores, eficiências, etc.
+    const nomeLower = nomeNorm.toLowerCase();
+    if (
+        nomeLower.includes('eficiência') ||
+        nomeLower.includes('eficiencias') ||
+        nomeLower === 'total' ||
+        nomeLower.includes('consultor') ||
+        nomeLower === ''
+    ) return;
+    
+    // Verifica se já existe em TODOS_CONSULTORES
+    const existe = TODOS_CONSULTORES.some(c => normalizarNome(c) === nomeNorm);
+    if (!existe) {
+        TODOS_CONSULTORES.push(nomeLimpo);
+    }
+}
+
 // Função para normalizar e renomear nomes de consultores solicitados pelo usuário
 function normalizarNome(nome) {
     if (!nome) return '';
     return nome
+        .replace(/[◦•]/g, '') // remove marcadores de lista
+        .trim()
         .replace(/Daniela Calanca da Silva/g, "Daniela Calanca")
         .replace(/Daniela Silva/g, "Daniela Calanca")
         .replace(/Saymon de Gouveia Pereira dos Santos/g, "Saymon Gouveia")
         .replace(/Saymon Santos/g, "Saymon Gouveia")
         .replace(/Eduardo Verano Chaves Soares/g, "Eduardo Verano")
         .replace(/Eduardo Soares/g, "Eduardo Verano")
-        .replace(/Bryan Martins dos Santos/g, "Bryan Martins");
+        .replace(/Bryan Martins dos Santos/g, "Bryan Martins")
+        .replace(/Tarek Shamseddine Jarrah Mourad/g, "Tarek Mourad");
 }
 
 // Gera a URL da foto do consultor com base no seu nome completo
