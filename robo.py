@@ -782,8 +782,107 @@ def processar_conta(conta):
             
     return resultado
 
+def baixar_historico_de_r2():
+    import boto3
+    from botocore.config import Config
+    
+    r2_account_id = os.getenv("R2_ACCOUNT_ID")
+    r2_access_key = os.getenv("R2_ACCESS_KEY_ID")
+    r2_secret_key = os.getenv("R2_SECRET_ACCESS_KEY")
+    r2_bucket = os.getenv("R2_BUCKET")
+    
+    if not all([r2_account_id, r2_access_key, r2_secret_key, r2_bucket]):
+        print("AVISO: Credenciais do Cloudflare R2 incompletas no arquivo .env. Pulando download do histórico.")
+        return False
+        
+    nome_arq_hist = "historico_muapd.json"
+    print(f"\nTentando baixar {nome_arq_hist} do Cloudflare R2...")
+    try:
+        s3 = boto3.client(
+            service_name='s3',
+            endpoint_url=f'https://{r2_account_id}.r2.cloudflarestorage.com',
+            aws_access_key_id=r2_access_key,
+            aws_secret_access_key=r2_secret_key,
+            config=Config(signature_version='s3v4'),
+            region_name='auto'
+        )
+        s3.download_file(
+            Bucket=r2_bucket,
+            Key=nome_arq_hist,
+            Filename=nome_arq_hist
+        )
+        print(f"Sucesso: {nome_arq_hist} baixado do R2.")
+        return True
+    except Exception as e:
+        print(f"Aviso ao baixar histórico do R2 (pode ser a primeira execução): {e}")
+        return False
+
+def upload_para_r2():
+    import boto3
+    from botocore.config import Config
+    
+    r2_account_id = os.getenv("R2_ACCOUNT_ID")
+    r2_access_key = os.getenv("R2_ACCESS_KEY_ID")
+    r2_secret_key = os.getenv("R2_SECRET_ACCESS_KEY")
+    r2_bucket = os.getenv("R2_BUCKET")
+    
+    if not all([r2_account_id, r2_access_key, r2_secret_key, r2_bucket]):
+        print("AVISO: Credenciais do Cloudflare R2 incompletas no arquivo .env. Pulando upload.")
+        return False
+        
+    arquivos = [
+        "dados_extraidos.csv",
+        "dados_semana.csv",
+        "ranking_muapd.csv",
+        "ranking_ap.csv",
+        "ranking_pp.csv",
+        "historico_muapd.json",
+        "last_update.txt"
+    ]
+    
+    print("\n--- Iniciando upload dos arquivos para o Cloudflare R2 ---")
+    try:
+        s3 = boto3.client(
+            service_name='s3',
+            endpoint_url=f'https://{r2_account_id}.r2.cloudflarestorage.com',
+            aws_access_key_id=r2_access_key,
+            aws_secret_access_key=r2_secret_key,
+            config=Config(signature_version='s3v4'),
+            region_name='auto'
+        )
+        
+        for arq in arquivos:
+            if os.path.exists(arq):
+                content_type = 'text/plain'
+                if arq.endswith('.csv'):
+                    content_type = 'text/csv; charset=utf-8'
+                elif arq.endswith('.json'):
+                    content_type = 'application/json; charset=utf-8'
+                elif arq.endswith('.txt'):
+                    content_type = 'text/plain; charset=utf-8'
+                
+                print(f"Enviando {arq}...")
+                s3.upload_file(
+                    Filename=arq,
+                    Bucket=r2_bucket,
+                    Key=arq,
+                    ExtraArgs={'ContentType': content_type}
+                )
+                print(f"Sucesso: {arq} enviado para R2.")
+            else:
+                print(f"Aviso: Arquivo {arq} não encontrado localmente.")
+        print("Upload completo para o Cloudflare R2!")
+        return True
+    except Exception as e:
+        print(f"ERRO ao fazer upload para o Cloudflare R2: {e}")
+        return False
+
 def executar_robo():
     print("Iniciando o robô...")
+    
+    # Tenta baixar o histórico do R2 para preservar streaks
+    baixar_historico_de_r2()
+
     
     # Cria os arquivos vazios logo de cara para evitar erro no Git Add
     for arq in ["dados_extraidos.csv", "ranking_muapd.csv", "ranking_ap.csv", "ranking_pp.csv"]:
@@ -962,6 +1061,10 @@ def executar_robo():
         df_ranking_pp_final = df_ranking_pp_final.head(15)
         df_ranking_pp_final.to_csv("ranking_pp.csv", index=False)
         print("Ranking PP consolidado e salvo.")
+
+    # Envia todos os arquivos extraídos para o Cloudflare R2
+    upload_para_r2()
+
 
 
 

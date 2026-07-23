@@ -8,17 +8,6 @@ on:
     - cron: '5,25,45 * * * *' # Executa nos minutos 5, 25 e 45 de cada hora
   workflow_dispatch: # Permite rodar manualmente clicando em um botão no GitHub
 
-# Define as permissões necessárias para o Commit e para o deploy do Pages
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
-# Garante que apenas um deploy aconteça por vez para evitar concorrência
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   extrair_dados:
     runs-on: ubuntu-latest
@@ -32,7 +21,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Instalar dependências (Pandas, Playwright, BS4)
+      - name: Instalar dependências (Pandas, Playwright, BS4, Boto3)
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -49,29 +38,11 @@ jobs:
           echo "CONTA1_SENHA=${{ secrets.CONTA1_SENHA }}" >> .env
           echo "CONTA2_EMAIL=${{ secrets.CONTA2_EMAIL }}" >> .env
           echo "CONTA2_SENHA=${{ secrets.CONTA2_SENHA }}" >> .env
+          echo "R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }}" >> .env
+          echo "R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }}" >> .env
+          echo "R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}" >> .env
+          echo "R2_BUCKET=${{ secrets.R2_BUCKET }}" >> .env
 
       - name: Rodar o Robô de Extração
         run: |
           python robo.py
-
-      - name: Salvar os dados (Commit e Push)
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          git add .
-          git commit -m "Automated: Atualização horária dos dados" || echo "Nenhuma mudança para commitar"
-          git pull --rebase -X theirs origin main
-          git push origin main
-
-      - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Fazer Upload do Artefato
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-
-      - name: Publicar no GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

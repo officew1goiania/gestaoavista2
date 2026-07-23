@@ -1,5 +1,18 @@
 // Script Dashboard W1 - TV Version
 
+// URL do Cloudflare Worker Proxy (ex: 'https://gestaoavista-api.seu-usuario.workers.dev')
+// Se deixada em branco (""), a aplicação lerá os arquivos do próprio domínio (caminhos relativos).
+const WORKER_URL = "";
+
+// Helper para obter a URL correta do arquivo de dados
+function getFileUrl(filename) {
+    if (!WORKER_URL) {
+        return filename + '?t=' + new Date().getTime();
+    }
+    const cleanBaseUrl = WORKER_URL.endsWith('/') ? WORKER_URL.slice(0, -1) : WORKER_URL;
+    return cleanBaseUrl + '/' + filename + '?t=' + new Date().getTime();
+}
+
 // Mapeamento manual de fotos para os consultores (opcional)
 // Chave: Nome Completo do Consultor (como aparece no CSV)
 // Valor: Caminho relativo do arquivo de imagem (ex: 'fotos/joao.jpg')
@@ -498,7 +511,7 @@ function obterNomeExibicao(nome) {
 }
 
 function carregarUltimaAtualizacao() {
-    fetch('last_update.txt?t=' + new Date().getTime())
+    fetch(getFileUrl('last_update.txt'))
         .then(response => response.text())
         .then(isoString => {
             const date = new Date(isoString);
@@ -510,7 +523,7 @@ function carregarUltimaAtualizacao() {
 }
 
 function carregarDadosCSV() {
-    Papa.parse('dados_extraidos.csv?t=' + new Date().getTime(), {
+    Papa.parse(getFileUrl('dados_extraidos.csv'), {
         download: true,
         header: true,
         skipEmptyLines: true,
@@ -522,7 +535,7 @@ function carregarDadosCSV() {
 }
 
 function carregarRankingPPCSV() {
-    Papa.parse('ranking_pp.csv?t=' + new Date().getTime(), {
+    Papa.parse(getFileUrl('ranking_pp.csv'), {
         download: true,
         header: true,
         skipEmptyLines: true,
@@ -534,7 +547,7 @@ function carregarRankingPPCSV() {
 }
 
 function carregarRankingCSV() {
-    Papa.parse('ranking_muapd.csv?t=' + new Date().getTime(), {
+    Papa.parse(getFileUrl('ranking_muapd.csv'), {
         download: true,
         header: true,
         skipEmptyLines: true,
@@ -542,7 +555,7 @@ function carregarRankingCSV() {
             registrarCargos(results.data, 'Consultor');
             
             // Carrega o histórico JSON
-            fetch('historico_muapd.json?t=' + new Date().getTime())
+            fetch(getFileUrl('historico_muapd.json'))
                 .then(response => {
                     if (!response.ok) throw new Error("Sem histórico");
                     return response.text();
@@ -639,7 +652,7 @@ function renderizarTabela(data) {
 }
 
 function carregarDadosSemanaCSV() {
-    Papa.parse('dados_semana.csv?t=' + new Date().getTime(), {
+    Papa.parse(getFileUrl('dados_semana.csv'), {
         download: true,
         header: true,
         skipEmptyLines: true,
@@ -967,7 +980,7 @@ function renderizarRankingEMaratona(data, historico) {
 }
 
 function carregarRankingAPCSV() {
-    Papa.parse('ranking_ap.csv?t=' + new Date().getTime(), {
+    Papa.parse(getFileUrl('ranking_ap.csv'), {
         download: true,
         header: true,
         skipEmptyLines: true,

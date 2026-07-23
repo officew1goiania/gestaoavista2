@@ -4,3 +4,5 @@ python-dotenv
 beautifulsoup4
 lxml
 streamlit
+boto3
+urllib3
