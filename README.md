@@ -1,4 +1,4 @@
-# Painel de Gestão à Vista - W1 Goiânia
+# Painel de Gestão à Vista - Goiânia
 
 Este projeto consiste em um robô raspador (Python) que extrai dados de produção do CRM W1nner e envia os relatórios consolidados diretamente para um bucket **Cloudflare R2**. Um **Cloudflare Worker** atua como proxy seguro fornecendo esses dados para o frontend (Dashboard HTML/CSS/JS) protegido via **Cloudflare Access**.
 
