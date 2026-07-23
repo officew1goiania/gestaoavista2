@@ -1,8 +1,8 @@
 // Script Dashboard W1 - TV Version
 
-// URL do Cloudflare Worker Proxy (ex: 'https://gestaoavista-api.seu-usuario.workers.dev')
+// URL do Cloudflare Worker Proxy (ex: 'https://gestaoavista-api.officew1goiania.workers.dev')
 // Se deixada em branco (""), a aplicação lerá os arquivos do próprio domínio (caminhos relativos).
-const WORKER_URL = "";
+const WORKER_URL = "https://gestaoavista-api.officew1goiania.workers.dev";
 
 // Helper para obter a URL correta do arquivo de dados
 function getFileUrl(filename) {
@@ -148,10 +148,10 @@ function registrarCargos(data, campoNome) {
     data.forEach(row => {
         const nomeCompleto = row[campoNome] || '';
         if (!nomeCompleto) return;
-        
+
         // Registra dinamicamente o consultor na lista mestre se não estiver
         registrarConsultorDinamico(nomeCompleto);
-        
+
         const matchCargo = nomeCompleto.match(/\(([^)]+)\)/);
         if (matchCargo) {
             const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
@@ -164,11 +164,11 @@ function registrarCargos(data, campoNome) {
 // Função para registrar dinamicamente novos consultores ativos dos CSVs
 function registrarConsultorDinamico(nomeCompleto) {
     if (!nomeCompleto) return;
-    
+
     // Remove parênteses como "(FA I)", "(FA II)"
     const nomeLimpo = nomeCompleto.replace(/\s*\(.*\)\s*/g, '').trim();
     const nomeNorm = normalizarNome(nomeLimpo);
-    
+
     // Ignora totalizadores, eficiências, etc.
     const nomeLower = nomeNorm.toLowerCase();
     if (
@@ -178,11 +178,11 @@ function registrarConsultorDinamico(nomeCompleto) {
         nomeLower.includes('consultor') ||
         nomeLower === ''
     ) return;
-    
+
     // Verifica se está na lista de excluídos
     const eExcluido = EXCLUIDOS.some(c => normalizarNome(c) === nomeNorm);
     if (eExcluido) return;
-    
+
     // Verifica se já existe em TODOS_CONSULTORES
     const existe = TODOS_CONSULTORES.some(c => normalizarNome(c) === nomeNorm);
     if (!existe) {
@@ -285,7 +285,7 @@ function obterSegundaFeiraDestaSemana() {
     const diaSemana = hoje.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
     const diff = hoje.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
     const segunda = new Date(hoje.setDate(diff));
-    
+
     const ano = segunda.getFullYear();
     const mes = String(segunda.getMonth() + 1).padStart(2, '0');
     const dia = String(segunda.getDate()).padStart(2, '0');
@@ -307,7 +307,7 @@ function obterDataBrasilia() {
 // Calcula a quantidade de dias úteis consecutivos marcados por um consultor (de trás para frente)
 function calcularStreakConsultor(nomeConsultor, historico, hojeStr) {
     const nomeNorm = normalizarNome(nomeConsultor);
-    
+
     // Filtra e ordena as chaves do histórico que são dias úteis (segunda a sexta)
     const chavesOrdenadas = Object.keys(historico || {})
         .filter(k => {
@@ -316,21 +316,21 @@ function calcularStreakConsultor(nomeConsultor, historico, hojeStr) {
             return day >= 1 && day <= 5;
         })
         .sort();
-        
+
     if (chavesOrdenadas.length === 0) {
         return 0;
     }
-    
+
     const ultimoDiaHist = chavesOrdenadas[chavesOrdenadas.length - 1];
     const hojeNoHist = chavesOrdenadas.includes(hojeStr);
-    
+
     let startIndex = -1;
-    
+
     if (hojeNoHist) {
         // Se hoje está no histórico, verifica se o consultor marcou hoje
         const ativosHoje = (historico[hojeStr] || []).map(n => normalizarNome(n.replace(/\s*\(.*\)\s*/g, '').trim()));
         const marcouHoje = ativosHoje.includes(nomeNorm);
-        
+
         if (marcouHoje) {
             startIndex = chavesOrdenadas.indexOf(hojeStr);
         } else {
@@ -359,7 +359,7 @@ function calcularStreakConsultor(nomeConsultor, historico, hojeStr) {
             return 0;
         }
     }
-    
+
     // Conta os dias consecutivos marcados a partir de startIndex para trás
     let streak = 0;
     for (let i = startIndex; i >= 0; i--) {
@@ -371,7 +371,7 @@ function calcularStreakConsultor(nomeConsultor, historico, hojeStr) {
             break;
         }
     }
-    
+
     return streak;
 }
 
@@ -553,7 +553,7 @@ function carregarRankingCSV() {
         skipEmptyLines: true,
         complete: function (results) {
             registrarCargos(results.data, 'Consultor');
-            
+
             // Carrega o histórico JSON
             fetch(getFileUrl('historico_muapd.json'))
                 .then(response => {
@@ -884,7 +884,7 @@ function renderizarRankingEMaratona(data, historico) {
     // ==========================================
     const segundaStr = obterSegundaFeiraDestaSemana();
     const hojeStr = obterDataBrasilia();
-    
+
     // Obtém datas da semana de segunda a sexta
     const datasSemana = [];
     for (let i = 0; i < 5; i++) {
@@ -898,7 +898,7 @@ function renderizarRankingEMaratona(data, historico) {
 
     // Calcula os participantes da maratona e sua consistência detalhada
     const participantesMaratona = [];
-    
+
     TODOS_CONSULTORES.forEach(nomeConsultor => {
         const nomeNorm = normalizarNome(nomeConsultor);
         const diasConcluidos = [];
@@ -945,13 +945,13 @@ function renderizarRankingEMaratona(data, historico) {
                 const card = document.createElement('div');
                 const nomeExibicao = `(${part.streak}) ${obterNomeExibicao(part.nomeCompleto)}`;
                 const iniciais = obterIniciais(part.nomeCompleto);
-                
+
                 // Determina se o consultor completou a meta de 30 dias
                 const eConsistenteTotal = part.streak >= 30;
-                const fireBadge = eConsistenteTotal 
-                    ? '<span class="maratona-fire-badge" style="animation: none;" title="Meta de 30 dias alcançada! 🎉">👑</span>' 
+                const fireBadge = eConsistenteTotal
+                    ? '<span class="maratona-fire-badge" style="animation: none;" title="Meta de 30 dias alcançada! 🎉">👑</span>'
                     : '<span class="maratona-fire-badge" title="Consistente!">🔥</span>';
-                
+
                 const diasLabels = ['S', 'T', 'Q', 'Q', 'S'];
                 let diasHtml = '';
                 part.diasConcluidos.forEach((concluido, i) => {
@@ -960,7 +960,7 @@ function renderizarRankingEMaratona(data, historico) {
                 });
 
                 card.className = `maratona-card ${eConsistenteTotal ? 'completed' : ''}`;
-                
+
                 card.innerHTML = `
                     <div class="maratona-avatar-container">
                         <div class="maratona-avatar-fallback" style="background: ${obterCorGradiente(part.nomeCompleto)}">${iniciais}</div>
@@ -1286,76 +1286,76 @@ function consultarStatusGitHub() {
     fetch('https://api.github.com/repos/officew1goiania/gestaoavista2/actions/workflows/scraper.yml/runs?per_page=1', {
         headers: headers
     })
-    .then(response => {
-        if (response.status === 401) {
-            localStorage.removeItem('github_pat_token');
-            resetarBotaoSync();
-            iniciarMonitoramentoWorkflow(); // Reinicia como anônimo
-            return;
-        }
-        if (!response.ok) throw new Error("Erro na requisição");
-        return response.json();
-    })
-    .then(data => {
-        if (!data || !data.workflow_runs || data.workflow_runs.length === 0) return;
-
-        const latestRun = data.workflow_runs[0];
-        const status = latestRun.status;
-        const runningStatuses = ['queued', 'in_progress', 'waiting', 'requested', 'pending'];
-        const token = localStorage.getItem('github_pat_token');
-
-        if (runningStatuses.includes(status)) {
-            // A Action está rodando
-            if (!isWorkflowRunning) {
-                isWorkflowRunning = true;
-                // Aumenta a frequência de monitoramento (15 segundos para anônimo, 8 para com token)
-                clearInterval(checkStatusInterval);
-                const fastInterval = token ? 8000 : 15000;
-                checkStatusInterval = setInterval(() => {
-                    consultarStatusGitHub();
-                }, fastInterval);
-            }
-            
-            btnSync.disabled = true;
-            btnSync.classList.add('loading');
-            syncIcon.textContent = '🔄';
-            syncText.textContent = 'Rodando...';
-            btnSync.style.borderColor = 'rgba(250, 204, 21, 0.4)';
-            btnSync.style.color = '#facc15';
-            btnSync.style.background = 'rgba(250, 204, 21, 0.08)';
-        } else {
-            // Finalizada / Ociosa
-            if (isWorkflowRunning) {
-                // Acabou de finalizar!
-                isWorkflowRunning = false;
-                
-                // Recarrega todos os dados
-                carregarUltimaAtualizacao();
-                carregarDadosCSV();
-                carregarRankingCSV();
-                carregarRankingAPCSV();
-                carregarRankingPPCSV();
-                carregarDadosSemanaCSV();
-
-                // Mostra feedback de conclusão
-                syncIcon.textContent = '✅';
-                syncText.textContent = 'Atualizado!';
-                btnSync.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                btnSync.style.color = '#10b981';
-                btnSync.style.background = 'rgba(16, 185, 129, 0.08)';
-
-                setTimeout(() => {
-                    resetarBotaoSync();
-                    iniciarMonitoramentoWorkflow(); // Volta para a checagem normal
-                }, 5000);
-            } else {
+        .then(response => {
+            if (response.status === 401) {
+                localStorage.removeItem('github_pat_token');
                 resetarBotaoSync();
+                iniciarMonitoramentoWorkflow(); // Reinicia como anônimo
+                return;
             }
-        }
-    })
-    .catch(err => {
-        console.error("Erro ao verificar status do workflow:", err);
-    });
+            if (!response.ok) throw new Error("Erro na requisição");
+            return response.json();
+        })
+        .then(data => {
+            if (!data || !data.workflow_runs || data.workflow_runs.length === 0) return;
+
+            const latestRun = data.workflow_runs[0];
+            const status = latestRun.status;
+            const runningStatuses = ['queued', 'in_progress', 'waiting', 'requested', 'pending'];
+            const token = localStorage.getItem('github_pat_token');
+
+            if (runningStatuses.includes(status)) {
+                // A Action está rodando
+                if (!isWorkflowRunning) {
+                    isWorkflowRunning = true;
+                    // Aumenta a frequência de monitoramento (15 segundos para anônimo, 8 para com token)
+                    clearInterval(checkStatusInterval);
+                    const fastInterval = token ? 8000 : 15000;
+                    checkStatusInterval = setInterval(() => {
+                        consultarStatusGitHub();
+                    }, fastInterval);
+                }
+
+                btnSync.disabled = true;
+                btnSync.classList.add('loading');
+                syncIcon.textContent = '🔄';
+                syncText.textContent = 'Rodando...';
+                btnSync.style.borderColor = 'rgba(250, 204, 21, 0.4)';
+                btnSync.style.color = '#facc15';
+                btnSync.style.background = 'rgba(250, 204, 21, 0.08)';
+            } else {
+                // Finalizada / Ociosa
+                if (isWorkflowRunning) {
+                    // Acabou de finalizar!
+                    isWorkflowRunning = false;
+
+                    // Recarrega todos os dados
+                    carregarUltimaAtualizacao();
+                    carregarDadosCSV();
+                    carregarRankingCSV();
+                    carregarRankingAPCSV();
+                    carregarRankingPPCSV();
+                    carregarDadosSemanaCSV();
+
+                    // Mostra feedback de conclusão
+                    syncIcon.textContent = '✅';
+                    syncText.textContent = 'Atualizado!';
+                    btnSync.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                    btnSync.style.color = '#10b981';
+                    btnSync.style.background = 'rgba(16, 185, 129, 0.08)';
+
+                    setTimeout(() => {
+                        resetarBotaoSync();
+                        iniciarMonitoramentoWorkflow(); // Volta para a checagem normal
+                    }, 5000);
+                } else {
+                    resetarBotaoSync();
+                }
+            }
+        })
+        .catch(err => {
+            console.error("Erro ao verificar status do workflow:", err);
+        });
 }
 
 function resetarBotaoSync() {
@@ -1392,33 +1392,33 @@ function acionarRobotWorkflow(token) {
         },
         body: JSON.stringify({ ref: 'main' })
     })
-    .then(response => {
-        btnSync.classList.remove('loading');
-        if (response.status === 204) {
-            btnSync.querySelector('.sync-icon').textContent = '✅';
-            syncText.textContent = 'Acionado!';
-            
-            // Aguarda 4 segundos e então força o estado ativo e o monitoramento imediato
-            setTimeout(() => {
-                isWorkflowRunning = true;
-                iniciarMonitoramentoWorkflow();
-            }, 4000);
-        } else if (response.status === 401) {
-            localStorage.removeItem('github_pat_token');
+        .then(response => {
+            btnSync.classList.remove('loading');
+            if (response.status === 204) {
+                btnSync.querySelector('.sync-icon').textContent = '✅';
+                syncText.textContent = 'Acionado!';
+
+                // Aguarda 4 segundos e então força o estado ativo e o monitoramento imediato
+                setTimeout(() => {
+                    isWorkflowRunning = true;
+                    iniciarMonitoramentoWorkflow();
+                }, 4000);
+            } else if (response.status === 401) {
+                localStorage.removeItem('github_pat_token');
+                btnSync.disabled = false;
+                syncText.textContent = originalText;
+                alert('Token do GitHub expirado ou inválido. Por favor, insira um novo token.');
+                document.getElementById('auth-modal-overlay').classList.add('active');
+                document.getElementById('github-pat-input').focus();
+            } else {
+                throw new Error('Falha no acionamento (Status: ' + response.status + ')');
+            }
+        })
+        .catch(error => {
+            btnSync.classList.remove('loading');
             btnSync.disabled = false;
             syncText.textContent = originalText;
-            alert('Token do GitHub expirado ou inválido. Por favor, insira um novo token.');
-            document.getElementById('auth-modal-overlay').classList.add('active');
-            document.getElementById('github-pat-input').focus();
-        } else {
-            throw new Error('Falha no acionamento (Status: ' + response.status + ')');
-        }
-    })
-    .catch(error => {
-        btnSync.classList.remove('loading');
-        btnSync.disabled = false;
-        syncText.textContent = originalText;
-        console.error(error);
-        alert('Erro ao acionar o robô: ' + (error.message || 'Verifique sua conexão ou permissões do token.'));
-    });
+            console.error(error);
+            alert('Erro ao acionar o robô: ' + (error.message || 'Verifique sua conexão ou permissões do token.'));
+        });
 }

@@ -785,6 +785,7 @@ def processar_conta(conta):
 def baixar_historico_de_r2():
     import boto3
     from botocore.config import Config
+    import botocore
     
     r2_account_id = os.getenv("R2_ACCOUNT_ID")
     r2_access_key = os.getenv("R2_ACCESS_KEY_ID")
@@ -813,9 +814,16 @@ def baixar_historico_de_r2():
         )
         print(f"Sucesso: {nome_arq_hist} baixado do R2.")
         return True
+    except botocore.exceptions.ClientError as e:
+        error_code = e.response.get('Error', {}).get('Code')
+        if error_code in ['404', 'NoSuchKey']:
+            print(f"Aviso: {nome_arq_hist} não encontrado no R2 (pode ser a primeira execução).")
+            return False
+        print(f"ERRO ao baixar histórico do R2: {e}")
+        raise e
     except Exception as e:
-        print(f"Aviso ao baixar histórico do R2 (pode ser a primeira execução): {e}")
-        return False
+        print(f"ERRO inesperado ao baixar histórico do R2: {e}")
+        raise e
 
 def upload_para_r2():
     import boto3
@@ -827,8 +835,10 @@ def upload_para_r2():
     r2_bucket = os.getenv("R2_BUCKET")
     
     if not all([r2_account_id, r2_access_key, r2_secret_key, r2_bucket]):
-        print("AVISO: Credenciais do Cloudflare R2 incompletas no arquivo .env. Pulando upload.")
-        return False
+        raise ValueError(
+            "ERRO CRÍTICO: Credenciais do Cloudflare R2 incompletas no arquivo .env. "
+            "Certifique-se de configurar R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY e R2_BUCKET."
+        )
         
     arquivos = [
         "dados_extraidos.csv",
@@ -874,8 +884,9 @@ def upload_para_r2():
         print("Upload completo para o Cloudflare R2!")
         return True
     except Exception as e:
-        print(f"ERRO ao fazer upload para o Cloudflare R2: {e}")
-        return False
+        print(f"ERRO CRÍTICO ao fazer upload para o Cloudflare R2: {e}")
+        raise e
+
 
 def executar_robo():
     print("Iniciando o robô...")
